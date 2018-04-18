@@ -98,4 +98,8 @@ ENV/
 # mypy
 .mypy_cache/
 
+# config file
 /bettingbook/config.ini
+
+# PyCharm files
+/.idea
