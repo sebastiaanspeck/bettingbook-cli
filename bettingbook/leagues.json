@@ -1,0 +1,26 @@
+{
+  "leagues": [
+    {
+      "id": 8,
+      "name": "Premier League"
+    }, {
+      "id": 72,
+      "name": "Eredivisie"
+    }, {
+      "id": 82,
+      "name": "Bundesliga"
+    }, {
+      "id": 208,
+      "name": "Jupiler Pro League"
+    }, {
+      "id": 301,
+      "name": "Ligue 1"
+    }, {
+      "id": 384,
+      "name": "Serie A"
+    }, {
+      "id": 564,
+      "name": "Primera Division"
+    }
+  ]
+}
