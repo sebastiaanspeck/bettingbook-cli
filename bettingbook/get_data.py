@@ -9,9 +9,10 @@ import exceptions
 class GetData(object):
     BASE_URL = 'https://soccer.sportmonks.com/api/v2.0/'
 
-    def __init__(self, params, league_ids, writer):
+    def __init__(self, params, league_ids, league_names, writer):
         self.params = params
         self.league_ids = league_ids
+        self.league_names = league_names
         self.writer = writer
 
     def show_profile(self, profiledata):
@@ -25,7 +26,7 @@ class GetData(object):
             data = self.get_data(req, url)
             return req, data
 
-        if req.status_code == requests.codes.bad:
+        if req.status_code in [requests.codes.bad, requests.codes.server_error]:
             raise exceptions.APIErrorException('Invalid request. Check parameters.')
 
         if req.status_code == requests.codes.forbidden:
@@ -55,37 +56,6 @@ class GetData(object):
                 if next_data:
                     data.extend(next_data)
         return data
-
-    def get_countries(self):
-        coun = []
-        url = 'countries'
-
-        response, countries = self._get(url)
-
-        for country in countries:
-            contry_name = country['name']
-            country_id = country['id']
-            if contry_name not in coun:
-                coun.extend([[contry_name, country_id]])
-        coun = sorted(coun, key=lambda x: str(x[0]))
-
-        return coun
-
-    def get_competitions(self):
-        comp = []
-        url = 'leagues'
-
-        response, competitions = self._get(url)
-
-        for competition in competitions:
-            competition_name = competition['name']
-            competition_id = competition['id']
-            if competition_name not in comp:
-                comp.extend([[competition_name, competition_id]])
-
-        comp = sorted(comp, key=lambda x: str(x[0]))
-
-        return comp
 
     def get_today_scores(self):
         """Gets the scores for today"""
@@ -171,3 +141,17 @@ class GetData(object):
                 self.writer.league_scores(fixtures_results)
             except exceptions.APIErrorException:
                 click.secho("No data available.", fg="red", bold=True)
+
+    def get_standings(self, league_name):
+        league_id = self.league_ids[league_name]
+        url = f'leagues/{league_id}'
+        try:
+            _, league_data = self._get(url)
+            current_season_id = league_data['current_season_id']
+            url = f'standings/season/{current_season_id}'
+            _, standings_data = self._get(url)
+            self.writer.standings(standings_data, league_name)
+        except exceptions.APIErrorException:
+            # Click handles incorrect League codes so this will only come up
+            # if that league does not have standings available. ie. Champions League
+            click.secho("No standings availble for {league}.".format(league=league_name), fg="red", bold=True)

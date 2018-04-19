@@ -1,5 +1,6 @@
 import os
 import click
+import json
 
 from get_data import GetData
 from exceptions import IncorrectParametersException
@@ -13,7 +14,18 @@ except ImportError:
 
 config = ConfigParser()
 
+
+def load_json(file):
+    """Load JSON file at app start"""
+    here = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(here, file)) as jfile:
+        data = json.load(jfile)
+    return data
+
+
 LEAGUE_IDS = leagueids.LEAGUE_IDS
+LEAGUES_DATA = load_json("leagues.json")["leagues"]
+LEAGUES_NAMES = {league["id"]: league["name"] for league in LEAGUES_DATA}
 
 
 def create_config_file(apikey, name, timezone, filename):
@@ -95,8 +107,8 @@ def load_config_file():
               help="Shows matches from various leagues for today.")
 @click.option('--matches', is_flag=True,
               help="Shows matches from various leagues for a longer period.")
-@click.option('--profile', is_flag=True,
-              help="Show your profile (name, balance, timezone)")
+@click.option('--standings', is_flag=True,
+              help="Standings for a particular league.")
 @click.option('--league', type=click.Choice(LEAGUE_IDS.keys()),
               help="Show fixtures from a particular league.")
 @click.option('--time', default=6, show_default=True,
@@ -105,7 +117,9 @@ def load_config_file():
                     "in the past when used with --history"))
 @click.option('--history', is_flag=True, default=False, show_default=True,
               help="Displays past games when used with --time command.")
-def main(apikey, timezone, live, today, matches, profile, league, time, history):
+@click.option('--profile', is_flag=True,
+              help="Show your profile (name, balance, timezone)")
+def main(apikey, timezone, live, today, matches, standings, league, time, history, profile):
     """
     A CLI to "bet" on football games.
 
@@ -135,17 +149,29 @@ def main(apikey, timezone, live, today, matches, profile, league, time, history)
 
     try:
         writer = get_writer()
-        gd = GetData(params, LEAGUE_IDS, writer)
+        gd = GetData(params, LEAGUE_IDS, LEAGUES_NAMES, writer)
+
+        if live:
+            gd.get_live_scores()
+            return
 
         if today:
             gd.get_today_scores()
             return
-        if live:
-            gd.get_live_scores()
-            return
+
         if matches:
             gd.get_matches(league, time, history)
             return
+
+        if standings:
+            if not league:
+                raise IncorrectParametersException('Please specify a league. '
+                                                   'Example --standings --league=EPL')
+            if league.endswith('C'):
+                raise IncorrectParametersException(f'Standings for {league} not supported')
+            gd.get_standings(league)
+            return
+
         if profile:
             gd.show_profile(profile_data)
             return
