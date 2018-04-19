@@ -180,7 +180,7 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
     def league_header(self, league):
         """Prints the league header"""
         league_name = " {0} ".format(league)
-        click.secho(f"{league_name:=^62}{'':=^15}", fg=self.colors.MISC)
+        click.secho(f"{league_name:=^62}", fg=self.colors.MISC)
         click.echo()
 
     def scores(self, result, add_new_line=True):
