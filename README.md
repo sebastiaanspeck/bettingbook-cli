@@ -23,91 +23,76 @@ To get colorized terminal output on Windows, make sure to install [ansicon](http
 Usage
 ====
 
-### View your bettingbook
+### View live scores from various leagues
 
 ```bash
-$ python main.py --bettingbook
-```
-
-### View account details
-
-```bash
-$ python main.py --account
-```
-
-### Place bet
-
-```bash
-$ python main.py --bet # This shows all bets for today
-$ python main.py --bet --league=PL # This shows all bets in a specific league for today (PL is Premier League)
+$ main.py --live
 ```
 
 ### View matches from various leagues for today
 
 ```bash
-$ soccer --today
-```
-
-### View live scores from various leagues
-
-```bash
-$ soccer --live
+$ main.py --today
 ```
 
 #### Note:
---live only shows the matches that are live now or are finished, to view have not started yet, use --today
+--live only shows the matches that are live now or are finished, to view games that have not started yet, use --today
 
+### Get scores for all leagues with a set time period
+
+```bash
+$ main.py --matches --time=10 # get scores for all the seven leagues over the coming 10 days
+```
 
 ### Get scores for a particular league
 
 ```bash
-$ soccer --league=BL # BL is the league code for Bundesliga
-$ soccer --league=FL --time=15 # get scores for all the French Ligue games over the past 15 days
+$ main.py --matches --league=DE1 # DE1 is the league code for Bundesliga
+$ main.py --matches --league=FR1 --history --time=15 # get scores for all the French Ligue 1 games over the past 15 days
 ```
 
-### Get information about players of a team
+### View account details
 
 ```bash
-$ soccer --team=JUVE --players
-```
-
-### Get scores for all seven leagues with a set time period
-
-```bash
-$ soccer --time=10 # get scores for all the seven leagues over the past 10 days
+$ main.py --account
 ```
 
 ### Help
 ```bash
-$ soccer --help
+$ main.py --help
 ```
 ### List of supported leagues and their league codes
 
 - England:
   - GB1: Premier League
-- France:
-  - FR1: Ligue 1
-- Germany:
-  - DE1: Bundesliga
-- Italy:
-  - IT1: Serie A
 - Netherlands:
   - NL1: Eredivisie
+- Germany:
+  - DE1: Bundesliga
+- Belgium:
+  - BE1: Jupiler Pro League
+- France:
+  - FR1: Ligue 1
+- Italy:
+  - IT1: Serie A
 - Spain:
-  - ES1: La Liga
+  - ES1: Primera Division
 
-### Team and team codes
+### Supported leagues
 
-For a full list of supported leagues [see this](bettingbook/leagues.json).
+For a full list of supported leagues [see this](bettingbook/leagueids.py).
 
 Todo
 ====
-- [x] Add more competitions
+- [ ] Add more competitions
 - [x] Add league filter for live scores
-- [ ] Add league standings
+- [x] Add league standings
+- [ ] Add option to get matches for a specific team
 - [ ] Add odds to match overviews
-- [ ] Color coding for Europa league and differentiation between straight CL and CL playoff spots, and the same for EL spots
-- [ ] A built in watch feature so you can run once with --live and just leave the program running.
+- [x] Add color coding for Europa league and differentiation between straight CL and CL playoff spots, and the same for EL spots
+- [ ] Add date_start + date_end for matches (now it ends or starts with today)
+- [ ] Add betting functions
+- [ ] A built-in watch feature so you can run once with --live and just leave the program running.
 
 License
 ====
