@@ -2,6 +2,7 @@ import click
 import datetime
 import json
 import os
+import copy
 
 from abc import ABCMeta, abstractmethod
 from itertools import groupby
@@ -34,7 +35,7 @@ class BaseWriter(object):
         self.output_filename = output_file
 
     @abstractmethod
-    def live_scores(self, live_scores):
+    def today_scores(self, today_scores):
         pass
 
     @abstractmethod
@@ -50,7 +51,7 @@ class BaseWriter(object):
         pass
 
     @abstractmethod
-    def league_scores(self, total_data, time):
+    def league_scores(self, total_data):
         pass
 
 
@@ -70,12 +71,32 @@ class Stdout(BaseWriter):
         )
         self.colors = type('Enum', (), enums)
 
+    @staticmethod
+    def show_profile(profiledata):
+        click.secho("""Welcome back %s
+Your balance: %s
+Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata['timezone']), fg="green", nl=False)
+
+    def standings(self, league_table, league):
+        pass
+
+    def team_players(self, team):
+        pass
+
+    def team_scores(self, team_scores, time):
+        pass
+
     def today_scores(self, today_scores):
         """Prints the live scores in a pretty format"""
         scores = sorted(today_scores, key=lambda x: x["league_id"])
         for league, games in groupby(scores, key=lambda x: x['league_id']):
             league = Stdout.convert_leagueid_to_league(league)
-            games = sorted(games, key=lambda x: x["time"]["minute"], reverse=True)
+            status = copy.deepcopy(games)
+            status = {game["time"]["status"] for game in status}
+            if status == {"NS"}:
+                games = sorted(games, key=lambda x: x["time"]["starting_at"]["date_time"])
+            else:
+                games = sorted(games, key=lambda x: x["time"]["minute"], reverse=True)
             self.league_header(league)
             for game in games:
                 self.scores(self.parse_result(game), add_new_line=False)
@@ -90,61 +111,76 @@ class Stdout(BaseWriter):
                                 fg=self.colors.TIME)
                 click.echo()
 
-    def team_scores(self, team_scores, time, show_datetime):
-        """Prints the teams scores in a pretty format"""
-        for score in team_scores["fixtures"]:
-            if score["status"] == "FINISHED":
-                # click.echo()
-                click.secho("%s\t" % score["date"].split('T')[0],
-                            fg=self.colors.TIME, nl=False)
-                self.scores(self.parse_result(score))
-            elif show_datetime:
-                # click.echo()
-                self.scores(self.parse_result(score), add_new_line=False)
-                click.secho('   %s' % Stdout.convert_time(score["date"], show_datetime),
-                            fg=self.colors.TIME)
+    # def team_scores(self, team_scores, time):
+    #     """Prints the teams scores in a pretty format"""
+    #     for score in team_scores["fixtures"]:
+    #         if score["status"] == "FINISHED":
+    #             # click.echo()
+    #             click.secho("%s\t" % score["date"].split('T')[0],
+    #                         fg=self.colors.TIME, nl=False)
+    #             self.scores(self.parse_result(score))
+    #         else:
+    #             # click.echo()
+    #             self.scores(self.parse_result(score), add_new_line=False)
+    #             click.secho('   %s' % Stdout.convert_time(score["date"]),
+    #                         fg=self.colors.TIME)
+    #
+    # def team_players(self, team):
+    #     """Prints the team players in a pretty format"""
+    #     players = sorted(team['players'], key=lambda d: (d['jerseyNumber']))
+    #     click.secho("%-4s %-25s    %-20s    %-20s    %-15s    %-10s" %
+    #                 ("N.", "NAME", "POSITION", "NATIONALITY", "BIRTHDAY",
+    #                  "MARKET VALUE"), bold=True, fg=self.colors.MISC)
+    #     fmt = (u"{jerseyNumber:<4} {name:<28} {position:<23} {nationality:<23}"
+    #            u" {dateOfBirth:<18} {marketValue}")
+    #     for player in players:
+    #         # click.echo()
+    #         click.secho(fmt.format(**player), bold=True)
+    #
+    # def standings(self, league_table, league):
+    #     """ Prints the league standings in a pretty way """
+    #     click.secho("%-6s  %-30s    %-10s    %-10s    %-10s" %
+    #                 ("POS", "CLUB", "PLAYED", "GOAL DIFF", "POINTS"))
+    #     for team in league_table["standing"]:
+    #         if team["goalDifference"] >= 0:
+    #             team["goalDifference"] = ' ' + str(team["goalDifference"])
+    #
+    #         team_str = (u"{position:<7} {teamName:<33} {playedGames:<12}"
+    #                     u" {goalDifference:<14} {points}").format(**team)
+    #         click.secho(team_str, fg=self.colors.POSITION)
 
-    def team_players(self, team):
-        """Prints the team players in a pretty format"""
-        players = sorted(team['players'], key=lambda d: (d['jerseyNumber']))
-        click.secho("%-4s %-25s    %-20s    %-20s    %-15s    %-10s" %
-                    ("N.", "NAME", "POSITION", "NATIONALITY", "BIRTHDAY",
-                     "MARKET VALUE"), bold=True, fg=self.colors.MISC)
-        fmt = (u"{jerseyNumber:<4} {name:<28} {position:<23} {nationality:<23}"
-               u" {dateOfBirth:<18} {marketValue}")
-        for player in players:
-            # click.echo()
-            click.secho(fmt.format(**player), bold=True)
-
-    def standings(self, league_table, league):
-        """ Prints the league standings in a pretty way """
-        click.secho("%-6s  %-30s    %-10s    %-10s    %-10s" %
-                    ("POS", "CLUB", "PLAYED", "GOAL DIFF", "POINTS"))
-        for team in league_table["standing"]:
-            if team["goalDifference"] >= 0:
-                team["goalDifference"] = ' ' + str(team["goalDifference"])
-
-            team_str = (u"{position:<7} {teamName:<33} {playedGames:<12}"
-                        u" {goalDifference:<14} {points}").format(**team)
-            click.secho(team_str, fg=self.colors.POSITION)
-
-    def league_scores(self, total_data, time, show_datetime, use_12_hour_format):
+    def league_scores(self, total_data):
         """Prints the data in a pretty format"""
-        seen = set()
-        for league, data in self.supported_leagues(total_data):
-            if league not in seen:
-                seen.add(league)
-                self.league_header(league)
-            self.scores(self.parse_result(data), add_new_line=not show_datetime)
-            if show_datetime:
-                click.secho('   %s' % Stdout.convert_time(data["date"], show_datetime),
-                            fg=self.colors.TIME)
-            click.echo()
+        scores = sorted(total_data, key=lambda x: x["league_id"])
+        for league, games in groupby(scores, key=lambda x: x['league_id']):
+            league = Stdout.convert_leagueid_to_league(league)
+            if league is None:
+                continue
+            status = copy.deepcopy(games)
+            status = {game["time"]["status"] for game in status}
+            if status in [{"NS"}, {"FT"}, {'FT', 'NS'}, {'POSTP', 'FT'}]:
+                games = sorted(games, key=lambda x: x["time"]["starting_at"]["date_time"])
+            else:
+                games = sorted(games, key=lambda x: x["time"]["minute"], reverse=True)
+            self.league_header(league)
+            for game in games:
+                self.scores(self.parse_result(game), add_new_line=False)
+                if game["time"]["status"] in ["LIVE", "HT", "ET"]:
+                    click.secho('   %s' % game["time"]["minute"] + "'",
+                                fg=self.colors.TIME)
+                elif game["time"]["status"] in ["FT", "ABAN", "SUSP", "WO", "AU", "POSTP"]:
+                    click.secho('   %s %s' % (game["time"]["status"][0:2],
+                                              Stdout.convert_time(game["time"]["starting_at"]["date"])),
+                                fg=self.colors.TIME)
+                elif game["time"]["status"] == "NS":
+                    click.secho('   %s' % Stdout.convert_time(game["time"]["starting_at"]["date_time"]),
+                                fg=self.colors.TIME)
+                click.echo()
 
     def league_header(self, league):
         """Prints the league header"""
         league_name = " {0} ".format(league)
-        click.secho(f"{league_name:=^62}", fg=self.colors.MISC)
+        click.secho(f"{league_name:=^62}{'':=^15}", fg=self.colors.MISC)
         click.echo()
 
     def scores(self, result, add_new_line=True):
@@ -178,11 +214,15 @@ class Stdout(BaseWriter):
         return result
 
     @staticmethod
-    def convert_time(time_str, show_datetime=False):
+    def convert_time(time_str):
         """Converts the API UTC time string to the local user time."""
-        return datetime.datetime.strftime(datetime.datetime.strptime(time_str, '%Y-%m-%d %H:%M:%S'), '%d-%m-%Y %H:%M')
+        try:
+            return datetime.datetime.strftime(datetime.datetime.strptime(time_str,
+                                                                         '%Y-%m-%d %H:%M:%S'), '%d-%m-%Y %H:%M')
+        except ValueError:
+            return datetime.datetime.strftime(datetime.datetime.strptime(time_str,
+                                                                         '%Y-%m-%d'), '%d-%m-%Y')
 
     @staticmethod
     def convert_leagueid_to_league(league):
-        league_name = LEAGUES_NAMES.get(league)
-        return league_name
+        return LEAGUES_NAMES.get(league)
