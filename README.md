@@ -89,7 +89,8 @@ Todo
 - [x] Add league standings
 - [ ] Add option to get matches for a specific team
 - [ ] Add odds to match overviews
-- [x] Add color coding for Europa league and differentiation between straight CL and CL playoff spots, and the same for EL spots
+- [x] Add color coding for Europa league and Champions League
+- [x] Differentiation between straight CL and CL playoff spots, and the same for EL spots
 - [ ] Add date_start + date_end for matches (now it ends or starts with today)
 - [ ] Add betting functions
 - [ ] A built-in watch feature so you can run once with --live and just leave the program running.
