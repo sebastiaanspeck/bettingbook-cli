@@ -3,6 +3,7 @@ import datetime
 import json
 import os
 import re
+import copy
 
 from abc import ABCMeta, abstractmethod
 from itertools import groupby
@@ -154,26 +155,19 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
         scores = sorted(total_data, key=lambda x: x["league_id"])
         for league, games in groupby(scores, key=lambda x: x['league_id']):
             league = Stdout.convert_leagueid_to_league(league)
+            games = sorted(games, key=lambda x: x["time"]["starting_at"]["date_time"])
             if league is None:
                 continue
-            games = sorted(games, key=lambda x: x["time"]["starting_at"]["date_time"])
-            try:
-                games = sorted(games, key=lambda x: x["time"]["minute"], reverse=True)
-            except TypeError:
-                pass
             self.league_header(league)
             for game in games:
                 self.scores(self.parse_result(game), add_new_line=False)
                 if game["time"]["status"] in ["LIVE", "HT", "ET"]:
-                    click.secho('   %s' % game["time"]["minute"] + "'",
-                                fg=self.colors.TIME)
+                    click.secho(f'   {game["time"]["minute"]} {chr(44)}', fg=self.colors.TIME)
                 elif game["time"]["status"] in ["FT", "ABAN", "SUSP", "WO", "AU", "POSTP"]:
-                    click.secho('   %s %s' % (game["time"]["status"][0:2],
-                                              Stdout.convert_time(game["time"]["starting_at"]["date"])),
-                                fg=self.colors.TIME)
+                    click.secho(f'   {game["time"]["status"][0:2]} '
+                                f'{Stdout.convert_time(game["time"]["starting_at"]["date"])}', fg=self.colors.TIME)
                 elif game["time"]["status"] == "NS":
-                    click.secho('   %s' % Stdout.convert_time(game["time"]["starting_at"]["date_time"]),
-                                fg=self.colors.TIME)
+                    click.secho(f'   {Stdout.convert_time(game["time"]["starting_at"]["date_time"])}', fg=self.colors.TIME)
                 click.echo()
 
     def league_header(self, league):
