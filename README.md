@@ -84,7 +84,9 @@ For a full list of supported leagues [see this](bettingbook/leagueids.py).
 
 Todo
 ====
-- [ ] Add more competitions
+- [ ] Add more competitions (divisions under the first divisions)
+- [ ] Add cups
+- [ ] Add detailed information to match results
 - [x] Add league filter for live scores
 - [x] Add league standings
 - [ ] Add option to get matches for a specific team
