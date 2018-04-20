@@ -1,26 +1,33 @@
 {
   "leagues": [
     {
-      "id": 8,
-      "name": "Premier League"
+      "id": ["8"],
+      "name": "Premier League",
+      "abbrevation": "EN1"
     }, {
-      "id": 72,
-      "name": "Eredivisie"
+      "id": ["72"],
+      "name": "Eredivisie",
+      "abbrevation": "NL1"
     }, {
-      "id": 82,
-      "name": "Bundesliga"
+      "id": ["82"],
+      "name": "Bundesliga",
+      "abbrevation": "DE1"
     }, {
-      "id": 208,
-      "name": "Jupiler Pro League"
+      "id": ["208", "1371"],
+      "name": "Pro League",
+      "abbrevation": "BE1"
     }, {
-      "id": 301,
-      "name": "Ligue 1"
+      "id": ["301"],
+      "name": "Ligue 1",
+      "abbrevation": "FR1"
     }, {
-      "id": 384,
-      "name": "Serie A"
+      "id": ["384"],
+      "name": "Serie A",
+      "abbrevation": "IT1"
     }, {
-      "id": 564,
-      "name": "Primera Division"
+      "id": ["564"],
+      "name": "La Liga",
+      "abbrevation": "ES1"
     }
   ]
 }
