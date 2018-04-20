@@ -24,8 +24,7 @@ def load_json(file):
 
 
 LEAGUE_IDS = leagueids.LEAGUE_IDS
-LEAGUES_DATA = load_json("leagues.json")["leagues"]
-LEAGUES_NAMES = {league["id"]: league["name"] for league in LEAGUES_DATA}
+LEAGUES_DATA = load_json("leagues.json")
 
 
 def create_config_file(apikey, name, timezone, filename):
@@ -149,7 +148,7 @@ def main(apikey, timezone, live, today, matches, standings, league, time, histor
 
     try:
         writer = get_writer()
-        gd = GetData(params, LEAGUE_IDS, LEAGUES_NAMES, writer)
+        gd = GetData(params, LEAGUE_IDS, LEAGUES_DATA, writer)
 
         if live:
             gd.get_live_scores()
@@ -166,7 +165,7 @@ def main(apikey, timezone, live, today, matches, standings, league, time, histor
         if standings:
             if not league:
                 raise IncorrectParametersException('Please specify a league. '
-                                                   'Example --standings --league=EPL')
+                                                   'Example --standings --league=EN1')
             if league.endswith('C'):
                 raise IncorrectParametersException(f'Standings for {league} not supported')
             gd.get_standings(league)
