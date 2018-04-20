@@ -112,7 +112,7 @@ class GetData(object):
         league_ids = self.get_league_ids()
 
         self.params['leagues'] = ','.join(val for val in league_ids)
-        self.params['include'] = 'localTeam,visitorTeam,league'
+        self.params['include'] = 'localTeam,visitorTeam,league,round,events'
 
         if show_history:
             start = datetime.datetime.strftime(now - datetime.timedelta(days=time), '%Y-%m-%d')
@@ -123,15 +123,15 @@ class GetData(object):
         if league_name:
             try:
                 league_id = self.league_ids[league_name]
+                league_name = self.writer.convert_leagueid_to_leaguename(league_id[0])
                 self.params['leagues'] = ','.join(str(val) for val in league_id)
                 response, fixtures_results = self._get(url + f'{start}/{end}')
                 # no fixtures in the timespan. display a help message and return
                 if len(fixtures_results) == 0:
                     if show_history:
-                        if show_history:
-                            click.secho(f"No {league_name} matches in the past {time} days.", fg="red", bold=True)
-                        else:
-                            click.secho(f"No {league_name} matches in the coming {time} days.", fg="red", bold=True)
+                        click.secho(f"No {league_name} matches in the past {time} days.", fg="red", bold=True)
+                    else:
+                        click.secho(f"No {league_name} matches in the coming {time} days.", fg="red", bold=True)
                     return
                 self.writer.league_scores(fixtures_results)
             except exceptions.APIErrorException:
@@ -159,7 +159,8 @@ class GetData(object):
                 url = f'standings/season/{current_season_id}'
                 _, standings_data = self._get(url)
                 if len(standings_data) == 0:
-                    click.secho(f"No standings availble for {league_name} with {league_id}.", fg="red", bold=True)
+                    click.secho(f"\nLOG: No standings availble for {league_name} with id {league_id}.\n",
+                                fg="red", bold=True)
                     continue
                 self.writer.standings(standings_data, league_name)
             except exceptions.APIErrorException:
