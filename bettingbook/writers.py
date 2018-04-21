@@ -86,31 +86,6 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
     def team_scores(self, team_scores, time):
         pass
 
-    def today_scores(self, today_scores):
-        """Prints the live scores in a pretty format"""
-        scores = sorted(today_scores, key=lambda x: x["league_id"])
-        for league, games in groupby(scores, key=lambda x: x['league_id']):
-            league = Stdout.convert_leagueid_to_leaguename(league)
-            games = sorted(games, key=lambda x: x["time"]["starting_at"]["date_time"])
-            try:
-                games = sorted(games, key=lambda x: x["time"]["minute"], reverse=True)
-            except TypeError:
-                pass
-            self.league_header(league)
-            for game in games:
-                self.scores(self.parse_result(game), add_new_line=False)
-                if game["time"]["status"] in ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK"]:
-                    click.secho('   %s' % game["time"]["minute"]+"'",
-                                fg=self.colors.TIME)
-                elif game["time"]["status"] in ["FT", "FT_PEN", "TBA"]:
-                    click.secho('   %s' % re.sub('[_]', '', game["time"]["status"][0:2]),
-                                fg=self.colors.TIME)
-                elif game["time"]["status"] in ["NS", "CANCL", "POSTP", "INT", "ABAN", "SUSP", "AWARDED", "DELAYED",
-                                                "WO", "AU"]:
-                    click.secho('   %s' % Stdout.convert_time(game["time"]["starting_at"]["date_time"]),
-                                fg=self.colors.TIME)
-                click.echo()
-
     def standings(self, league_table, league):
         """ Prints the league standings in a pretty way """
         for leagues in league_table:
@@ -182,15 +157,20 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                             events["away"].extend([{goal[1]: [{"minute": [goal[2]], "type": [goal[3]]}]}])
                     events["home"] = self.merge_duplicate_keys(events["home"])
                     events["away"] = self.merge_duplicate_keys(events["away"])
-                    goals = self.convert_events_to_pretty_goals(events)
+                    goals = self.convert_events_to_pretty_goals(events, match["scores"]["localteam_score"],
+                                                                match["scores"]["visitorteam_score"])
                     self.scores(self.parse_result(match), add_new_line=False)
-                    if match["time"]["status"] in ["LIVE", "HT", "ET"]:
-                        click.secho(f'   {match["time"]["minute"]} {chr(44)}', fg=self.colors.TIME)
-                    elif match["time"]["status"] in ["FT", "ABAN", "SUSP", "WO", "AU", "POSTP"]:
+                    if match["time"]["status"] in ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK"]:
+                        click.secho(f'   {match["time"]["minute"]}\'',
+                                    fg=self.colors.TIME)
+                    elif match["time"]["status"] in ["FT", "FT_PEN", "TBA"]:
                         click.secho(f'   {match["time"]["status"][0:2]} '
-                                    f'{Stdout.convert_time(match["time"]["starting_at"]["date"])}', fg=self.colors.TIME)
-                    elif match["time"]["status"] == "NS":
-                        click.secho(f'   {Stdout.convert_time(match["time"]["starting_at"]["date_time"])}',
+                                    f'{Stdout.convert_time(match["time"]["starting_at"]["date"])}',
+                                    fg=self.colors.TIME)
+                    elif match["time"]["status"] in ["NS", "CANCL", "POSTP", "INT", "ABAN", "SUSP", "AWARDED",
+                                                     "DELAYED", "WO", "AU"]:
+                        click.secho(f'   {match["time"]["status"][0:2]} '
+                                    f'{Stdout.convert_time(match["time"]["starting_at"]["date_time"])}',
                                     fg=self.colors.TIME)
                     if details:
                         self.goals(goals)
@@ -241,45 +221,80 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                     d[key] = dicty[key]
         return d
 
-    @staticmethod
-    def convert_events_to_pretty_goals(events):
+    def convert_events_to_pretty_goals(self, events, home_goals, away_goals):
         goals = []
-        home_goals = len(events["home"])
-        away_goals = len(events["away"])
         # no home or away-goals scored (0-0)
         if home_goals == 0 and away_goals == 0:
             return goals
+        # home scored and away didn't (x-0)
         if home_goals > 0 and away_goals == 0:
-            for goal in events["home"]:
-                number_of_goals = len(events["home"][goal][0]["minute"])
-                if number_of_goals == 1:
-                    str_scorer = ''.join([goal, ' (', str(events['home'][goal][0]['minute'][0]),
-                                          str(events['home'][goal][0]['type'][0]), ')'])
-                else:
-                    minutes = []
-                    for key, val in enumerate(events["home"][goal][0]["minute"]):
-                        minutes.extend([''.join([str(val), str(events["home"][goal][0]["type"][key])])])
-                    str_scorer = ''.join([goal, ' (', ','.join(minutes), ')'])
-                goals.extend(["{}".format(str_scorer)])
+            goals = self.get_pretty_goals_clean_sheet("home", events)
+            return goals
+        # away didn't score and away did (0-x)
         if home_goals == 0 and away_goals > 0:
-            for goal in events["away"]:
-                number_of_goals = len(events["away"][goal][0]["minute"])
-                if number_of_goals == 1:
-                    str_scorer = ''.join([goal, ' (', str(events['away'][goal][0]['minute'][0]),
-                                          str(events['away'][goal][0]['type'][0]), ')'])
-                else:
-                    minutes = []
-                    for key, val in enumerate(events["away"][goal][0]["minute"]):
-                        minutes.extend([''.join([str(val), str(events["away"][goal][0]["type"][key])])])
-                    str_scorer = ''.join([goal, ' (', ','.join(minutes), ')'])
+            goals = self.get_pretty_goals_clean_sheet("away", events)
+            return goals
+        if home_goals > 0 and away_goals > 0:
+            goals = self.get_pretty_goals(events)
+            return goals
+
+    @staticmethod
+    def get_pretty_goals_clean_sheet(team, events):
+        goals = []
+        for goal in events[team]:
+            number_of_goals = len(events[team][goal][0]["minute"])
+            if number_of_goals == 1:
+                str_scorer = ''.join([goal, ' (', str(events[team][goal][0]['minute'][0]),
+                                      str(events[team][goal][0]['type'][0]), ')'])
+            else:
+                minutes = []
+                for key, val in enumerate(events[team][goal][0]["minute"]):
+                    minutes.extend([''.join([str(val), str(events[team][goal][0]["type"][key])])])
+                str_scorer = ''.join([goal, ' (', ','.join(minutes), ')'])
+            if team == "home":
+                goals.extend(["{}".format(str_scorer)])
+            else:
+                goals.extend(["{}".format(str_scorer.rjust(62))])
+        return goals
+
+    @staticmethod
+    def get_pretty_goals(events):
+        goals = []
+        for goal in events["home"]:
+            number_of_goals = len(events["home"][goal][0]["minute"])
+            if number_of_goals == 1:
+                str_scorer = ''.join([goal, ' (', str(events['home'][goal][0]['minute'][0]),
+                                      str(events['home'][goal][0]['type'][0]), ')'])
+            else:
+                minutes = []
+                for key, val in enumerate(events["home"][goal][0]["minute"]):
+                    minutes.extend([''.join([str(val), str(events["home"][goal][0]["type"][key])])])
+                str_scorer = ''.join([goal, ' (', ','.join(minutes), ')'])
+            goals.extend(["{}".format(str_scorer)])
+        for i, goal in enumerate(events["away"]):
+            number_of_goals = len(events["away"][goal][0]["minute"])
+            if number_of_goals == 1:
+                str_scorer = ''.join([goal, ' (', str(events['away'][goal][0]['minute'][0]),
+                                      str(events['away'][goal][0]['type'][0]), ')'])
+            else:
+                minutes = []
+                for key, val in enumerate(events["away"][goal][0]["minute"]):
+                    minutes.extend([''.join([str(val), str(events["away"][goal][0]["type"][key])])])
+                str_scorer = ''.join([goal, ' (', ','.join(minutes), ')'])
+            try:
+                goals[i] += "{}".format(str_scorer.rjust(62 - len(goals[i])))
+            except IndexError:
                 goals.extend(["{}".format(str_scorer.rjust(62))])
         return goals
 
     @staticmethod
     def goals(goals):
         """"Prints the goals in a pretty format"""
-        for goal in goals:
-            click.secho(goal)
+        try:
+            for goal in goals:
+                click.secho(goal)
+        except TypeError:
+            pass
 
     def parse_result(self, data):
         """Parses the results and returns a Result namedtuple"""
@@ -315,7 +330,10 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
 
     @staticmethod
     def format_playername(name):
-        player_name = name.split(' ', 1)
+        try:
+            player_name = name.split(' ', 1)
+        except AttributeError:
+            return name
         if len(player_name) == 1:
             player_name = player_name[0]
         else:
