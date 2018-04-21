@@ -110,8 +110,8 @@ def load_config_file():
               help="Standings for a particular league.")
 @click.option('--league', type=click.Choice(LEAGUE_IDS.keys()),
               help="Show fixtures from a particular league.")
-@click.option('--time', default=6, show_default=True,
-              help=("The number of days in the past for which you "
+@click.option('--days', default=6, show_default=True,
+              help=("The number of days in the future for which you "
                     "want to see the scores, or the number of days "
                     "in the past when used with --history"))
 @click.option('--history', is_flag=True, default=False, show_default=True,
@@ -120,7 +120,7 @@ def load_config_file():
               help="Displays goal-scorers under the score.")
 @click.option('--profile', is_flag=True,
               help="Show your profile (name, balance, timezone)")
-def main(apikey, timezone, live, today, matches, standings, league, time, history, details, profile):
+def main(apikey, timezone, live, today, matches, standings, league, days, history, details, profile):
     """
     A CLI to "bet" on football games.
 
@@ -153,15 +153,17 @@ def main(apikey, timezone, live, today, matches, standings, league, time, histor
         gd = GetData(params, LEAGUE_IDS, LEAGUES_DATA, writer)
 
         if live:
-            gd.get_live_scores()
+            gd.get_scores(details, 'livescores/now',
+                          ["No live action currently", "There was problem getting live scores"])
             return
 
         if today:
-            gd.get_today_scores()
+            gd.get_scores(details, 'livescores',
+                          ["No matches today", "There was problem getting todays scores"])
             return
 
         if matches:
-            gd.get_matches(league, time, history, details)
+            gd.get_matches(league, days, history, details)
             return
 
         if standings:
