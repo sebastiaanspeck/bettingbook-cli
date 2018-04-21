@@ -153,23 +153,42 @@ def main(apikey, timezone, live, today, matches, standings, league, days, histor
         gd = GetData(params, LEAGUE_IDS, LEAGUES_DATA, writer)
 
         if live:
-            gd.get_scores(details, 'livescores/now',
-                          ["No live action currently", "There was problem getting live scores"])
+            if history:
+                raise IncorrectParametersException('--history and --days is not supported for --live. '
+                                                   'Use --matches to use these parameters')
+            gd.get_matches('livescores/now',
+                           ["No live action currently", "There was problem getting live scores, check your parameters"],
+                           league, days, history, details, type_sort="live")
             return
 
         if today:
-            gd.get_scores(details, 'livescores',
-                          ["No matches today", "There was problem getting todays scores"])
+            if history:
+                raise IncorrectParametersException('--history and --days is not supported for --today. '
+                                                   'Use --matches to use these parameters')
+            gd.get_matches('livescores',
+                           ["No matches today", "There was problem getting todays scores, check your parameters"],
+                           league, days, history, details, type_sort="today")
             return
 
         if matches:
-            gd.get_matches(league, days, history, details)
+            league_id = LEAGUE_IDS[league]
+            league_name = writer.convert_leagueid_to_leaguename(league_id[0])
+            gd.get_matches('fixtures/between/',
+                           [["No ", str(league_name), " matches in the past ", str(days), " days."],
+                            ["No ", str(league_name), " matches in the coming ", str(days), " days."]],
+                           league, days, history, details, type="matches")
             return
 
         if standings:
             if not league:
                 raise IncorrectParametersException('Please specify a league. '
                                                    'Example --standings --league=EN1')
+            if history:
+                raise IncorrectParametersException('--history and --days is not supported for --standings. '
+                                                   'Use --matches to use these parameters')
+            if details:
+                raise IncorrectParametersException('--details is not supported for --standings. '
+                                                   'Use --matches, --live or --today to use these parameters')
             if league.endswith('C'):
                 raise IncorrectParametersException(f'Standings for {league} not supported')
             gd.get_standings(league)

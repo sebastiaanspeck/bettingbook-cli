@@ -41,14 +41,15 @@ $ main.py --today
 ### Get scores for all leagues with a set time period
 
 ```bash
-$ main.py --matches --time=10 # get scores for all the seven leagues over the coming 10 days
+$ main.py --matches --days=10 # get scores for all the seven leagues over the coming 10 days
 ```
 
 ### Get scores for a particular league
 
 ```bash
 $ main.py --matches --league=DE1 # DE1 is the league code for Bundesliga
-$ main.py --matches --league=FR1 --history --time=15 # get scores for all the French Ligue 1 games over the past 15 days
+$ main.py --matches --league=FR1 --history --days=15 # get scores for all the French Ligue 1 games over the past 15 days
+$ main.py --matches --league=EN1 --history --details # get scores for all the Premier League games over the past 6 days and showing the goalscorers.
 ```
 
 ### View account details
@@ -64,7 +65,7 @@ $ main.py --help
 ### List of supported leagues and their league codes
 
 - England:
-  - GB1: Premier League
+  - EN1: Premier League
 - Netherlands:
   - NL1: Eredivisie
 - Germany:
@@ -88,14 +89,13 @@ Todo
 - [ ] Add cups
 - [ ] Add Champions League and Europa League
 - [x] Add detailed information to match results
-- [ ] Add detailed information to match results in games where both teams scored
+- [x] Add detailed information to match results in games where both teams scored
 - [x] Add league filter for live scores
 - [x] Add league standings
 - [ ] Add option to get matches for a specific team
 - [ ] Add odds to match overviews
 - [x] Add color coding for Europa league and Champions League
 - [x] Differentiation between straight CL and CL playoff spots, and the same for EL spots
-- [ ] Add date_start + date_end for matches (now it ends or starts with today)
 - [ ] Add betting functions
 - [ ] A built-in watch feature so you can run once with --live and just leave the program running.
 

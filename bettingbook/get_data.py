@@ -82,12 +82,11 @@ class GetData(object):
         else:
             click.secho(msg[1], fg="red", bold=True)
 
-    def get_matches(self, league_name, days, show_history, show_details):
+    def get_matches(self, url, msg, league_name, days, show_history, show_details, type_sort):
         """
         Queries the API and fetches the scores for fixtures
         based upon the league and time parameter
         """
-        url = 'fixtures/between/'
         now = datetime.datetime.now()
 
         league_ids = self.get_league_ids()
@@ -104,32 +103,32 @@ class GetData(object):
         if league_name:
             try:
                 league_id = self.league_ids[league_name]
-                league_name = self.writer.convert_leagueid_to_leaguename(league_id[0])
                 self.params['leagues'] = ','.join(str(val) for val in league_id)
-                response, fixtures_results = self._get(url + f'{start}/{end}')
-                # no fixtures in the timespan. display a help message and return
-                if len(fixtures_results) == 0:
-                    if show_history:
-                        click.secho(f"No {league_name} matches in the past {time} days.", fg="red", bold=True)
-                    else:
-                        click.secho(f"No {league_name} matches in the coming {time} days.", fg="red", bold=True)
-                    return
-                self.writer.league_scores(fixtures_results, show_details)
+                self.get_match_data(type_sort, url, start, end, show_history, msg, show_details)
             except exceptions.APIErrorException:
                 click.secho("No data for the given league.", fg="red", bold=True)
         else:
             try:
-                response, fixtures_results = self._get(url + f'{start}/{end}')
-                # no fixtures in the timespan. display a help message and return
-                if len(fixtures_results) == 0:
-                    if show_history:
-                        click.secho(f"No {league_name} matches in the past {time} days.", fg="red", bold=True)
-                    else:
-                        click.secho(f"No {league_name} matches in the coming {time} days.", fg="red", bold=True)
-                    return
-                self.writer.league_scores(fixtures_results, show_details)
+                self.get_match_data(type_sort, url, start, end, show_history, msg, show_details)
             except exceptions.APIErrorException:
                 click.secho("No data available.", fg="red", bold=True)
+
+    def get_match_data(self, type_sort, url, start, end, show_history, msg, show_details):
+        if type_sort == "matches":
+            response, fixtures_results = self._get(url + f'{start}/{end}')
+        else:
+            response, fixtures_results = self._get(url)
+        # no fixtures in the timespan. display a help message and return
+        if len(fixtures_results) == 0:
+            if type_sort == "matches":
+                if show_history:
+                    click.secho(''.join(msg[0]), fg="red", bold=True)
+                else:
+                    click.secho(''.join(msg[1]), fg="red", bold=True)
+            else:
+                click.secho(msg[0], fg="red", bold=True)
+            return
+        self.writer.league_scores(fixtures_results, show_details)
 
     def get_standings(self, league_name):
         for league_id in self.league_ids[league_name]:
