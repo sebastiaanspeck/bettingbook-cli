@@ -86,7 +86,9 @@ Todo
 ====
 - [ ] Add more competitions (divisions under the first divisions)
 - [ ] Add cups
-- [ ] Add detailed information to match results
+- [ ] Add Champions League and Europa League
+- [x] Add detailed information to match results
+- [ ] Add detailed information to match results in games where both teams scored
 - [x] Add league filter for live scores
 - [x] Add league standings
 - [ ] Add option to get matches for a specific team
