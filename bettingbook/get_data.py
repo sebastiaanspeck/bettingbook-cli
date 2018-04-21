@@ -65,43 +65,24 @@ class GetData(object):
                 leagueids.extend([str(x)])
         return leagueids
 
-    def get_today_scores(self):
-        """Gets the scores for today"""
-        url = 'livescores'
-
-        league_ids = self.get_league_ids()
-
-        self.params['leagues'] = ','.join(val for val in league_ids)
-        self.params['include'] = 'localTeam,visitorTeam,events'
-        response, scores = self._get(url)
-
-        if response.status_code == requests.codes.ok:
-            if len(scores) == 0:
-                click.secho("No matches today", fg="red", bold=True)
-                return
-            self.writer.today_scores(scores)
-        else:
-            click.secho("There was problem getting todays scores", fg="red", bold=True)
-
-    def get_live_scores(self):
+    def get_scores(self, show_details, url, msg):
         """Gets the live scores"""
-        url = 'livescores/now'
 
         league_ids = self.get_league_ids()
 
         self.params['leagues'] = ','.join(val for val in league_ids)
-        self.params['include'] = 'localTeam,visitorTeam,events'
+        self.params['include'] = 'localTeam,visitorTeam,league,round,events'
         response, scores = self._get(url)
 
         if response.status_code == requests.codes.ok:
             if len(scores) == 0:
-                click.secho("No live action currently", fg="red", bold=True)
+                click.secho(msg[0], fg="red", bold=True)
                 return
-            self.writer.today_scores(scores)
+            self.writer.league_scores(scores, show_details)
         else:
-            click.secho("There was problem getting live scores", fg="red", bold=True)
+            click.secho(msg[1], fg="red", bold=True)
 
-    def get_matches(self, league_name, time, show_history, show_details):
+    def get_matches(self, league_name, days, show_history, show_details):
         """
         Queries the API and fetches the scores for fixtures
         based upon the league and time parameter
@@ -115,11 +96,11 @@ class GetData(object):
         self.params['include'] = 'localTeam,visitorTeam,league,round,events'
 
         if show_history:
-            start = datetime.datetime.strftime(now - datetime.timedelta(days=time), '%Y-%m-%d')
+            start = datetime.datetime.strftime(now - datetime.timedelta(days=days), '%Y-%m-%d')
             end = datetime.datetime.strftime(now - datetime.timedelta(days=1), '%Y-%m-%d')
         else:
             start = datetime.datetime.strftime(now, '%Y-%m-%d')
-            end = datetime.datetime.strftime(now + datetime.timedelta(days=time), '%Y-%m-%d')
+            end = datetime.datetime.strftime(now + datetime.timedelta(days=days), '%Y-%m-%d')
         if league_name:
             try:
                 league_id = self.league_ids[league_name]
