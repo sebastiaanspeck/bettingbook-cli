@@ -116,9 +116,11 @@ def load_config_file():
                     "in the past when used with --history"))
 @click.option('--history', is_flag=True, default=False, show_default=True,
               help="Displays past games when used with --time command.")
+@click.option('--details', is_flag=True, default=False, show_default=True,
+              help="Displays goal-scorers under the score.")
 @click.option('--profile', is_flag=True,
               help="Show your profile (name, balance, timezone)")
-def main(apikey, timezone, live, today, matches, standings, league, time, history, profile):
+def main(apikey, timezone, live, today, matches, standings, league, time, history, details, profile):
     """
     A CLI to "bet" on football games.
 
@@ -159,7 +161,7 @@ def main(apikey, timezone, live, today, matches, standings, league, time, histor
             return
 
         if matches:
-            gd.get_matches(league, time, history)
+            gd.get_matches(league, time, history, details)
             return
 
         if standings:

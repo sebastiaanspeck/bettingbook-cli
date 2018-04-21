@@ -72,7 +72,7 @@ class GetData(object):
         league_ids = self.get_league_ids()
 
         self.params['leagues'] = ','.join(val for val in league_ids)
-        self.params['include'] = 'localTeam,visitorTeam'
+        self.params['include'] = 'localTeam,visitorTeam,events'
         response, scores = self._get(url)
 
         if response.status_code == requests.codes.ok:
@@ -90,7 +90,7 @@ class GetData(object):
         league_ids = self.get_league_ids()
 
         self.params['leagues'] = ','.join(val for val in league_ids)
-        self.params['include'] = 'localTeam,visitorTeam'
+        self.params['include'] = 'localTeam,visitorTeam,events'
         response, scores = self._get(url)
 
         if response.status_code == requests.codes.ok:
@@ -101,7 +101,7 @@ class GetData(object):
         else:
             click.secho("There was problem getting live scores", fg="red", bold=True)
 
-    def get_matches(self, league_name, time, show_history):
+    def get_matches(self, league_name, time, show_history, show_details):
         """
         Queries the API and fetches the scores for fixtures
         based upon the league and time parameter
@@ -133,7 +133,7 @@ class GetData(object):
                     else:
                         click.secho(f"No {league_name} matches in the coming {time} days.", fg="red", bold=True)
                     return
-                self.writer.league_scores(fixtures_results)
+                self.writer.league_scores(fixtures_results, show_details)
             except exceptions.APIErrorException:
                 click.secho("No data for the given league.", fg="red", bold=True)
         else:
@@ -146,7 +146,7 @@ class GetData(object):
                     else:
                         click.secho(f"No {league_name} matches in the coming {time} days.", fg="red", bold=True)
                     return
-                self.writer.league_scores(fixtures_results)
+                self.writer.league_scores(fixtures_results, show_details)
             except exceptions.APIErrorException:
                 click.secho("No data available.", fg="red", bold=True)
 

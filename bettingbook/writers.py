@@ -47,15 +47,11 @@ class BaseWriter(object):
         pass
 
     @abstractmethod
-    def convert_leagueid_to_leaguename(self, league):
-        pass
-
-    @abstractmethod
     def standings(self, league_table, league):
         pass
 
     @abstractmethod
-    def league_scores(self, total_data):
+    def league_scores(self, total_data, details):
         pass
 
 
@@ -151,7 +147,7 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
         click.secho("This color is EL (play-offs) position", fg=self.colors.EL_POSITION)
         click.secho("This color is relegation (play-offs) position", fg=self.colors.RL_POSITION)
 
-    def league_scores(self, total_data):
+    def league_scores(self, total_data, details):
         """Prints the data in a pretty format"""
         scores = sorted(total_data, key=lambda x: x["league_id"])
         for league, games in groupby(scores, key=lambda x: x['league_id']):
@@ -168,6 +164,25 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
             for matchday, matches in groupby(games, key=lambda x: x["round"]["data"]["name"]):
                 self.league_matchday(matchday)
                 for match in matches:
+                    goals = []
+                    events = sorted(match["events"]["data"], key=lambda x: x["id"])
+                    for event in events:
+                        if event["type"] in ["goal", "penalty", "own-goal"] and event["minute"] is not None:
+                            player_name = Stdout.format_playername(event["player_name"])
+                            home_team = Stdout.convert_teamid_to_teamname(event["team_id"],
+                                                                          match["localTeam"]["data"]["id"])
+                            goal_type = Stdout.convert_type_to_prefix(event["type"])
+                            goals.extend([[home_team, player_name, event["minute"], goal_type]])
+                    goals = sorted(goals, key=lambda x: x[0])
+                    events = {"home": [], "away": []}
+                    for goal in goals:
+                        if goal[0]:
+                            events["home"].extend([{goal[1]: [{"minute": [goal[2]], "type": [goal[3]]}]}])
+                        else:
+                            events["away"].extend([{goal[1]: [{"minute": [goal[2]], "type": [goal[3]]}]}])
+                    events["home"] = self.merge_duplicate_keys(events["home"])
+                    events["away"] = self.merge_duplicate_keys(events["away"])
+                    goals = self.convert_events_to_pretty_goals(events)
                     self.scores(self.parse_result(match), add_new_line=False)
                     if match["time"]["status"] in ["LIVE", "HT", "ET"]:
                         click.secho(f'   {match["time"]["minute"]} {chr(44)}', fg=self.colors.TIME)
@@ -177,6 +192,8 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                     elif match["time"]["status"] == "NS":
                         click.secho(f'   {Stdout.convert_time(match["time"]["starting_at"]["date_time"])}',
                                     fg=self.colors.TIME)
+                    if details:
+                        self.goals(goals)
                     click.echo()
 
     def league_header(self, league):
@@ -212,6 +229,58 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
         click.secho('{:>2} {}'.format(result.goalsAwayTeam, result.awayTeam.rjust(26)), fg=away_color,
                     nl=add_new_line)
 
+    @staticmethod
+    def merge_duplicate_keys(dicts):
+        d = {}
+        for dicty in dicts:
+            for key in dicty:
+                try:
+                    d[key][0]["minute"] += dicty[key][0]["minute"]
+                    d[key][0]["type"] += dicty[key][0]["type"]
+                except KeyError:
+                    d[key] = dicty[key]
+        return d
+
+    @staticmethod
+    def convert_events_to_pretty_goals(events):
+        goals = []
+        home_goals = len(events["home"])
+        away_goals = len(events["away"])
+        # no home or away-goals scored (0-0)
+        if home_goals == 0 and away_goals == 0:
+            return goals
+        if home_goals > 0 and away_goals == 0:
+            for goal in events["home"]:
+                number_of_goals = len(events["home"][goal][0]["minute"])
+                if number_of_goals == 1:
+                    str_scorer = ''.join([goal, ' (', str(events['home'][goal][0]['minute'][0]),
+                                          str(events['home'][goal][0]['type'][0]), ')'])
+                else:
+                    minutes = []
+                    for key, val in enumerate(events["home"][goal][0]["minute"]):
+                        minutes.extend([''.join([str(val), str(events["home"][goal][0]["type"][key])])])
+                    str_scorer = ''.join([goal, ' (', ','.join(minutes), ')'])
+                goals.extend(["{}".format(str_scorer)])
+        if home_goals == 0 and away_goals > 0:
+            for goal in events["away"]:
+                number_of_goals = len(events["away"][goal][0]["minute"])
+                if number_of_goals == 1:
+                    str_scorer = ''.join([goal, ' (', str(events['away'][goal][0]['minute'][0]),
+                                          str(events['away'][goal][0]['type'][0]), ')'])
+                else:
+                    minutes = []
+                    for key, val in enumerate(events["away"][goal][0]["minute"]):
+                        minutes.extend([''.join([str(val), str(events["away"][goal][0]["type"][key])])])
+                    str_scorer = ''.join([goal, ' (', ','.join(minutes), ')'])
+                goals.extend(["{}".format(str_scorer.rjust(62))])
+        return goals
+
+    @staticmethod
+    def goals(goals):
+        """"Prints the goals in a pretty format"""
+        for goal in goals:
+            click.secho(goal)
+
     def parse_result(self, data):
         """Parses the results and returns a Result namedtuple"""
         def match_status(status, score):
@@ -243,3 +312,25 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
         except ValueError:
             return datetime.datetime.strftime(datetime.datetime.strptime(time_str,
                                                                          '%Y-%m-%d'), '%d-%m-%Y')
+
+    @staticmethod
+    def format_playername(name):
+        player_name = name.split(' ', 1)
+        if len(player_name) == 1:
+            player_name = player_name[0]
+        else:
+            player_name = player_name[1]
+        return player_name
+
+    @staticmethod
+    def convert_teamid_to_teamname(teamid, hometeam):
+        return teamid == str(hometeam)
+
+    @staticmethod
+    def convert_type_to_prefix(goal_type):
+        if goal_type == "goal":
+            return ''
+        elif goal_type == "penalty":
+            return ' P'
+        elif goal_type == "own-goal":
+            return ' OG'
