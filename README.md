@@ -83,6 +83,12 @@ $ main.py --help
 
 For a full list of supported leagues [see this](bettingbook/leagueids.py).
 
+### Commands and possible arguments
+- --live: --league, --details
+- --today: --league, --details
+- --matches: --league, --days, --history, --details
+- --standings: ---league
+
 Todo
 ====
 - [ ] Add more competitions (divisions under the first divisions)
@@ -92,6 +98,7 @@ Todo
 - [x] Add detailed information to match results in games where both teams scored
 - [x] Add league filter for live scores
 - [x] Add league standings
+- [ ] Add --details to league standings (details are won, draw, lost, goal for, goal against)
 - [ ] Add option to get matches for a specific team
 - [ ] Add odds to match overviews
 - [x] Add color coding for Europa league and Champions League
