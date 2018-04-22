@@ -1,33 +1,29 @@
 {
   "leagues": [
     {
-      "id": ["8"],
-      "name": "Premier League",
-      "abbrevation": "EN1"
+      "DE1": ["82", "163", "166"],
+      "name": "Bundesliga"
     }, {
-      "id": ["72"],
-      "name": "Eredivisie",
-      "abbrevation": "NL1"
+      "FR1": ["301"],
+      "name": "Ligue 1"
     }, {
-      "id": ["82"],
-      "name": "Bundesliga",
-      "abbrevation": "DE1"
+      "ES1": ["564"],
+      "name": "La Liga"
     }, {
-      "id": ["208", "1371"],
-      "name": "Pro League",
-      "abbrevation": "BE1"
+      "NL1": ["72", "1353"],
+      "name": "Eredivisie"
     }, {
-      "id": ["301"],
-      "name": "Ligue 1",
-      "abbrevation": "FR1"
+      "IT1": ["384"],
+      "name": "Serie A"
     }, {
-      "id": ["384"],
-      "name": "Serie A",
-      "abbrevation": "IT1"
+      "EN1": ["8"],
+      "name": "Premier League"
     }, {
-      "id": ["564"],
-      "name": "La Liga",
-      "abbrevation": "ES1"
+      "ENC": ["24"],
+      "name": "FA Cup"
+    }, {
+      "BE1": ["208", "217", "1371"],
+      "name": "Pro League"
     }
   ]
 }

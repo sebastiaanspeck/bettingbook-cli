@@ -5,7 +5,6 @@ import json
 from get_data import GetData
 from exceptions import IncorrectParametersException
 from writers import get_writer
-import leagueids
 
 try:
     from configparser import ConfigParser
@@ -23,8 +22,8 @@ def load_json(file):
     return data
 
 
-LEAGUE_IDS = leagueids.LEAGUE_IDS
-LEAGUES_DATA = load_json("leagues.json")
+LEAGUES_DATA = load_json("leagues.json")['leagues']
+LEAGUES = [list(x.keys())[0] for x in LEAGUES_DATA]
 
 
 def create_config_file(apikey, name, timezone, filename):
@@ -108,9 +107,9 @@ def load_config_file():
               help="Shows matches from various leagues for a longer period.")
 @click.option('--standings', is_flag=True,
               help="Standings for a particular league.")
-@click.option('--league', type=click.Choice(LEAGUE_IDS.keys()),
+@click.option('--league', type=click.Choice(LEAGUES),
               help="Show fixtures from a particular league.")
-@click.option('--days', default=6, show_default=True,
+@click.option('--days', default=7, show_default=True,
               help=("The number of days in the future for which you "
                     "want to see the scores, or the number of days "
                     "in the past when used with --history"))
@@ -150,7 +149,7 @@ def main(apikey, timezone, live, today, matches, standings, league, days, histor
 
     try:
         writer = get_writer()
-        gd = GetData(params, LEAGUE_IDS, LEAGUES_DATA, writer)
+        gd = GetData(params, LEAGUES_DATA, writer)
 
         if live:
             if history:
@@ -171,12 +170,10 @@ def main(apikey, timezone, live, today, matches, standings, league, days, histor
             return
 
         if matches:
-            league_id = LEAGUE_IDS[league]
-            league_name = writer.convert_leagueid_to_leaguename(league_id[0])
             gd.get_matches('fixtures/between/',
-                           [["No ", str(league_name), " matches in the past ", str(days), " days."],
-                            ["No ", str(league_name), " matches in the coming ", str(days), " days."]],
-                           league, days, history, details, type="matches")
+                           [[f"No matches in the past {str(days)} days."],
+                            [f"No matches in the coming {str(days)} days."]],
+                           league, days, history, details, type_sort="matches")
             return
 
         if standings:

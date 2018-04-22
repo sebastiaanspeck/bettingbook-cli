@@ -9,10 +9,9 @@ import exceptions
 class GetData(object):
     BASE_URL = 'https://soccer.sportmonks.com/api/v2.0/'
 
-    def __init__(self, params, league_ids, league_names, writer):
+    def __init__(self, params, league_data, writer):
         self.params = params
-        self.league_ids = league_ids
-        self.league_names = league_names
+        self.league_data = league_data
         self.writer = writer
 
     def show_profile(self, profiledata):
@@ -58,29 +57,21 @@ class GetData(object):
         return data
 
     def get_league_ids(self):
-        leagueids = []
+        league_ids = []
 
-        for k, dk in self.league_ids.items():
-            for x in dk:
-                leagueids.extend([str(x)])
-        return leagueids
+        for x in self.league_data:
+            ids = list(x.values())[0]
+            for league_id in ids:
+                league_ids.extend([league_id])
+        return league_ids
 
-    def get_scores(self, show_details, url, msg):
-        """Gets the live scores"""
-
-        league_ids = self.get_league_ids()
-
-        self.params['leagues'] = ','.join(val for val in league_ids)
-        self.params['include'] = 'localTeam,visitorTeam,league,round,events'
-        response, scores = self._get(url)
-
-        if response.status_code == requests.codes.ok:
-            if len(scores) == 0:
-                click.secho(msg[0], fg="red", bold=True)
-                return
-            self.writer.league_scores(scores, show_details)
-        else:
-            click.secho(msg[1], fg="red", bold=True)
+    def get_league_abbrevation(self, league_name):
+        for x in self.league_data:
+            abbrevation = list(x.keys())[0]
+            ids = list(x.values())[0]
+            if league_name == abbrevation:
+                return ids
+        return None
 
     def get_matches(self, url, msg, league_name, days, show_history, show_details, type_sort):
         """
@@ -92,17 +83,17 @@ class GetData(object):
         league_ids = self.get_league_ids()
 
         self.params['leagues'] = ','.join(val for val in league_ids)
-        self.params['include'] = 'localTeam,visitorTeam,league,round,events'
+        self.params['include'] = 'localTeam,visitorTeam,league,round,events,stage'
 
         if show_history:
             start = datetime.datetime.strftime(now - datetime.timedelta(days=days), '%Y-%m-%d')
             end = datetime.datetime.strftime(now - datetime.timedelta(days=1), '%Y-%m-%d')
         else:
-            start = datetime.datetime.strftime(now, '%Y-%m-%d')
+            start = datetime.datetime.strftime(now + datetime.timedelta(days=1), '%Y-%m-%d')
             end = datetime.datetime.strftime(now + datetime.timedelta(days=days), '%Y-%m-%d')
         if league_name:
             try:
-                league_id = self.league_ids[league_name]
+                league_id = self.get_league_abbrevation(league_name)
                 self.params['leagues'] = ','.join(str(val) for val in league_id)
                 self.get_match_data(type_sort, url, start, end, show_history, msg, show_details)
             except exceptions.APIErrorException:
@@ -128,10 +119,10 @@ class GetData(object):
             else:
                 click.secho(msg[0], fg="red", bold=True)
             return
-        self.writer.league_scores(fixtures_results, show_details)
+        self.writer.league_scores(fixtures_results, show_details, type_sort)
 
     def get_standings(self, league_name):
-        for league_id in self.league_ids[league_name]:
+        for league_id in self.get_league_abbrevation(league_name):
             url = f'leagues/{league_id}'
             try:
                 _, league_data = self._get(url)
@@ -142,7 +133,7 @@ class GetData(object):
                     click.secho(f"\nLOG: No standings availble for {league_name} with id {league_id}.\n",
                                 fg="red", bold=True)
                     continue
-                self.writer.standings(standings_data, league_name)
+                self.writer.standings(standings_data, league_id)
             except exceptions.APIErrorException:
                 # Click handles incorrect League codes so this will only come up
                 # if that league does not have standings available. ie. Champions League
