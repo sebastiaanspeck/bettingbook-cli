@@ -2,14 +2,12 @@ import click
 import datetime
 import json
 import os
-import re
 import copy
+from operator import itemgetter
 
 from abc import ABCMeta, abstractmethod
 from itertools import groupby
 from collections import namedtuple
-
-import leagueids
 
 
 def load_json(file):
@@ -20,7 +18,6 @@ def load_json(file):
     return data
 
 
-LEAGUE_IDS = leagueids.LEAGUE_IDS
 LEAGUES_DATA = load_json("leagues.json")["leagues"]
 
 
@@ -35,23 +32,11 @@ class BaseWriter(object):
         self.output_filename = output_file
 
     @abstractmethod
-    def today_scores(self, today_scores):
-        pass
-
-    @abstractmethod
-    def team_scores(self, team_scores, time):
-        pass
-
-    @abstractmethod
-    def team_players(self, team):
-        pass
-
-    @abstractmethod
     def standings(self, league_table, league):
         pass
 
     @abstractmethod
-    def league_scores(self, total_data, details):
+    def league_scores(self, total_data, details, type_sort):
         pass
 
 
@@ -80,16 +65,10 @@ class Stdout(BaseWriter):
 Your balance: %s
 Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata['timezone']), fg="green", nl=False)
 
-    def team_players(self, team):
-        pass
-
-    def team_scores(self, team_scores, time):
-        pass
-
-    def standings(self, league_table, league):
+    def standings(self, league_table, leagueid):
         """ Prints the league standings in a pretty way """
         for leagues in league_table:
-            self.standings_header(self.convert_leagueid_to_leaguename(league), leagues['name'])
+            self.standings_header(self.convert_leagueid_to_leaguename(leagueid), leagues['name'])
             number_of_teams = len(leagues['standings']['data'])
             click.secho("{:6}  {:30}    {:10}    {:10}    {:10}    {:10}    {:10}    {:10}".format
                         ("POS", "CLUB", "PLAYED", "WON", "DRAW", "LOST", "GOAL DIFF", "POINTS"))
@@ -122,57 +101,99 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
         click.secho("This color is EL (play-offs) position", fg=self.colors.EL_POSITION)
         click.secho("This color is relegation (play-offs) position", fg=self.colors.RL_POSITION)
 
-    def league_scores(self, total_data, details):
+    def league_scores(self, total_data, details, type_sort):
         """Prints the data in a pretty format"""
-        scores = sorted(total_data, key=lambda x: x["league_id"])
+        # TODO: group the matches using the stage_id because if --matches has a huge timespan, matches from regular
+        # TODO: season gets mixed up and the matchday isn't shown anymore, but only the stage-name is shown.
+        scores = sorted(total_data, key=lambda x: (x["league"]["data"]["country_id"], x['league_id']))
         for league, games in groupby(scores, key=lambda x: x['league_id']):
             league = Stdout.convert_leagueid_to_leaguename(league)
             games = sorted(games, key=lambda x: x["time"]["starting_at"]["date_time"])
             if league is None:
                 continue
-            league_names = copy.deepcopy(games)
-            league_prefix = list(set([x['league']['data']['name'] for x in league_names]))
+            games_copy = copy.deepcopy(games)
+            league_prefix = list(set([x['league']['data']['name'] for x in games_copy]))
+            match_status = list(set([x['time']['status'] for x in games_copy]))
+            if type_sort == "live" and match_status != ["LIVE"]:
+                continue
+            if type_sort == "today" and match_status == ["LIVE"]:
+                continue
             if league_prefix[0] == league:
                 self.league_header(league)
             else:
                 self.league_header(league + ' - ' + league_prefix[0])
-            for matchday, matches in groupby(games, key=lambda x: x["round"]["data"]["name"]):
-                self.league_matchday(matchday)
+            keys = [list(key.keys()) for key in games_copy]
+            uniq_keys = set()
+            for key in keys:
+                uniq_keys.update(key)
+            if "round" in uniq_keys:
+                if self.groupby_round(games_copy):
+                    games = groupby(games, key=lambda x: x["round"]["data"]["name"])
+                else:
+                    games = groupby(games, key=lambda x: x["stage"]["data"]["name"])
+            else:
+                games = groupby(games, key=lambda x: x["stage"]["data"]["name"])
+            for matchday, matches in games:
+                print_matchday = ''
+                if len(str(matchday)) < 3:
+                    self.league_subheader(matchday, 'matchday')
+                else:
+                    self.league_subheader(matchday, 'stage')
                 for match in matches:
-                    goals = []
-                    events = sorted(match["events"]["data"], key=lambda x: x["id"])
-                    for event in events:
-                        if event["type"] in ["goal", "penalty", "own-goal"] and event["minute"] is not None:
-                            player_name = Stdout.format_playername(event["player_name"])
-                            home_team = Stdout.convert_teamid_to_teamname(event["team_id"],
-                                                                          match["localTeam"]["data"]["id"])
-                            goal_type = Stdout.convert_type_to_prefix(event["type"])
-                            goals.extend([[home_team, player_name, event["minute"], goal_type]])
-                    goals = sorted(goals, key=lambda x: x[0])
-                    events = {"home": [], "away": []}
-                    for goal in goals:
-                        if goal[0]:
-                            events["home"].extend([{goal[1]: [{"minute": [goal[2]], "type": [goal[3]]}]}])
-                        else:
-                            events["away"].extend([{goal[1]: [{"minute": [goal[2]], "type": [goal[3]]}]}])
-                    events["home"] = self.merge_duplicate_keys(events["home"])
-                    events["away"] = self.merge_duplicate_keys(events["away"])
-                    goals = self.convert_events_to_pretty_goals(events, match["scores"]["localteam_score"],
-                                                                match["scores"]["visitorteam_score"])
+                    if type_sort == "today" and match["time"]["status"] in ["LIVE", "HT", "ET",
+                                                                            "PEN_LIVE", "AET", "BREAK"]:
+                        continue
+                    if matchday == "Regular Season" and print_matchday != match["round"]["data"]["name"]:
+                        print_matchday = match["round"]["data"]["name"]
+                        self.league_subheader(print_matchday, 'matchday')
+
                     self.scores(self.parse_result(match), add_new_line=False)
-                    if match["time"]["status"] in ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK"]:
-                        click.secho(f'   {match["time"]["minute"]}\'',
-                                    fg=self.colors.TIME)
-                    elif match["time"]["status"] in ["FT", "FT_PEN", "TBA"]:
-                        click.secho(f'   {match["time"]["status"][0:2]} '
-                                    f'{Stdout.convert_time(match["time"]["starting_at"]["date"])}',
-                                    fg=self.colors.TIME)
-                    elif match["time"]["status"] in ["NS", "CANCL", "POSTP", "INT", "ABAN", "SUSP", "AWARDED",
-                                                     "DELAYED", "WO", "AU"]:
-                        click.secho(f'   {match["time"]["status"][0:2]} '
-                                    f'{Stdout.convert_time(match["time"]["starting_at"]["date_time"])}',
-                                    fg=self.colors.TIME)
+                    if type_sort != "matches":
+                        if match["time"]["status"] in ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK"]:
+                            # print 0' instead of None'
+                            if match["time"]["minute"] is None:
+                                click.secho(f'   0\'',
+                                            fg=self.colors.TIME)
+                            # print minute
+                            else:
+                                click.secho(f'   {match["time"]["minute"]}\'',
+                                            fg=self.colors.TIME)
+                        elif match["time"]["status"] in ["FT", "FT_PEN", "TBA", "NS", "CANCL", "POSTP", "INT", "ABAN",
+                                                         "SUSP", "AWARDED", "DELAYED", "WO", "AU"]:
+                            click.secho(f'   {Stdout.convert_time(match["time"]["starting_at"]["date_time"])} '
+                                        f'{match["time"]["status"]}',
+                                        fg=self.colors.TIME)
+                    else:
+                        if match["time"]["status"] in ["FT", "FT_PEN", "TBA"]:
+                            click.secho(f'   {Stdout.convert_time(match["time"]["starting_at"]["date"])} '
+                                        f'{match["time"]["status"]}',
+                                        fg=self.colors.TIME)
+                        elif match["time"]["status"] in ["NS", "CANCL", "POSTP", "INT", "ABAN", "SUSP", "AWARDED",
+                                                         "DELAYED", "WO", "AU"]:
+                            click.secho(f'   {Stdout.convert_time(match["time"]["starting_at"]["date_time"])} '
+                                        f'{match["time"]["status"]}',
+                                        fg=self.colors.TIME)
                     if details:
+                        goals = []
+                        events = sorted(match["events"]["data"], key=lambda x: x["id"])
+                        for event in events:
+                            if event["type"] in ["goal", "penalty", "own-goal"] and event["minute"] is not None:
+                                player_name = Stdout.format_playername(event["player_name"])
+                                home_team = Stdout.convert_teamid_to_teamname(event["team_id"],
+                                                                              match["localTeam"]["data"]["id"])
+                                goal_type = Stdout.convert_type_to_prefix(event["type"])
+                                goals.extend([[home_team, player_name, event["minute"], goal_type]])
+                        goals = sorted(goals, key=lambda x: x[0])
+                        events = {"home": [], "away": []}
+                        for goal in goals:
+                            if goal[0]:
+                                events["home"].extend([{goal[1]: [{"minute": [goal[2]], "type": [goal[3]]}]}])
+                            else:
+                                events["away"].extend([{goal[1]: [{"minute": [goal[2]], "type": [goal[3]]}]}])
+                        events["home"] = self.merge_duplicate_keys(events["home"])
+                        events["away"] = self.merge_duplicate_keys(events["away"])
+                        goals = self.convert_events_to_pretty_goals(events, match["scores"]["localteam_score"],
+                                                                    match["scores"]["visitorteam_score"])
                         self.goals(goals)
                     click.echo()
 
@@ -180,7 +201,6 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
         """Prints the league header"""
         league_name = f" {league} "
         click.secho(f"{league_name:=^62}", fg=self.colors.MISC)
-        click.echo()
 
     def standings_header(self, league, prefix=None):
         """Prints the league header"""
@@ -188,10 +208,13 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
         click.secho(f"{league_name:#^118}", fg=self.colors.MISC)
         click.echo()
 
-    def league_matchday(self, matchday):
+    def league_subheader(self, subheader, type_header):
         """Prints the league matchday"""
-        league_round = " Matchday {0} ".format(matchday)
-        click.secho(f"{league_round:-^62}", fg=self.colors.MISC)
+        if type_header == 'matchday':
+            league_subheader = " Matchday {0} ".format(subheader)
+        else:
+            league_subheader = " {0} ".format(subheader)
+        click.secho(f"{league_subheader:-^62}", fg=self.colors.MISC)
         click.echo()
 
     def scores(self, result, add_new_line=True):
@@ -312,10 +335,10 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
     @staticmethod
     def convert_leagueid_to_leaguename(league):
         for leagues in LEAGUES_DATA:
-            if str(league) in leagues['id']:
-                return leagues['name']
-            if str(league) in leagues['abbrevation']:
-                return leagues['name']
+            leaguename = list(leagues.values())[1]
+            leagueids = list(leagues.values())[0]
+            if str(league) in leagueids:
+                return leaguename
         return None
 
     @staticmethod
@@ -352,3 +375,12 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
             return ' P'
         elif goal_type == "own-goal":
             return ' OG'
+
+    @staticmethod
+    def groupby_round(matches):
+        for match in matches:
+            try:
+                x = match['round']['data']['name']
+            except KeyError:
+                return False
+        return True
