@@ -62,26 +62,27 @@ $ main.py --account
 ```bash
 $ main.py --help
 ```
-### List of supported leagues and their league codes
+### List of supported leagues & cups and their league codes
 
-- England:
-  - EN1: Premier League
-- Netherlands:
-  - NL1: Eredivisie
 - Germany:
   - DE1: Bundesliga
-- Belgium:
-  - BE1: Jupiler Pro League
 - France:
   - FR1: Ligue 1
+- Spain:
+  - ES1: La Liga
 - Italy:
   - IT1: Serie A
-- Spain:
-  - ES1: Primera Division
+- England:
+  - EN1: Premier League
+  - ENC: FA Cup
+- Netherlands:
+  - NL1: Eredivisie
+- Belgium:
+  - BE1: Pro League
 
-### Supported leagues
+### Supported leagues & cups
 
-For a full list of supported leagues [see this](bettingbook/leagueids.py).
+For a full list of supported leagues & cups [see this](bettingbook/leagues.json).
 
 ### Commands and possible arguments
 - --live: --league, --details
@@ -89,10 +90,36 @@ For a full list of supported leagues [see this](bettingbook/leagueids.py).
 - --matches: --league, --days, --history, --details
 - --standings: ---league
 
+### Abbreviations
+The abbreviations you can see when using live, today or matches are explained down here:
+
+Abbreviation | Definition | Information
+--- | --- | ---
+NS |	Not Started	| The initial status of a game
+LIVE |	Live |	The game is currently inplay
+HT |	Half-Time |	The game currently is in half-time
+FT |	Full-Time	| The game has ended after 90 minutes
+ET |	Extra-Time |	The game currently is in extra time, can happen in knockout games
+PEN_LIVE |	Penalty Shootout |	ET status didn't get a winner, penalties are taken to determine the winner
+AET |	Finished after extra time	| The game has finished after 120 minutes
+BREAK |	Regular time finished	| Waiting for extra time or penalties to start
+FT_PEN | Full-Time after penalties |	Finished after penalty shootout
+CANCL |	Cancelled	| The game has been cancelled
+POSTP	| Postponed	| The game has been postponed
+INT	| Interrupted	| The game has been interrupted. Can be due to bad weather
+ABAN | Abandoned | The game has abandoned and will continue at a later time or day
+SUSP | Suspended | The game has suspended and will continue at a later time or day
+AWARDED	| Awarded |	Winner is beeing decided externally
+DELAYED	| Delayed	| The game is delayed so it wil start later
+TBA	| To Be Announced	| Fixture will be updated with exact time later
+WO | Walkover	| Awarding of a victory to a contestant because there are no other contestants
+AU | Awaiting Updates | Can occur when there is a connectivity issue or something
+
+
 Todo
 ====
 - [ ] Add more competitions (divisions under the first divisions)
-- [ ] Add cups
+- [x] Add cups
 - [ ] Add Champions League and Europa League
 - [x] Add detailed information to match results
 - [x] Add detailed information to match results in games where both teams scored
@@ -100,9 +127,9 @@ Todo
 - [x] Add league standings
 - [ ] Add --details to league standings (details are won, draw, lost, goal for, goal against)
 - [ ] Add option to get matches for a specific team
+- [ ] Solve bug (see league_scores in writers.py for more information)
 - [ ] Add odds to match overviews
 - [x] Add color coding for Europa league and Champions League
-- [x] Differentiation between straight CL and CL playoff spots, and the same for EL spots
 - [ ] Add betting functions
 - [ ] A built-in watch feature so you can run once with --live and just leave the program running.
 
