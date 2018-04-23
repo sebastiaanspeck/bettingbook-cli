@@ -3,7 +3,6 @@ import datetime
 import json
 import os
 import copy
-from operator import itemgetter
 
 from abc import ABCMeta, abstractmethod
 from itertools import groupby
@@ -357,9 +356,9 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
         def winning_odd(odd):
             if odd == [None, None, None]:
                 return "no_winning_odd"
-            for i, o in enumerate(odd):
+            for index, o in enumerate(odd):
                 if o:
-                    return i
+                    return index
         for i, _ in enumerate(odds):
             if type(odds[i]["value"]) == float:
                 odds[i]["value"] = "{0:.2f}".format(odds[i]["value"])
