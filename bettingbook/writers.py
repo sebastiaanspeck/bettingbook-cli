@@ -36,7 +36,7 @@ class BaseWriter(object):
         pass
 
     @abstractmethod
-    def league_scores(self, total_data, details, type_sort):
+    def league_scores(self, total_data, details, odds, type_sort):
         pass
 
 
@@ -45,6 +45,8 @@ class Stdout(BaseWriter):
     def __init__(self, output_file):
         super().__init__(output_file)
         self.Result = namedtuple("Result", "homeTeam, goalsHomeTeam, awayTeam, goalsAwayTeam")
+
+        self.Odds = namedtuple("Odds", "oddHometeam, oddDraw, oddAwayteam, winningOdd")
 
         enums = dict(
             WIN="green",
@@ -55,7 +57,8 @@ class Stdout(BaseWriter):
             CL_POSITION="green",
             EL_POSITION="yellow",
             RL_POSITION="red",
-            POSITION="white"
+            POSITION="white",
+            ODDS="yellow"
         )
         self.colors = type('Enum', (), enums)
 
@@ -101,10 +104,8 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
         click.secho("This color is EL (play-offs) position", fg=self.colors.EL_POSITION)
         click.secho("This color is relegation (play-offs) position", fg=self.colors.RL_POSITION)
 
-    def league_scores(self, total_data, details, type_sort):
+    def league_scores(self, total_data, details, odds, type_sort):
         """Prints the data in a pretty format"""
-        # TODO: group the matches using the stage_id because if --matches has a huge timespan, matches from regular
-        # TODO: season gets mixed up and the matchday isn't shown anymore, but only the stage-name is shown.
         scores = sorted(total_data, key=lambda x: (x["league"]["data"]["country_id"], x['league_id']))
         for league, games in groupby(scores, key=lambda x: x['league_id']):
             league = Stdout.convert_leagueid_to_leaguename(league)
@@ -146,8 +147,12 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                     if matchday == "Regular Season" and print_matchday != match["round"]["data"]["name"]:
                         print_matchday = match["round"]["data"]["name"]
                         self.league_subheader(print_matchday, 'matchday')
-
-                    self.scores(self.parse_result(match), add_new_line=False)
+                    if odds:
+                        for i, odd in enumerate(match["flatOdds"]["data"]):
+                            if match["flatOdds"]["data"][i]["market_id"] == 1:
+                                odds = odd["odds"]
+                        self.odds(self.parse_odd(odds))
+                    self.scores(self.parse_result(match))
                     if type_sort != "matches":
                         if match["time"]["status"] in ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK"]:
                             # print 0' instead of None'
@@ -217,7 +222,7 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
         click.secho(f"{league_subheader:-^62}", fg=self.colors.MISC)
         click.echo()
 
-    def scores(self, result, add_new_line=True):
+    def scores(self, result):
         """Prints out the scores in a pretty format"""
         if result.goalsHomeTeam > result.goalsAwayTeam:
             home_color, away_color = (self.colors.WIN, self.colors.LOSE)
@@ -230,7 +235,22 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                     fg=home_color, nl=False)
         click.secho("  vs ", nl=False)
         click.secho('{:>2} {}'.format(result.goalsAwayTeam, result.awayTeam.rjust(26)), fg=away_color,
-                    nl=add_new_line)
+                    nl=False)
+
+    def odds(self, odds):
+        """Prints out the odds in a pretty format"""
+        if odds.winningOdd == 0:
+            home_color, draw_color, away_color = (self.colors.WIN, self.colors.LOSE, self.colors.LOSE)
+        elif odds.winningOdd == 1:
+            home_color, draw_color, away_color = (self.colors.LOSE, self.colors.WIN, self.colors.LOSE)
+        elif odds.winningOdd == 2:
+            home_color, draw_color, away_color = (self.colors.LOSE, self.colors.LOSE, self.colors.WIN)
+        else:
+            home_color, draw_color, away_color = (self.colors.ODDS, self.colors.ODDS, self.colors.ODDS)
+
+        click.secho("{}".format(odds.oddHometeam.rjust(28)), fg=home_color, nl=False)
+        click.secho(" {} ".format(odds.oddDraw), fg=draw_color, nl=False)
+        click.secho("{}".format(odds.oddAwayteam), fg=away_color, nl=True)
 
     @staticmethod
     def merge_duplicate_keys(dicts):
@@ -331,6 +351,25 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
             match_status(data["time"]["status"], data["scores"]["visitorteam_score"]))
 
         return result
+
+    def parse_odd(self, odds):
+        """Parses the odds and returns a Odds namedtuple"""
+        def winning_odd(odd):
+            if odd == [None, None, None]:
+                return "no_winning_odd"
+            for i, o in enumerate(odd):
+                if o:
+                    return i
+        for i, _ in enumerate(odds):
+            if type(odds[i]["value"]) == float:
+                odds[i]["value"] = "{0:.2f}".format(odds[i]["value"])
+            if len(str(odds[i]["value"])) > 4:
+                odds[i]["value"] = "{0:.1f}".format(float(odds[i]["value"]))
+
+        odds = self.Odds(
+            str(odds[0]["value"]), str(odds[1]["value"]), str(odds[2]["value"]),
+            winning_odd([odds[0]["winning"], odds[1]["winning"], odds[2]["winning"]]))
+        return odds
 
     @staticmethod
     def convert_leagueid_to_leaguename(league):

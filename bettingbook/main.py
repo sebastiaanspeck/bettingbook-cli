@@ -99,27 +99,29 @@ def load_config_file():
 @click.option('--timezone', default=load_config_file,
               help="Timezone to use. See https://bit.ly/2glGdNY "
                    "for a list of accepted timezones")
-@click.option('--live', is_flag=True,
+@click.option('--live', '-L', is_flag=True,
               help="Shows live scores from various leagues.")
-@click.option('--today', is_flag=True,
+@click.option('--today', '-T', is_flag=True,
               help="Shows matches from various leagues for today.")
-@click.option('--matches', is_flag=True,
+@click.option('--matches', '-M', is_flag=True,
               help="Shows matches from various leagues for a longer period.")
-@click.option('--standings', is_flag=True,
+@click.option('--standings', '-S', is_flag=True,
               help="Standings for a particular league.")
-@click.option('--league', type=click.Choice(LEAGUES),
+@click.option('--league', '-l', type=click.Choice(LEAGUES),
               help="Show fixtures from a particular league.")
-@click.option('--days', default=7, show_default=True,
+@click.option('--days', '-d', default=7, show_default=True,
               help=("The number of days in the future for which you "
                     "want to see the scores, or the number of days "
                     "in the past when used with --history"))
-@click.option('--history', is_flag=True, default=False, show_default=True,
+@click.option('--history', '-H', is_flag=True, default=False, show_default=True,
               help="Displays past games when used with --time command.")
-@click.option('--details', is_flag=True, default=False, show_default=True,
+@click.option('--details', '-D', is_flag=True, default=False, show_default=True,
               help="Displays goal-scorers under the score.")
-@click.option('--profile', is_flag=True,
+@click.option('--odds', '-O', is_flag=True, default=False, show_default=True,
+              help="Displays the odds above the score.")
+@click.option('--profile', '-P', is_flag=True,
               help="Show your profile (name, balance, timezone)")
-def main(apikey, timezone, live, today, matches, standings, league, days, history, details, profile):
+def main(apikey, timezone, live, today, matches, standings, league, days, history, details, odds, profile):
     """
     A CLI to "bet" on football games.
 
@@ -157,7 +159,7 @@ def main(apikey, timezone, live, today, matches, standings, league, days, histor
                                                    'Use --matches to use these parameters')
             gd.get_matches('livescores/now',
                            ["No live action currently", "There was problem getting live scores, check your parameters"],
-                           league, days, history, details, type_sort="live")
+                           league, days, history, details, odds, type_sort="live")
             return
 
         if today:
@@ -166,14 +168,14 @@ def main(apikey, timezone, live, today, matches, standings, league, days, histor
                                                    'Use --matches to use these parameters')
             gd.get_matches('livescores',
                            ["No matches today", "There was problem getting todays scores, check your parameters"],
-                           league, days, history, details, type_sort="today")
+                           league, days, history, details, odds, type_sort="today")
             return
 
         if matches:
             gd.get_matches('fixtures/between/',
                            [[f"No matches in the past {str(days)} days."],
                             [f"No matches in the coming {str(days)} days."]],
-                           league, days, history, details, type_sort="matches")
+                           league, days, history, details, odds, type_sort="matches")
             return
 
         if standings:

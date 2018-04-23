@@ -50,6 +50,7 @@ $ main.py --matches --days=10 # get scores for all the seven leagues over the co
 $ main.py --matches --league=DE1 # DE1 is the league code for Bundesliga
 $ main.py --matches --league=FR1 --history --days=15 # get scores for all the French Ligue 1 games over the past 15 days
 $ main.py --matches --league=EN1 --history --details # get scores for all the Premier League games over the past 6 days and showing the goalscorers.
+$ main.py --matches --league=NL1 --history --odds # get odds for all the Eredivisie games over the past 6 days and showing the odds (in corresponding colors).
 ```
 
 ### View account details
@@ -85,10 +86,26 @@ $ main.py --help
 For a full list of supported leagues & cups [see this](bettingbook/leagues.json).
 
 ### Commands and possible arguments
-- --live: --league, --details
-- --today: --league, --details
-- --matches: --league, --days, --history, --details
-- --standings: ---league
+- --live (-L):
+  - --league (-l)
+  - --details (-D)
+  - --odds (-O)
+- --today (-T):
+  - --league (-l)
+  - --details (-D)
+  - --odds (-O)
+- --matches (-M):
+  - --league (-l)
+  - --days (-d)
+  - --history (-H)
+  - --details (-D)
+  - --odds (-O)
+- --standings:
+  - --league (-l)
+
+Commands (live, today, matches, standings) and flags (details, odds, history) can be used like -UPPERCASE.
+Paramters (league, days) can also be used like -lowercase
+
 
 ### Abbreviations
 The abbreviations you can see when using live, today or matches are explained down here:
