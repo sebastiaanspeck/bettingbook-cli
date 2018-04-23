@@ -103,9 +103,8 @@ For a full list of supported leagues & cups [see this](bettingbook/leagues.json)
 - --standings:
   - --league (-l)
 
-Commands (live, today, matches, standings) and flags (details, odds, history) can be used like -UPPERCASE.
-
-Paramters (league, days) can also be used like -lowercase
+Commands (live, today, matches, standings) and flags (details, odds, history) can be used like -UPPERCASE.\n
+Parameters (league, days) can also be used like -lowercase
 
 
 ### Abbreviations
