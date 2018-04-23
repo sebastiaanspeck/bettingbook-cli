@@ -100,7 +100,7 @@ For a full list of supported leagues & cups [see this](bettingbook/leagues.json)
   - --history (-H)
   - --details (-D)
   - --odds (-O)
-- --standings:
+- --standings (-S):
   - --league (-l)
 
 Commands (live, today, matches, standings) and flags (details, odds, history) can be used like -UPPERCASE.  
@@ -136,19 +136,17 @@ AU | Awaiting Updates | Can occur when there is a connectivity issue or somethin
 Todo
 ====
 - [ ] Add more competitions (divisions under the first divisions)
-- [x] Add cups
 - [ ] Add Champions League and Europa League
-- [x] Add detailed information to match results
-- [x] Add detailed information to match results in games where both teams scored
-- [x] Add league filter for live scores
-- [x] Add league standings
 - [ ] Add --details to league standings (details are won, draw, lost, goal for, goal against)
 - [ ] Add option to get matches for a specific team
-- [ ] Solve bug (see league_scores in writers.py for more information)
-- [ ] Add odds to match overviews
-- [x] Add color coding for Europa league and Champions League
 - [ ] Add betting functions
 - [ ] A built-in watch feature so you can run once with --live and just leave the program running.
+- [x] Add odds to match overviews
+- [x] Add color coding for Europa league and Champions League
+- [x] Add cups
+- [x] Add detailed information to match results
+- [x] Add league filter for live scores
+- [x] Add league standings
 
 License
 ====
