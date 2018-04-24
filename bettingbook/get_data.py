@@ -83,7 +83,7 @@ class GetData(object):
         league_ids = self.get_league_ids()
 
         self.params['leagues'] = ','.join(val for val in league_ids)
-        self.params['include'] = 'localTeam,visitorTeam,league,round,events,stage,flatOdds:filter(bookmaker_id|97)'
+        self.params['include'] = 'localTeam,visitorTeam,league,round,events,stage,flatOdds:filter(bookmaker_id|2)'
 
         if show_history:
             start = datetime.datetime.strftime(now - datetime.timedelta(days=days), '%Y-%m-%d')
