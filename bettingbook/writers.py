@@ -99,6 +99,7 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                     click.secho(team_str, fg=self.colors.POSITION)
                 if team['position'] == number_of_teams:
                     click.echo()
+        # check the team['result'] -> split it to seperate function.
         click.secho("This color is CL (play-offs) position", fg=self.colors.CL_POSITION)
         click.secho("This color is EL (play-offs) position", fg=self.colors.EL_POSITION)
         click.secho("This color is relegation (play-offs) position", fg=self.colors.RL_POSITION)
@@ -150,7 +151,8 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                         for i, odd in enumerate(match["flatOdds"]["data"]):
                             if match["flatOdds"]["data"][i]["market_id"] == 1:
                                 odds = odd["odds"]
-                        self.odds(self.parse_odd(odds))
+                        self.odds(self.parse_odd(odds, match["scores"]["localteam_score"],
+                                  match["scores"]["visitorteam_score"], match["time"]["status"]))
                     self.scores(self.parse_result(match))
                     if type_sort != "matches":
                         if match["time"]["status"] in ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK"]:
@@ -168,7 +170,7 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                                         f'{match["time"]["status"]}',
                                         fg=self.colors.TIME)
                     else:
-                        if match["time"]["status"] in ["FT", "FT_PEN", "TBA"]:
+                        if match["time"]["status"] in ["FT", "FT_PEN", "AET", "TBA"]:
                             click.secho(f'   {Stdout.convert_time(match["time"]["starting_at"]["date"])} '
                                         f'{match["time"]["status"]}',
                                         fg=self.colors.TIME)
@@ -223,9 +225,10 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
 
     def scores(self, result):
         """Prints out the scores in a pretty format"""
-        if result.goalsHomeTeam > result.goalsAwayTeam:
+        winning_team = self.calculate_winning_team(result.goalsHomeTeam, result.goalsAwayTeam, '')
+        if winning_team == 0:
             home_color, away_color = (self.colors.WIN, self.colors.LOSE)
-        elif result.goalsHomeTeam < result.goalsAwayTeam:
+        elif winning_team == 2:
             home_color, away_color = (self.colors.LOSE, self.colors.WIN)
         else:
             home_color = away_color = self.colors.TIE
@@ -262,6 +265,21 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                 except KeyError:
                     d[key] = dicty[key]
         return d
+
+    @staticmethod
+    def calculate_winning_team(home_goals, away_goals, game_status):
+        # hometeam won
+        if home_goals > away_goals:
+            return 0
+        # awayteam won
+        elif home_goals < away_goals:
+            return 2
+        # draw
+        elif home_goals == away_goals and game_status != 'NS':
+            return 1
+        # no winner yet
+        else:
+            return 'no_winner_yet'
 
     def convert_events_to_pretty_goals(self, events, home_goals, away_goals):
         goals = []
@@ -351,23 +369,35 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
 
         return result
 
-    def parse_odd(self, odds):
+    def parse_odd(self, odds, home_goals, away_goals, status):
         """Parses the odds and returns a Odds namedtuple"""
         def winning_odd(odd):
             if odd == [None, None, None]:
-                return "no_winning_odd"
+                winning_team = self.calculate_winning_team(home_goals, away_goals, status)
+                return winning_team
             for index, o in enumerate(odd):
                 if o:
                     return index
+
         for i, _ in enumerate(odds):
-            if type(odds[i]["value"]) == float:
+            if len(str(odds[i]["value"])) <= 3:
                 odds[i]["value"] = "{0:.2f}".format(odds[i]["value"])
             if len(str(odds[i]["value"])) > 4:
                 odds[i]["value"] = "{0:.1f}".format(float(odds[i]["value"]))
+            if odds[i]["label"] == "1":
+                home_odd = odds[i]["value"]
+                home_winning = odds[i]["winning"]
+            elif odds[i]["label"] == "2":
+                away_odd = odds[i]["value"]
+                away_winning = odds[i]["winning"]
+            elif odds[i]["label"] == "X":
+                draw_odd = odds[i]["value"]
+                draw_winning = odds[i]["winning"]
 
         odds = self.Odds(
-            str(odds[0]["value"]), str(odds[1]["value"]), str(odds[2]["value"]),
-            winning_odd([odds[0]["winning"], odds[1]["winning"], odds[2]["winning"]]))
+            str(home_odd), str(draw_odd),  str(away_odd),
+            winning_odd([home_winning, draw_winning, away_winning]))
+
         return odds
 
     @staticmethod
