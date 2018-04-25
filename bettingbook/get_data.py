@@ -58,7 +58,6 @@ class GetData(object):
 
     def get_league_ids(self):
         league_ids = []
-
         for x in self.league_data:
             ids = list(x.values())[0]
             for league_id in ids:
@@ -73,7 +72,7 @@ class GetData(object):
                 return ids
         return None
 
-    def get_matches(self, url, msg, league_name, days, show_history, show_details, show_odds, type_sort):
+    def get_matches(self, parameters):
         """
         Queries the API and fetches the scores for fixtures
         based upon the league and time parameter
@@ -85,41 +84,41 @@ class GetData(object):
         self.params['leagues'] = ','.join(val for val in league_ids)
         self.params['include'] = 'localTeam,visitorTeam,league,round,events,stage,flatOdds:filter(bookmaker_id|2)'
 
-        if show_history:
-            start = datetime.datetime.strftime(now - datetime.timedelta(days=days), '%Y-%m-%d')
+        if parameters.show_history:
+            start = datetime.datetime.strftime(now - datetime.timedelta(days=parameters.days), '%Y-%m-%d')
             end = datetime.datetime.strftime(now - datetime.timedelta(days=1), '%Y-%m-%d')
         else:
             start = datetime.datetime.strftime(now + datetime.timedelta(days=1), '%Y-%m-%d')
-            end = datetime.datetime.strftime(now + datetime.timedelta(days=days), '%Y-%m-%d')
-        if league_name:
+            end = datetime.datetime.strftime(now + datetime.timedelta(days=parameters.days), '%Y-%m-%d')
+        if parameters.league_name:
             try:
-                league_id = self.get_league_abbrevation(league_name)
+                league_id = self.get_league_abbrevation(parameters.league_name)
                 self.params['leagues'] = ','.join(str(val) for val in league_id)
-                self.get_match_data(type_sort, url, start, end, show_history, msg, show_details, show_odds)
+                self.get_match_data(parameters, start, end)
             except exceptions.APIErrorException:
                 click.secho("No data for the given league.", fg="red", bold=True)
         else:
             try:
-                self.get_match_data(type_sort, url, start, end, show_history, msg, show_details, show_odds)
+                self.get_match_data(parameters, start, end)
             except exceptions.APIErrorException:
                 click.secho("No data available.", fg="red", bold=True)
 
-    def get_match_data(self, type_sort, url, start, end, show_history, msg, show_details, show_odds):
-        if type_sort == "matches":
-            response, fixtures_results = self._get(url + f'{start}/{end}')
+    def get_match_data(self, parameters, start, end):
+        if parameters.type_sort == "matches":
+            response, fixtures_results = self._get(parameters.url + f'{start}/{end}')
         else:
-            response, fixtures_results = self._get(url)
+            response, fixtures_results = self._get(parameters.url)
         # no fixtures in the timespan. display a help message and return
         if len(fixtures_results) == 0:
-            if type_sort == "matches":
-                if show_history:
-                    click.secho(''.join(msg[0]), fg="red", bold=True)
+            if parameters.type_sort == "matches":
+                if parameters.show_history:
+                    click.secho(''.join(parameters.msg[0]), fg="red", bold=True)
                 else:
-                    click.secho(''.join(msg[1]), fg="red", bold=True)
+                    click.secho(''.join(parameters.msg[1]), fg="red", bold=True)
             else:
-                click.secho(msg[0], fg="red", bold=True)
+                click.secho(parameters.msg[0], fg="red", bold=True)
             return
-        self.writer.league_scores(fixtures_results, show_details, show_odds, type_sort)
+        self.writer.league_scores(fixtures_results, parameters)
 
     def get_standings(self, league_name):
         for league_id in self.get_league_abbrevation(league_name):

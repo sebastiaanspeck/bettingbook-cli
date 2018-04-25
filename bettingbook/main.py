@@ -1,6 +1,7 @@
 import os
 import click
 import json
+from collections import namedtuple
 
 from get_data import GetData
 from exceptions import IncorrectParametersException
@@ -153,29 +154,37 @@ def main(apikey, timezone, live, today, matches, standings, league, days, histor
         writer = get_writer()
         gd = GetData(params, LEAGUES_DATA, writer)
 
+        Parameters = namedtuple("parameters", "url, msg, league_name, days, "
+                                              "show_history, show_details, show_odds, type_sort")
+
         if live:
             if history:
                 raise IncorrectParametersException('--history and --days is not supported for --live. '
                                                    'Use --matches to use these parameters')
-            gd.get_matches('livescores/now',
-                           ["No live action currently", "There was problem getting live scores, check your parameters"],
-                           league, days, history, details, odds, type_sort="live")
+            parameters = Parameters('livescores/now',
+                                    ["No live action currently",
+                                     "There was problem getting live scores, check your parameters"],
+                                    league, days, history, details, odds, type_sort="live")
+            gd.get_matches(parameters)
             return
 
         if today:
             if history:
                 raise IncorrectParametersException('--history and --days is not supported for --today. '
                                                    'Use --matches to use these parameters')
-            gd.get_matches('livescores',
-                           ["No matches today", "There was problem getting todays scores, check your parameters"],
-                           league, days, history, details, odds, type_sort="today")
+            parameters = Parameters('livescores',
+                                    ["No matches today",
+                                     "There was problem getting todays scores, check your parameters"],
+                                    league, days, history, details, odds, type_sort="today")
+            gd.get_matches(parameters)
             return
 
         if matches:
-            gd.get_matches('fixtures/between/',
-                           [[f"No matches in the past {str(days)} days."],
-                            [f"No matches in the coming {str(days)} days."]],
-                           league, days, history, details, odds, type_sort="matches")
+            parameters = Parameters('fixtures/between/',
+                                    [[f"No matches in the past {str(days)} days."],
+                                     [f"No matches in the coming {str(days)} days."]],
+                                    league, days, history, details, odds, type_sort="matches")
+            gd.get_matches(parameters)
             return
 
         if standings:
