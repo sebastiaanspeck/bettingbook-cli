@@ -19,6 +19,18 @@
       "ESC": ["570"],
       "name": "Copa Del Rey"
     }, {
+      "IT1": ["384"],
+      "name": "Serie A"
+    }, {
+      "ITC": ["390"],
+      "name": "Coppa Italia"
+    }, {
+      "EN1": ["8"],
+      "name": "Premier League"
+    }, {
+      "ENC": ["24"],
+      "name": "FA Cup"
+    }, {
       "NL1": ["72", "1353"],
       "name": "Eredivisie"
     }, {
@@ -28,38 +40,29 @@
       "NLC": ["78"],
       "name": "KNVB Beker"
     }, {
+      "BE1": ["208", "217", "1371"],
+      "name": "Pro League"
+    }, {
+      "BEC": ["214"],
+      "name": "Belgian Cup"
+    }, {
       "CL": ["2"],
       "name": "Champions League"
     }, {
       "EL": ["5"],
       "name": "Europa League"
     }, {
-      "WCQE": ["720"],
+      "WCEQ": ["720"],
       "name": "WC Qualification Europe"
+    }, {
+      "WC": ["732"],
+      "name": "World Cup"
     }, {
       "EQ": ["1325"],
       "name": "Euro Qualification"
     }, {
       "EC": ["1326"],
       "name": "European Championship"
-    }, {
-      "IT1": ["384"],
-      "name": "Serie A"
-    }, {
-      "IT1": ["390"],
-      "name": "Coppa Italia"
-    }, {
-      "EN1": ["8"],
-      "name": "Premier League"
-    }, {
-      "ENC": ["24"],
-      "name": "FA Cup"
-    }, {
-      "BE1": ["208", "217", "1371"],
-      "name": "Pro League"
-    }, {
-      "BEC": ["214"],
-      "name": "Belgian Cup"
     }
   ]
 }
