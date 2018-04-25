@@ -93,29 +93,36 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
 
     def color_results(self, result, team_str, positions):
         if 'Champions League' in result or result == "Promotion":
-            if result == "Promotion" and 'promotion' not in positions:
-                positions.extend(['promotion'])
-            elif "Champions League" in result and 'CL (play-offs)' not in positions:
-                positions.extend(['CL (play-offs)'])
+            if result == "Promotion" and not(self.alreadyin('promotion', positions)):
+                positions.extend([['promotion', self.colors.CL_POSITION]])
+            elif "Champions League" in result and not(self.alreadyin('CL (play-offs)', positions)):
+                positions.extend([['CL (play-offs)', self.colors.CL_POSITION]])
             click.secho(team_str, bold=True, fg=self.colors.CL_POSITION)
         elif 'Europa League' in result or result == "Promotion Play-off":
-            if result == "Promotion Play-off" and 'promotion (play-offs)' not in positions:
-                positions.extend(['promotion (play-offs)'])
-            elif "Europa League" in result and 'EL (play-offs)' not in positions:
-                positions.extend(['EL (play-offs)'])
+            if result == "Promotion Play-off" and not(self.alreadyin('promotion (play-offs', positions)):
+                positions.extend([['promotion (play-offs)', self.colors.EL_POSITION]])
+            elif "Europa League" in result and not(self.alreadyin('EL (play-offs)', positions)):
+                positions.extend([['EL (play-offs)', self.colors.EL_POSITION]])
             click.secho(team_str, fg=self.colors.EL_POSITION)
         elif 'Relegation' in result:
-            if 'relegation (play-offs)' not in positions:
-                positions.extend(['relegation (play-offs)'])
+            if not(self.alreadyin('relegation (play-offs)', positions)):
+                positions.extend([['relegation (play-offs)', self.colors.RL_POSITION]])
             click.secho(team_str, fg=self.colors.RL_POSITION)
         else:
             click.secho(team_str, fg=self.colors.POSITION)
         return positions
 
-    def print_colors(self, positions):
-        click.secho(f"This color is {positions[0]} position", fg=self.colors.CL_POSITION)
-        click.secho(f"This color is {positions[1]} position", fg=self.colors.EL_POSITION)
-        click.secho(f"This color is {positions[2]} position", fg=self.colors.RL_POSITION)
+    @staticmethod
+    def alreadyin(test, listy):
+        return bool([x for x in listy if test == x[0]])
+
+    @staticmethod
+    def print_colors(positions):
+        for position in positions:
+            try:
+                click.secho(f"This color is {position[0]} position", fg=position[1])
+            except IndexError:
+                pass
 
     def league_scores(self, total_data, parameters):
         """Prints the data in a pretty format"""
