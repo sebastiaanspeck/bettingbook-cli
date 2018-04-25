@@ -35,7 +35,7 @@ class BaseWriter(object):
         pass
 
     @abstractmethod
-    def league_scores(self, total_data, details, odds, type_sort):
+    def league_scores(self, total_data, parameters):
         pass
 
 
@@ -136,40 +136,50 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                 self.league_header(league)
             else:
                 self.league_header(league + ' - ' + league_prefix[0])
-            keys = [list(key.keys()) for key in games_copy]
-            uniq_keys = set()
-            for key in keys:
-                uniq_keys.update(key)
-            if "round" in uniq_keys:
-                if self.groupby_round(games_copy):
-                    games = groupby(games, key=lambda x: x["round"]["data"]["name"])
-                else:
-                    games = groupby(games, key=lambda x: x["stage"]["data"]["name"])
+            games = self.group_games(games, games_copy)
+            self.print_matches(games, parameters)
+
+    def group_games(self, games, games_copy):
+        keys = [list(key.keys()) for key in games_copy]
+        uniq_keys = set()
+        for key in keys:
+            uniq_keys.update(key)
+        if "round" in uniq_keys:
+            if self.groupby_round(games_copy):
+                games = groupby(games, key=lambda x: x["round"]["data"]["name"])
             else:
                 games = groupby(games, key=lambda x: x["stage"]["data"]["name"])
-            for matchday, matches in games:
-                print_matchday = ''
-                if len(str(matchday)) < 3:
-                    self.league_subheader(matchday, 'matchday')
-                else:
-                    self.league_subheader(matchday, 'stage')
-                for match in matches:
-                    if parameters.type_sort == "today" and match["time"]["status"] in ["LIVE", "HT", "ET",
-                                                                            "PEN_LIVE", "AET", "BREAK"]:
-                        continue
-                    if matchday == "Regular Season" and print_matchday != match["round"]["data"]["name"]:
-                        print_matchday = match["round"]["data"]["name"]
-                        self.league_subheader(print_matchday, 'matchday')
-                    if parameters.show_odds:
-                        self.print_odds(match)
-                    self.scores(self.parse_result(match))
-                    if parameters.type_sort != "matches":
-                        self.print_datetime_status_matches(match)
-                    else:
-                        self.print_datetime_status(match)
-                    if parameters.show_details:
-                        self.print_details(match)
-                    click.echo()
+        else:
+            games = groupby(games, key=lambda x: x["stage"]["data"]["name"])
+        return games
+
+    def print_matches(self, games, parameters):
+        for matchday, matches in games:
+            print_matchday = ''
+            if len(str(matchday)) < 3:
+                self.league_subheader(matchday, 'matchday')
+            else:
+                self.league_subheader(matchday, 'stage')
+            for match in matches:
+                self.print_match(match, parameters, print_matchday, matchday)
+
+    def print_match(self, match, parameters, print_matchday, matchday):
+        if parameters.type_sort == "today" and match["time"]["status"] in ["LIVE", "HT", "ET",
+                                                                           "PEN_LIVE", "AET", "BREAK"]:
+            return
+        if matchday == "Regular Season" and print_matchday != match["round"]["data"]["name"]:
+            print_matchday = match["round"]["data"]["name"]
+            self.league_subheader(print_matchday, 'matchday')
+        if parameters.show_odds:
+            self.print_odds(match)
+        self.scores(self.parse_result(match))
+        if parameters.type_sort != "matches":
+            self.print_datetime_status_matches(match)
+        else:
+            self.print_datetime_status(match)
+        if parameters.show_details:
+            self.print_details(match)
+        click.echo()
 
     def league_header(self, league):
         """Prints the league header"""
@@ -230,7 +240,7 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
             click.secho(f'   {Stdout.convert_time(match["time"]["starting_at"]["date_time"])} '
                         f'{match["time"]["status"]}',
                         fg=self.colors.TIME)
-            
+
     def print_datetime_status(self, match):
         if match["time"]["status"] in ["FT", "FT_PEN", "AET", "TBA"]:
             click.secho(f'   {Stdout.convert_time(match["time"]["starting_at"]["date"])} '

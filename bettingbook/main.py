@@ -94,6 +94,26 @@ def load_config_file():
     check_config_file(filename)
 
 
+def get_profile_data():
+    profile_data = {}
+    for (key, val) in config.items('profile'):
+        profile_data[key] = val
+    return profile_data
+
+
+def get_params(apikey, timezone):
+    params = {}
+    if apikey:
+        params['api_token'] = apikey
+    else:
+        params['api_token'] = config.get('auth', 'api_key')
+    if timezone:
+        params['tz'] = timezone
+    else:
+        params['tz'] = config.get('profile', 'timezone')
+    return params
+
+
 @click.command()
 @click.option('--apikey', default=load_config_file,
               help="API key to use.")
@@ -123,32 +143,8 @@ def load_config_file():
 @click.option('--profile', '-P', is_flag=True,
               help="Show your profile (name, balance, timezone)")
 def main(apikey, timezone, live, today, matches, standings, league, days, history, details, odds, profile):
-    """
-    A CLI to "bet" on football games.
-
-    League codes:
-
-    \b
-    - GB1: English Premier League
-    - FR1: French Ligue 1
-    - DE1: German Bundesliga
-    - IT1: Serie A
-    - NL1: Eredivisie
-    - ES1: Primera Division
-    """
-    params = {}
-    if apikey:
-        params['api_token'] = apikey
-    else:
-        params['api_token'] = config.get('auth', 'api_key')
-    if timezone:
-        params['tz'] = timezone
-    else:
-        params['tz'] = config.get('profile', 'timezone')
-
-    profile_data = {}
-    for (key, val) in config.items('profile'):
-        profile_data[key] = val
+    params = get_params(apikey, timezone)
+    profile_data = get_profile_data()
 
     try:
         writer = get_writer()
