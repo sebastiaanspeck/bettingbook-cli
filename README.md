@@ -67,19 +67,33 @@ $ main.py --help
 
 - Germany:
   - DE1: Bundesliga
+  - DEC: DFB Pokal
 - France:
   - FR1: Ligue 1
+  - FRC: Coupe de France
 - Spain:
   - ES1: La Liga
+  - ESC: Copa Del Rey
 - Italy:
   - IT1: Serie A
+  - ITC: Coppa Italia
 - England:
   - EN1: Premier League
   - ENC: FA Cup
 - Netherlands:
   - NL1: Eredivisie
+  - NL2: Jupiler League/Eerste Divisie
+  - NLC: KNVB Beker
 - Belgium:
   - BE1: Pro League
+  - BEC: Belgian Cup
+- Europe:
+  - CL: Champions League
+  - EL: Europa League
+  - WCEQ: WC Qualification Europe
+  - WC: World Cup
+  - EQ: Euro Qualification
+  - EC: European Chamionship
 
 ### Supported leagues & cups
 
