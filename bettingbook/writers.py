@@ -429,10 +429,14 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
             elif odds[i]["label"] == "X":
                 draw_odd = odds[i]["value"]
                 draw_winning = odds[i]["winning"]
-
-        odds = self.Odds(
-            str(home_odd), str(draw_odd),  str(away_odd),
-            winning_odd([home_winning, draw_winning, away_winning]))
+        try:
+            odds = self.Odds(
+                str(home_odd), str(draw_odd),  str(away_odd),
+                winning_odd([home_winning, draw_winning, away_winning]))
+        except UnboundLocalError:
+            odds = self.Odds(
+                '0.00', '0.00', '0.00',
+                'no_winner_yet')
 
         return odds
 
