@@ -1,8 +1,9 @@
 import click
-import datetime
 import json
 import os
 import copy
+
+import convert
 
 from abc import ABCMeta, abstractmethod
 from itertools import groupby
@@ -70,7 +71,7 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
     def standings(self, league_table, leagueid):
         """ Prints the league standings in a pretty way """
         for leagues in league_table:
-            self.standings_header(self.convert_leagueid_to_leaguename(leagueid), leagues['name'])
+            self.standings_header(convert.convert_leagueid_to_leaguename(leagueid), leagues['name'])
             number_of_teams = len(leagues['standings']['data'])
             positions = []
             click.secho("{:6}  {:30}    {:10}    {:10}    {:10}    {:10}    {:10}    {:10}".format
@@ -128,7 +129,7 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
         """Prints the data in a pretty format"""
         scores = sorted(total_data, key=lambda x: (x["league"]["data"]["country_id"], x['league_id']))
         for league, games in groupby(scores, key=lambda x: x['league_id']):
-            league = Stdout.convert_leagueid_to_leaguename(league)
+            league = convert.convert_leagueid_to_leaguename(league)
             games = sorted(games, key=lambda x: x["time"]["starting_at"]["date_time"])
             if league is None:
                 continue
@@ -244,18 +245,18 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                             fg=self.colors.TIME)
         elif match["time"]["status"] in ["FT", "FT_PEN", "TBA", "NS", "CANCL", "POSTP", "INT", "ABAN",
                                          "SUSP", "AWARDED", "DELAYED", "WO", "AU"]:
-            click.secho(f'   {Stdout.convert_time(match["time"]["starting_at"]["date_time"])} '
+            click.secho(f'   {convert.convert_time(match["time"]["starting_at"]["date_time"])} '
                         f'{match["time"]["status"]}',
                         fg=self.colors.TIME)
 
     def print_datetime_status(self, match):
         if match["time"]["status"] in ["FT", "FT_PEN", "AET", "TBA"]:
-            click.secho(f'   {Stdout.convert_time(match["time"]["starting_at"]["date"])} '
+            click.secho(f'   {convert.convert_time(match["time"]["starting_at"]["date"])} '
                         f'{match["time"]["status"]}',
                         fg=self.colors.TIME)
         elif match["time"]["status"] in ["NS", "CANCL", "POSTP", "INT", "ABAN", "SUSP", "AWARDED",
                                          "DELAYED", "WO", "AU"]:
-            click.secho(f'   {Stdout.convert_time(match["time"]["starting_at"]["date_time"])} '
+            click.secho(f'   {convert.convert_time(match["time"]["starting_at"]["date_time"])} '
                         f'{match["time"]["status"]}',
                         fg=self.colors.TIME)
 
@@ -264,10 +265,9 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
         events = sorted(match["events"]["data"], key=lambda x: x["id"])
         for event in events:
             if event["type"] in ["goal", "penalty", "own-goal"] and event["minute"] is not None:
-                player_name = Stdout.format_playername(event["player_name"])
-                home_team = Stdout.convert_teamid_to_teamname(event["team_id"],
-                                                              match["localTeam"]["data"]["id"])
-                goal_type = Stdout.convert_type_to_prefix(event["type"])
+                player_name = convert.format_playername(event["player_name"])
+                home_team = convert.convert_teamid_to_teamname(event["team_id"], match["localTeam"]["data"]["id"])
+                goal_type = convert.convert_type_to_prefix(event["type"])
                 goals.extend([[home_team, player_name, event["minute"], goal_type]])
         goals = sorted(goals, key=lambda x: x[0])
         events = {"home": [], "away": []}
@@ -278,8 +278,8 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                 events["away"].extend([{goal[1]: [{"minute": [goal[2]], "type": [goal[3]]}]}])
         events["home"] = self.merge_duplicate_keys(events["home"])
         events["away"] = self.merge_duplicate_keys(events["away"])
-        goals = self.convert_events_to_pretty_goals(events, match["scores"]["localteam_score"],
-                                                    match["scores"]["visitorteam_score"])
+        goals = convert.convert_events_to_pretty_goals(events, match["scores"]["localteam_score"],
+                                                       match["scores"]["visitorteam_score"])
         self.goals(goals)
 
     def odds(self, odds):
@@ -430,67 +430,6 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                 'no_winner_yet')
 
         return odds
-
-    def convert_events_to_pretty_goals(self, events, home_goals, away_goals):
-        goals = []
-        # no home or away-goals scored (0-0)
-        if home_goals == 0 and away_goals == 0:
-            return goals
-        # home scored and away didn't (x-0)
-        if home_goals > 0 and away_goals == 0:
-            goals = self.get_pretty_goals_clean_sheet("home", events)
-            return goals
-        # away didn't score and away did (0-x)
-        if home_goals == 0 and away_goals > 0:
-            goals = self.get_pretty_goals_clean_sheet("away", events)
-            return goals
-        if home_goals > 0 and away_goals > 0:
-            goals = self.get_pretty_goals(events)
-            return goals
-
-    @staticmethod
-    def convert_leagueid_to_leaguename(league):
-        for leagues in LEAGUES_DATA:
-            leaguename = list(leagues.values())[1]
-            leagueids = list(leagues.values())[0]
-            if str(league) in leagueids:
-                return leaguename
-        return None
-
-    @staticmethod
-    def convert_time(time_str):
-        """Converts the API UTC time string to the local user time."""
-        try:
-            return datetime.datetime.strftime(datetime.datetime.strptime(time_str,
-                                                                         '%Y-%m-%d %H:%M:%S'), '%d-%m-%Y %H:%M')
-        except ValueError:
-            return datetime.datetime.strftime(datetime.datetime.strptime(time_str,
-                                                                         '%Y-%m-%d'), '%d-%m-%Y')
-
-    @staticmethod
-    def format_playername(name):
-        try:
-            player_name = name.split(' ', 1)
-        except AttributeError:
-            return name
-        if len(player_name) == 1:
-            player_name = player_name[0]
-        else:
-            player_name = player_name[1]
-        return player_name
-
-    @staticmethod
-    def convert_teamid_to_teamname(teamid, hometeam):
-        return teamid == str(hometeam)
-
-    @staticmethod
-    def convert_type_to_prefix(goal_type):
-        if goal_type == "goal":
-            return ''
-        elif goal_type == "penalty":
-            return ' P'
-        elif goal_type == "own-goal":
-            return ' OG'
 
     @staticmethod
     def groupby_round(matches):
