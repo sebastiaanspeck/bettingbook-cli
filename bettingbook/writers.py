@@ -324,23 +324,6 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
         else:
             return 'no_winner_yet'
 
-    def convert_events_to_pretty_goals(self, events, home_goals, away_goals):
-        goals = []
-        # no home or away-goals scored (0-0)
-        if home_goals == 0 and away_goals == 0:
-            return goals
-        # home scored and away didn't (x-0)
-        if home_goals > 0 and away_goals == 0:
-            goals = self.get_pretty_goals_clean_sheet("home", events)
-            return goals
-        # away didn't score and away did (0-x)
-        if home_goals == 0 and away_goals > 0:
-            goals = self.get_pretty_goals_clean_sheet("away", events)
-            return goals
-        if home_goals > 0 and away_goals > 0:
-            goals = self.get_pretty_goals(events)
-            return goals
-
     @staticmethod
     def get_pretty_goals_clean_sheet(team, events):
         goals = []
@@ -414,6 +397,7 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
 
     def parse_odd(self, odds, home_goals, away_goals, status):
         """Parses the odds and returns a Odds namedtuple"""
+
         def winning_odd(odd):
             if odd == [None, None, None]:
                 winning_team = self.calculate_winning_team(home_goals, away_goals, status)
@@ -446,6 +430,23 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                 'no_winner_yet')
 
         return odds
+
+    def convert_events_to_pretty_goals(self, events, home_goals, away_goals):
+        goals = []
+        # no home or away-goals scored (0-0)
+        if home_goals == 0 and away_goals == 0:
+            return goals
+        # home scored and away didn't (x-0)
+        if home_goals > 0 and away_goals == 0:
+            goals = self.get_pretty_goals_clean_sheet("home", events)
+            return goals
+        # away didn't score and away did (0-x)
+        if home_goals == 0 and away_goals > 0:
+            goals = self.get_pretty_goals_clean_sheet("away", events)
+            return goals
+        if home_goals > 0 and away_goals > 0:
+            goals = self.get_pretty_goals(events)
+            return goals
 
     @staticmethod
     def convert_leagueid_to_leaguename(league):
@@ -495,7 +496,7 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
     def groupby_round(matches):
         for match in matches:
             try:
-                x = match['round']['data']['name']
+                match['round']['data']['name']
             except KeyError:
                 return False
         return True
