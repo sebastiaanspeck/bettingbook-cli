@@ -150,17 +150,17 @@ AU | Awaiting Updates | Can occur when there is a connectivity issue or somethin
 Todo
 ====
 - [ ] Add more competitions (divisions under the first divisions)
-- [ ] Add Champions League and Europa League
-- [ ] Add --details to league standings (details are won, draw, lost, goal for, goal against)
 - [ ] Add option to get matches for a specific team
 - [ ] Add betting functions
 - [ ] A built-in watch feature so you can run once with --live and just leave the program running.
 - [x] Add odds to match overviews
 - [x] Add color coding for Europa league and Champions League
 - [x] Add cups
+- [x] Add Champions League and Europa League
 - [x] Add detailed information to match results
 - [x] Add league filter for live scores
 - [x] Add league standings
+- [x] Add --details to league standings (details are won, draw, lost, goal for, goal against)
 
 License
 ====
