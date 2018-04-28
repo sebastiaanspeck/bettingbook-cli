@@ -6,7 +6,7 @@ import json
 import exceptions
 
 
-class GetData(object):
+class RequestHandler(object):
     BASE_URL = 'https://soccer.sportmonks.com/api/v2.0/'
 
     def __init__(self, params, league_data, writer):
@@ -19,7 +19,7 @@ class GetData(object):
 
     def _get(self, url):
         """Handles soccer.sportsmonks requests"""
-        req = requests.get(GetData.BASE_URL + url, params=self.params)
+        req = requests.get(RequestHandler.BASE_URL + url, params=self.params)
 
         if req.status_code == requests.codes.ok:
             data = self.get_data(req, url)
@@ -49,7 +49,7 @@ class GetData(object):
         if pages > 1:
             for i in range(2, pages + 1):
                 self.params['page'] = i
-                req = requests.get(GetData.BASE_URL + url, params=self.params)
+                req = requests.get(RequestHandler.BASE_URL + url, params=self.params)
                 next_parts = json.loads(req.text)
                 next_data = next_parts.get('data')
                 if next_data:

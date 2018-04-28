@@ -3,7 +3,7 @@ import click
 import json
 from collections import namedtuple
 
-from get_data import GetData
+from request_handler import RequestHandler
 from exceptions import IncorrectParametersException
 from writers import get_writer
 
@@ -148,39 +148,31 @@ def main(apikey, timezone, live, today, matches, standings, league, days, histor
 
     try:
         writer = get_writer()
-        gd = GetData(params, LEAGUES_DATA, writer)
+        rh = RequestHandler(params, LEAGUES_DATA, writer)
 
         Parameters = namedtuple("parameters", "url, msg, league_name, days, "
-                                              "show_history, show_details, show_odds, type_sort")
+                                "show_history, show_details, show_odds, type_sort")
 
-        if live:
-            if history:
-                raise IncorrectParametersException('--history and --days is not supported for --live. '
+        if live or today or matches:
+            if history and live or history and today:
+                raise IncorrectParametersException('--history and --days is not supported for --live/--today. '
                                                    'Use --matches to use these parameters')
-            parameters = Parameters('livescores/now',
-                                    ["No live action currently",
-                                     "There was problem getting live scores, check your parameters"],
-                                    league, days, history, details, odds, type_sort="live")
-            gd.get_matches(parameters)
-            return
-
-        if today:
-            if history:
-                raise IncorrectParametersException('--history and --days is not supported for --today. '
-                                                   'Use --matches to use these parameters')
-            parameters = Parameters('livescores',
-                                    ["No matches today",
-                                     "There was problem getting todays scores, check your parameters"],
-                                    league, days, history, details, odds, type_sort="today")
-            gd.get_matches(parameters)
-            return
-
-        if matches:
-            parameters = Parameters('fixtures/between/',
-                                    [[f"No matches in the past {str(days)} days."],
-                                     [f"No matches in the coming {str(days)} days."]],
-                                    league, days, history, details, odds, type_sort="matches")
-            gd.get_matches(parameters)
+            if live:
+                parameters = Parameters('livescores/now',
+                                        ["No live action currently",
+                                         "There was problem getting live scores, check your parameters"],
+                                        league, days, history, details, odds, "live")
+            elif today:
+                parameters = Parameters('livescores',
+                                        ["No matches today",
+                                         "There was problem getting todays scores, check your parameters"],
+                                        league, days, history, details, odds, "today")
+            else:
+                parameters = Parameters('fixtures/between/',
+                                        [[f"No matches in the past {str(days)} days."],
+                                         [f"No matches in the coming {str(days)} days."]],
+                                        league, days, history, details, odds, "matches")
+            rh.get_matches(parameters)
             return
 
         if standings:
@@ -195,11 +187,11 @@ def main(apikey, timezone, live, today, matches, standings, league, days, histor
                                                    'Use --matches, --live or --today to use these parameters')
             if league.endswith('C') and league not in ["WC", "EC"]:
                 raise IncorrectParametersException(f'Standings for {league} not supported')
-            gd.get_standings(league)
+            rh.get_standings(league)
             return
 
         if profile:
-            gd.show_profile(profile_data)
+            rh.show_profile(profile_data)
             return
 
     except IncorrectParametersException as e:
