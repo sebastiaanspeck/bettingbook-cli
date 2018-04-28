@@ -182,12 +182,9 @@ def main(apikey, timezone, live, today, matches, standings, league, days, histor
             if history:
                 raise IncorrectParametersException('--history and --days is not supported for --standings. '
                                                    'Use --matches to use these parameters')
-            if details:
-                raise IncorrectParametersException('--details is not supported for --standings. '
-                                                   'Use --matches, --live or --today to use these parameters')
             if league.endswith('C') and league not in ["WC", "EC"]:
                 raise IncorrectParametersException(f'Standings for {league} not supported')
-            rh.get_standings(league)
+            rh.get_standings(league, details)
             return
 
         if profile:

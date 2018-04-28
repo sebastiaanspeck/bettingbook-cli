@@ -120,7 +120,7 @@ class RequestHandler(object):
             return
         self.writer.league_scores(fixtures_results, parameters)
 
-    def get_standings(self, league_name):
+    def get_standings(self, league_name, show_details):
         for league_id in self.get_league_abbrevation(league_name):
             url = f'leagues/{league_id}'
             try:
@@ -132,7 +132,7 @@ class RequestHandler(object):
                     click.secho(f"\nLOG: No standings availble for {league_name} with id {league_id}.\n",
                                 fg="red", bold=True)
                     continue
-                self.writer.standings(standings_data, league_id)
+                self.writer.standings(standings_data, league_id, show_details)
             except exceptions.APIErrorException:
                 # Click handles incorrect League codes so this will only come up
                 # if that league does not have standings available. ie. Champions League

@@ -32,7 +32,7 @@ class BaseWriter(object):
         self.output_filename = output_file
 
     @abstractmethod
-    def standings(self, league_table, league):
+    def standings(self, league_table, league, details):
         pass
 
     @abstractmethod
@@ -68,14 +68,18 @@ class Stdout(BaseWriter):
 Your balance: %s
 Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata['timezone']), fg="green", nl=False)
 
-    def standings(self, league_table, leagueid):
+    def standings(self, league_table, leagueid, show_details):
         """ Prints the league standings in a pretty way """
         for leagues in league_table:
-            self.standings_header(convert.convert_leagueid_to_leaguename(leagueid), leagues['name'])
+            self.standings_header(convert.convert_leagueid_to_leaguename(leagueid), show_details, leagues['name'])
             number_of_teams = len(leagues['standings']['data'])
             positions = []
-            click.secho("{:6}  {:30}    {:10}    {:10}    {:10}    {:10}    {:10}    {:10}".format
-                        ("POS", "CLUB", "PLAYED", "WON", "DRAW", "LOST", "GOAL DIFF", "POINTS"))
+            if show_details:
+                click.secho(f"{'POS':6}  {'CLUB':30}    {'PLAYED':10}    {'WON':10}    {'DRAW':10}    {'LOST':10}    "
+                            f"{'GOALS':10}    {'GOAL DIFF':10}    {'POINTS':10}")
+            else:
+                click.secho("{:6}  {:30}    {:10}    {:10}    {:10}".format
+                            ("POS", "CLUB", "PLAYED", "GOAL DIFF", "POINTS"))
             for team in leagues['standings']['data']:
                 goal_difference = team['total']['goal_difference']
                 position = team['position']
@@ -84,9 +88,15 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                 if int(goal_difference) > 0:
                     goal_difference = goal_difference[1:]
 
-                team_str = (f"{position:<7} {team['team_name']:<33} {str(team['overall']['games_played']):<14}"
-                            f"{str(team['overall']['won']):<13} {str(team['overall']['draw']):<13} "
-                            f"{str(team['overall']['lost']):<13} {goal_difference:<13} {team['total']['points']}")
+                if show_details:
+                    team_str = (f"{position:<7} {team['team_name']:<33} {str(team['overall']['games_played']):<14}"
+                                f"{str(team['overall']['won']):<13} {str(team['overall']['draw']):<13} "
+                                f"{str(team['overall']['lost']):<13} {str(team['overall']['goals_scored'])}:"
+                                f"{str(team['overall']['goals_against']):<10} "
+                                f"{goal_difference:<13} {team['total']['points']}")
+                else:
+                    team_str = (f"{position:<7} {team['team_name']:<33} {str(team['overall']['games_played']):<14}"
+                                f"{goal_difference:<13} {team['total']['points']}")
                 positions = self.color_results(result, team_str, positions)
                 if team['position'] == number_of_teams:
                     click.echo()
@@ -194,10 +204,13 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
         league_name = f" {league} "
         click.secho(f"{league_name:=^62}", fg=self.colors.MISC)
 
-    def standings_header(self, league, prefix=None):
+    def standings_header(self, league, details, prefix=None):
         """Prints the league header"""
         league_name = f" {league} - {prefix} "
-        click.secho(f"{league_name:#^118}", fg=self.colors.MISC)
+        if details:
+            click.secho(f"{league_name:#^132}", fg=self.colors.MISC)
+        else:
+            click.secho(f"{league_name:#^76}", fg=self.colors.MISC)
         click.echo()
 
     def league_subheader(self, subheader, type_header):
