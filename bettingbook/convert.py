@@ -67,12 +67,9 @@ def convert_events_to_pretty_goals(events, home_goals, away_goals):
         return goals
     # home scored and away didn't (x-0)
     if home_goals > 0 and away_goals == 0:
-        goals = writers.Stdout.get_pretty_goals_clean_sheet("home", events)
-        return goals
+        return writers.Stdout.get_pretty_goals_clean_sheet("home", events)
     # away didn't score and away did (0-x)
     if home_goals == 0 and away_goals > 0:
-        goals = writers.Stdout.get_pretty_goals_clean_sheet("away", events)
-        return goals
+        return writers.Stdout.get_pretty_goals_clean_sheet("away", events)
     if home_goals > 0 and away_goals > 0:
-        goals = writers.Stdout.get_pretty_goals(events)
-        return goals
+        return writers.Stdout.get_pretty_goals(events)
