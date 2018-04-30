@@ -1,0 +1,1390 @@
+{
+   "teams": [
+      {
+         "id": 67,
+         "code": "S04",
+         "name": "Schalke 04",
+         "country_id": 11
+      },
+      {
+         "id": 68,
+         "code": "DOR",
+         "name": "Borussia Dortmund",
+         "country_id": 11
+      },
+      {
+         "id": 82,
+         "code": "SVW",
+         "name": "Werder Bremen",
+         "country_id": 11
+      },
+      {
+         "id": 90,
+         "code": "AUG",
+         "name": "Augsburg",
+         "country_id": 11
+      },
+      {
+         "id": 277,
+         "code": "RBL",
+         "name": "RB Leipzig",
+         "country_id": 11
+      },
+      {
+         "id": 366,
+         "code": "SGE",
+         "name": "Eintracht Frankfurt",
+         "country_id": 11
+      },
+      {
+         "id": 503,
+         "code": "BAY",
+         "name": "Bayern München",
+         "country_id": 11
+      },
+      {
+         "id": 510,
+         "code": "WOB",
+         "name": "Wolfsburg",
+         "country_id": 11
+      },
+      {
+         "id": 683,
+         "code": "BMG",
+         "name": "Borussia M'gladbach",
+         "country_id": 11
+      },
+      {
+         "id": 794,
+         "code": "MAI",
+         "name": "Mainz 05",
+         "country_id": 11
+      },
+      {
+         "id": 2554,
+         "code": "HAN",
+         "name": "Hannover 96",
+         "country_id": 11
+      },
+      {
+         "id": 2708,
+         "code": "HSV",
+         "name": "Hamburger SV",
+         "country_id": 11
+      },
+      {
+         "id": 2726,
+         "code": "TSG",
+         "name": "Hoffenheim",
+         "country_id": 11
+      },
+      {
+         "id": 3317,
+         "code": "BCS",
+         "name": "Hertha BSC",
+         "country_id": 11
+      },
+      {
+         "id": 3319,
+         "code": "STU",
+         "name": "Stuttgart",
+         "country_id": 11
+      },
+      {
+         "id": 3320,
+         "code": "KOL",
+         "name": "Köln",
+         "country_id": 11
+      },
+      {
+         "id": 3321,
+         "code": "B04",
+         "name": "Bayer Leverkusen",
+         "country_id": 11
+      },
+      {
+         "id": 3543,
+         "code": "SCF",
+         "name": "Freiburg",
+         "country_id": 11
+      },
+      {
+         "id": 3565,
+         "code": "EBR",
+         "name": "Eintracht Braunschweig",
+         "country_id": 11
+      },
+      {
+         "id": 454,
+         "code": null,
+         "name": "1860 München",
+         "country_id": 11
+      },
+      {
+         "id": 3463,
+         "code": "JAH",
+         "name": "Jahn Regensburg",
+         "country_id": 11
+      },
+      {
+         "id": 44,
+         "code": "OLM",
+         "name": "Olympique Marseille",
+         "country_id": 17
+      },
+      {
+         "id": 59,
+         "code": "NAN",
+         "name": "Nantes",
+         "country_id": 17
+      },
+      {
+         "id": 79,
+         "code": "LYO",
+         "name": "Olympique Lyonnais",
+         "country_id": 17
+      },
+      {
+         "id": 108,
+         "code": "STE",
+         "name": "Saint-Étienne",
+         "country_id": 17
+      },
+      {
+         "id": 289,
+         "code": "TOU",
+         "name": "Toulouse",
+         "country_id": 17
+      },
+      {
+         "id": 450,
+         "code": "NCE",
+         "name": "Nice",
+         "country_id": 17
+      },
+      {
+         "id": 581,
+         "code": "MPL",
+         "name": "Montpellier",
+         "country_id": 17
+      },
+      {
+         "id": 591,
+         "code": "PSG",
+         "name": "PSG",
+         "country_id": 17
+      },
+      {
+         "id": 598,
+         "code": "REN",
+         "name": "Rennes",
+         "country_id": 17
+      },
+      {
+         "id": 686,
+         "code": "STR",
+         "name": "Strasbourg",
+         "country_id": 17
+      },
+      {
+         "id": 690,
+         "code": "LIL",
+         "name": "Lille",
+         "country_id": 17
+      },
+      {
+         "id": 776,
+         "code": "ANG",
+         "name": "Angers SCO",
+         "country_id": 17
+      },
+      {
+         "id": 840,
+         "code": "AMI",
+         "name": "Amiens SC",
+         "country_id": 17
+      },
+      {
+         "id": 1393,
+         "code": "CAE",
+         "name": "Caen",
+         "country_id": 17
+      },
+      {
+         "id": 2919,
+         "code": "GUI",
+         "name": "Guingamp",
+         "country_id": 17
+      },
+      {
+         "id": 3513,
+         "code": "MTZ",
+         "name": "Metz",
+         "country_id": 17
+      },
+      {
+         "id": 3562,
+         "code": "BOR",
+         "name": "Bordeaux",
+         "country_id": 17
+      },
+      {
+         "id": 6789,
+         "code": "AMO",
+         "name": "Monaco",
+         "country_id": 75285
+      },
+      {
+         "id": 6842,
+         "code": "DIJ",
+         "name": "Dijon",
+         "country_id": 17
+      },
+      {
+         "id": 7047,
+         "code": "TRO",
+         "name": "Troyes",
+         "country_id": 17
+      },
+      {
+         "id": 36,
+         "code": "CLV",
+         "name": "Celta de Vigo",
+         "country_id": 32
+      },
+      {
+         "id": 60,
+         "code": "EIB",
+         "name": "Eibar",
+         "country_id": 32
+      },
+      {
+         "id": 83,
+         "code": "FCB",
+         "name": "Barcelona",
+         "country_id": 32
+      },
+      {
+         "id": 106,
+         "code": "GET",
+         "name": "Getafe",
+         "country_id": 32
+      },
+      {
+         "id": 126,
+         "code": "MLA",
+         "name": "Málaga",
+         "country_id": 32
+      },
+      {
+         "id": 214,
+         "code": "VAL",
+         "name": "Valencia",
+         "country_id": 32
+      },
+      {
+         "id": 231,
+         "code": "GIR",
+         "name": "Girona",
+         "country_id": 32
+      },
+      {
+         "id": 429,
+         "code": "COR",
+         "name": "Deportivo La Coruña",
+         "country_id": 32
+      },
+      {
+         "id": 485,
+         "code": "BET",
+         "name": "Real Betis",
+         "country_id": 32
+      },
+      {
+         "id": 528,
+         "code": "ESY",
+         "name": "Espanyol",
+         "country_id": 32
+      },
+      {
+         "id": 594,
+         "code": "SOC",
+         "name": "Real Sociedad",
+         "country_id": 32
+      },
+      {
+         "id": 676,
+         "code": "SEV",
+         "name": "Sevilla",
+         "country_id": 32
+      },
+      {
+         "id": 844,
+         "code": "LEG",
+         "name": "Leganés",
+         "country_id": 32
+      },
+      {
+         "id": 2921,
+         "code": "LAP",
+         "name": "Las Palmas",
+         "country_id": 32
+      },
+      {
+         "id": 2975,
+         "code": "ALV",
+         "name": "Deportivo Alavés",
+         "country_id": 32
+      },
+      {
+         "id": 3457,
+         "code": "LVT",
+         "name": "Levante",
+         "country_id": 32
+      },
+      {
+         "id": 3468,
+         "code": "MAD",
+         "name": "Real Madrid",
+         "country_id": 32
+      },
+      {
+         "id": 3477,
+         "code": "VIL",
+         "name": "Villarreal",
+         "country_id": 32
+      },
+      {
+         "id": 7980,
+         "code": "ATM",
+         "name": "Atlético Madrid",
+         "country_id": 32
+      },
+      {
+         "id": 13258,
+         "code": "ATH",
+         "name": "Athletic Club",
+         "country_id": 32
+      },
+      {
+         "id": 37,
+         "code": "ROM",
+         "name": "Roma",
+         "country_id": 251
+      },
+      {
+         "id": 43,
+         "code": "LAZ",
+         "name": "Lazio",
+         "country_id": 251
+      },
+      {
+         "id": 89,
+         "code": "CRO",
+         "name": "Crotone",
+         "country_id": 251
+      },
+      {
+         "id": 97,
+         "code": "CHV",
+         "name": "Chievo",
+         "country_id": 251
+      },
+      {
+         "id": 102,
+         "code": "GEN",
+         "name": "Genoa",
+         "country_id": 251
+      },
+      {
+         "id": 109,
+         "code": "FIO",
+         "name": "Fiorentina",
+         "country_id": 251
+      },
+      {
+         "id": 113,
+         "code": "MIL",
+         "name": "Milan",
+         "country_id": 251
+      },
+      {
+         "id": 346,
+         "code": "UDI",
+         "name": "Udinese",
+         "country_id": 251
+      },
+      {
+         "id": 394,
+         "code": "SPA",
+         "name": "SPAL",
+         "country_id": 251
+      },
+      {
+         "id": 522,
+         "code": "SAM",
+         "name": "Sampdoria",
+         "country_id": 251
+      },
+      {
+         "id": 563,
+         "code": "BEN",
+         "name": "Benevento",
+         "country_id": 251
+      },
+      {
+         "id": 585,
+         "code": "CAG",
+         "name": "Cagliari",
+         "country_id": 251
+      },
+      {
+         "id": 597,
+         "code": "NAP",
+         "name": "Napoli",
+         "country_id": 251
+      },
+      {
+         "id": 613,
+         "code": "TOR",
+         "name": "Torino",
+         "country_id": 251
+      },
+      {
+         "id": 625,
+         "code": "JUV",
+         "name": "Juventus",
+         "country_id": 251
+      },
+      {
+         "id": 708,
+         "code": "ATT",
+         "name": "Atalanta",
+         "country_id": 251
+      },
+      {
+         "id": 1123,
+         "code": "HEL",
+         "name": "Hellas Verona",
+         "country_id": 251
+      },
+      {
+         "id": 2714,
+         "code": "SAS",
+         "name": "Sassuolo",
+         "country_id": 251
+      },
+      {
+         "id": 2930,
+         "code": "INT",
+         "name": "Internazionale",
+         "country_id": 251
+      },
+      {
+         "id": 8513,
+         "code": "BGN",
+         "name": "Bologna",
+         "country_id": 251
+      },
+      {
+         "id": 1,
+         "code": "WHU",
+         "name": "West Ham United",
+         "country_id": 462
+      },
+      {
+         "id": 6,
+         "code": "TOT",
+         "name": "Tottenham Hotspur",
+         "country_id": 462
+      },
+      {
+         "id": 8,
+         "code": "LIV",
+         "name": "Liverpool",
+         "country_id": 462
+      },
+      {
+         "id": 9,
+         "code": "MCI",
+         "name": "Manchester City",
+         "country_id": 462
+      },
+      {
+         "id": 10,
+         "code": "WBA",
+         "name": "West Bromwich Albion",
+         "country_id": 462
+      },
+      {
+         "id": 13,
+         "code": "EVE",
+         "name": "Everton",
+         "country_id": 462
+      },
+      {
+         "id": 14,
+         "code": "MUN",
+         "name": "Manchester United",
+         "country_id": 462
+      },
+      {
+         "id": 18,
+         "code": "CHE",
+         "name": "Chelsea",
+         "country_id": 462
+      },
+      {
+         "id": 19,
+         "code": "ARS",
+         "name": "Arsenal",
+         "country_id": 462
+      },
+      {
+         "id": 20,
+         "code": "NEW",
+         "name": "Newcastle United",
+         "country_id": 462
+      },
+      {
+         "id": 25,
+         "code": "WAT",
+         "name": "Watford",
+         "country_id": 462
+      },
+      {
+         "id": 26,
+         "code": "STK",
+         "name": "Stoke City",
+         "country_id": 462
+      },
+      {
+         "id": 27,
+         "code": "BUR",
+         "name": "Burnley",
+         "country_id": 462
+      },
+      {
+         "id": 30,
+         "code": "SWA",
+         "name": "Swansea City",
+         "country_id": 515
+      },
+      {
+         "id": 42,
+         "code": "LEI",
+         "name": "Leicester City",
+         "country_id": 462
+      },
+      {
+         "id": 51,
+         "code": "CRY",
+         "name": "Crystal Palace",
+         "country_id": 462
+      },
+      {
+         "id": 52,
+         "code": "BOU",
+         "name": "AFC Bournemouth",
+         "country_id": 462
+      },
+      {
+         "id": 65,
+         "code": "SOU",
+         "name": "Southampton",
+         "country_id": 462
+      },
+      {
+         "id": 78,
+         "code": "BRH",
+         "name": "Brighton & Hove Albion",
+         "country_id": 462
+      },
+      {
+         "id": 251,
+         "code": "HDD",
+         "name": "Huddersfield Town",
+         "country_id": 462
+      },
+      {
+         "id": 61,
+         "code": "AZA",
+         "name": "AZ",
+         "country_id": 38
+      },
+      {
+         "id": 73,
+         "code": "FEY",
+         "name": "Feyenoord",
+         "country_id": 38
+      },
+      {
+         "id": 94,
+         "code": "VIT",
+         "name": "Vitesse",
+         "country_id": 38
+      },
+      {
+         "id": 593,
+         "code": "TWE",
+         "name": "FC Twente",
+         "country_id": 38
+      },
+      {
+         "id": 629,
+         "code": "AJA",
+         "name": "Ajax",
+         "country_id": 38
+      },
+      {
+         "id": 637,
+         "code": "NAC",
+         "name": "NAC Breda",
+         "country_id": 38
+      },
+      {
+         "id": 669,
+         "code": "WIL",
+         "name": "Willem II",
+         "country_id": 38
+      },
+      {
+         "id": 682,
+         "code": "PSV",
+         "name": "PSV",
+         "country_id": 38
+      },
+      {
+         "id": 750,
+         "code": "UTR",
+         "name": "FC Utrecht",
+         "country_id": 38
+      },
+      {
+         "id": 919,
+         "code": "SPR",
+         "name": "Sparta Rotterdam",
+         "country_id": 38
+      },
+      {
+         "id": 1016,
+         "code": "PEC",
+         "name": "PEC Zwolle",
+         "country_id": 38
+      },
+      {
+         "id": 1053,
+         "code": "HEE",
+         "name": "SC Heerenveen",
+         "country_id": 38
+      },
+      {
+         "id": 1128,
+         "code": "ADO",
+         "name": "ADO Den Haag",
+         "country_id": 38
+      },
+      {
+         "id": 1403,
+         "code": "HEA",
+         "name": "Heracles",
+         "country_id": 38
+      },
+      {
+         "id": 1652,
+         "code": "EXC",
+         "name": "Excelsior",
+         "country_id": 38
+      },
+      {
+         "id": 2344,
+         "code": "ROD",
+         "name": "Roda JC Kerkrade",
+         "country_id": 38
+      },
+      {
+         "id": 2345,
+         "code": "GRO",
+         "name": "FC Groningen",
+         "country_id": 38
+      },
+      {
+         "id": 2379,
+         "code": "VVV",
+         "name": "VVV-Venlo",
+         "country_id": 38
+      },
+      {
+         "id": 494,
+         "code": "NEC",
+         "name": "NEC",
+         "country_id": 38
+      },
+      {
+         "id": 814,
+         "code": "RKC",
+         "name": "RKC Waalwijk",
+         "country_id": 38
+      },
+      {
+         "id": 1433,
+         "code": "ALM",
+         "name": "Almere City",
+         "country_id": 38
+      },
+      {
+         "id": 1435,
+         "code": "CAM",
+         "name": "SC Cambuur",
+         "country_id": 38
+      },
+      {
+         "id": 1731,
+         "code": "MVV",
+         "name": "MVV Maastricht",
+         "country_id": 38
+      },
+      {
+         "id": 2396,
+         "code": "VOL",
+         "name": "FC Volendam",
+         "country_id": 38
+      },
+      {
+         "id": 2460,
+         "code": "HEL",
+         "name": "Helmond Sport",
+         "country_id": 38
+      },
+      {
+         "id": 2475,
+         "code": "EMM",
+         "name": "FC Emmen",
+         "country_id": 38
+      },
+      {
+         "id": 320,
+         "code": "EIN",
+         "name": "FC Eindhoven",
+         "country_id": 38
+      },
+      {
+         "id": 664,
+         "code": "GAE",
+         "name": "Go Ahead Eagles",
+         "country_id": 38
+      },
+      {
+         "id": 822,
+         "code": "DOR",
+         "name": "FC Dordrecht",
+         "country_id": 38
+      },
+      {
+         "id": 1073,
+         "code": "GRA",
+         "name": "Graafschap",
+         "country_id": 38
+      },
+      {
+         "id": 1459,
+         "code": "FOR",
+         "name": "Fortuna Sittard",
+         "country_id": 38
+      },
+      {
+         "id": 1550,
+         "code": "TEL",
+         "name": "Telstar",
+         "country_id": 38
+      },
+      {
+         "id": 2360,
+         "code": "OSS",
+         "name": "FC Oss",
+         "country_id": 38
+      },
+      {
+         "id": 2385,
+         "code": "FDB",
+         "name": "FC Den Bosch",
+         "country_id": 38
+      },
+      {
+         "id": 2755,
+         "code": "UTR",
+         "name": "Jong Utrecht",
+         "country_id": 38
+      },
+      {
+         "id": 2783,
+         "code": "AJA",
+         "name": "Jong Ajax",
+         "country_id": 38
+      },
+      {
+         "id": 2971,
+         "code": "PSV",
+         "name": "Jong PSV",
+         "country_id": 38
+      },
+      {
+         "id": 3115,
+         "code": "AZ",
+         "name": "Jong AZ",
+         "country_id": 38
+      },
+      {
+         "id": 328,
+         "code": null,
+         "name": "Antwerp",
+         "country_id": 556
+      },
+      {
+         "id": 340,
+         "code": "BRU",
+         "name": "Club Brugge",
+         "country_id": 556
+      },
+      {
+         "id": 355,
+         "code": "SIT",
+         "name": "Sint-Truiden",
+         "country_id": 556
+      },
+      {
+         "id": 660,
+         "code": "LOK",
+         "name": "Lokeren",
+         "country_id": 556
+      },
+      {
+         "id": 700,
+         "code": "STL",
+         "name": "Standard Liège",
+         "country_id": 556
+      },
+      {
+         "id": 1087,
+         "code": "SPC",
+         "name": "Sporting Charleroi",
+         "country_id": 556
+      },
+      {
+         "id": 1118,
+         "code": "ZUL",
+         "name": "Zulte-Waregem",
+         "country_id": 556
+      },
+      {
+         "id": 1130,
+         "code": "KOR",
+         "name": "Kortrijk",
+         "country_id": 556
+      },
+      {
+         "id": 1272,
+         "code": "WAB",
+         "name": "Waasland-Beveren",
+         "country_id": 556
+      },
+      {
+         "id": 2402,
+         "code": "GNT",
+         "name": "Gent",
+         "country_id": 556
+      },
+      {
+         "id": 2412,
+         "code": "ASE",
+         "name": "AS Eupen",
+         "country_id": 556
+      },
+      {
+         "id": 2462,
+         "code": "OOS",
+         "name": "KV Oostende",
+         "country_id": 556
+      },
+      {
+         "id": 2555,
+         "code": "ADL",
+         "name": "Anderlecht",
+         "country_id": 556
+      },
+      {
+         "id": 2709,
+         "code": "GNK",
+         "name": "Genk",
+         "country_id": 556
+      },
+      {
+         "id": 2817,
+         "code": "REM",
+         "name": "Royal Excel Mouscron",
+         "country_id": 556
+      },
+      {
+         "id": 2938,
+         "code": "MEC",
+         "name": "Mechelen",
+         "country_id": 556
+      },
+      {
+         "id": 1380,
+         "code": null,
+         "name": "Lierse",
+         "country_id": 556
+      },
+      {
+         "id": 1947,
+         "code": null,
+         "name": "OH Leuven",
+         "country_id": 556
+      },
+      {
+         "id": 2432,
+         "code": null,
+         "name": "Beerschot-Wilrijk",
+         "country_id": 556
+      },
+      {
+         "id": 18564,
+         "code": "SWE",
+         "name": "Sweden",
+         "country_id": 47
+      },
+      {
+         "id": 18568,
+         "code": "GRC",
+         "name": "Greece",
+         "country_id": 125
+      },
+      {
+         "id": 18570,
+         "code": "FIN",
+         "name": "Finland",
+         "country_id": 1233
+      },
+      {
+         "id": 18578,
+         "code": "NOR",
+         "name": "Norway",
+         "country_id": 1578
+      },
+      {
+         "id": 18583,
+         "code": "DNK",
+         "name": "Denmark",
+         "country_id": 320
+      },
+      {
+         "id": 18588,
+         "code": "CRO",
+         "name": "Croatia",
+         "country_id": 266
+      },
+      {
+         "id": 18603,
+         "code": "KAZ",
+         "name": "Kazakhstan",
+         "country_id": 2427
+      },
+      {
+         "id": 18623,
+         "code": "AZE",
+         "name": "Azerbaijan",
+         "country_id": 2453
+      },
+      {
+         "id": 18624,
+         "code": "UKR",
+         "name": "Ukraine",
+         "country_id": 86
+      },
+      {
+         "id": 18625,
+         "code": "BIH",
+         "name": "Bosnia-Herzegovina",
+         "country_id": 507
+      },
+      {
+         "id": 18626,
+         "code": "CYP",
+         "name": "Cyprus",
+         "country_id": 116
+      },
+      {
+         "id": 18630,
+         "code": "SVN",
+         "name": "Slovenia",
+         "country_id": 1638
+      },
+      {
+         "id": 18634,
+         "code": "BLR",
+         "name": "Belarus",
+         "country_id": 212
+      },
+      {
+         "id": 18635,
+         "code": "ICE",
+         "name": "Iceland",
+         "country_id": 1796
+      },
+      {
+         "id": 18638,
+         "code": "ROM",
+         "name": "Romania",
+         "country_id": 155
+      },
+      {
+         "id": 18639,
+         "code": "ARM",
+         "name": "Armenia",
+         "country_id": 919
+      },
+      {
+         "id": 18641,
+         "code": "ALB",
+         "name": "Albania",
+         "country_id": 2454
+      },
+      {
+         "id": 18643,
+         "code": "AUT",
+         "name": "Austria",
+         "country_id": 143
+      },
+      {
+         "id": 18645,
+         "code": "ENG",
+         "name": "England",
+         "country_id": 462
+      },
+      {
+         "id": 18647,
+         "code": "FRA",
+         "name": "France",
+         "country_id": 17
+      },
+      {
+         "id": 18648,
+         "code": "SVK",
+         "name": "Slovakia",
+         "country_id": 401
+      },
+      {
+         "id": 18654,
+         "code": null,
+         "name": "Republic of Ireland",
+         "country_id": 455
+      },
+      {
+         "id": 18657,
+         "code": "ISR",
+         "name": "Israel",
+         "country_id": 802
+      },
+      {
+         "id": 18658,
+         "code": "ITA",
+         "name": "Italy",
+         "country_id": 251
+      },
+      {
+         "id": 18660,
+         "code": "GER",
+         "name": "Germany",
+         "country_id": 11
+      },
+      {
+         "id": 18689,
+         "code": "MKD",
+         "name": "Macedonia FYR",
+         "country_id": 57142
+      },
+      {
+         "id": 18690,
+         "code": "BGR",
+         "name": "Bulgaria",
+         "country_id": 224
+      },
+      {
+         "id": 18691,
+         "code": "MLT",
+         "name": "Malta",
+         "country_id": 2756
+      },
+      {
+         "id": 18692,
+         "code": "GEO",
+         "name": "Georgia",
+         "country_id": 119
+      },
+      {
+         "id": 18694,
+         "code": "NLD",
+         "name": "Netherlands",
+         "country_id": 38
+      },
+      {
+         "id": 18696,
+         "code": "NIR",
+         "name": "Northern Ireland",
+         "country_id": 491
+      },
+      {
+         "id": 18697,
+         "code": "EST",
+         "name": "Estonia",
+         "country_id": 2405
+      },
+      {
+         "id": 18699,
+         "code": "POL",
+         "name": "Poland",
+         "country_id": 2
+      },
+      {
+         "id": 18701,
+         "code": "POR",
+         "name": "Portugal",
+         "country_id": 20
+      },
+      {
+         "id": 18706,
+         "code": "SCO",
+         "name": "Scotland",
+         "country_id": 1161
+      },
+      {
+         "id": 18708,
+         "code": "SWI",
+         "name": "Switzerland",
+         "country_id": 62
+      },
+      {
+         "id": 18710,
+         "code": "ESP",
+         "name": "Spain",
+         "country_id": 32
+      },
+      {
+         "id": 18716,
+         "code": "TUR",
+         "name": "Turkey",
+         "country_id": 404
+      },
+      {
+         "id": 18718,
+         "code": "CZE",
+         "name": "Czech Republic",
+         "country_id": 245
+      },
+      {
+         "id": 18721,
+         "code": "WAL",
+         "name": "Wales",
+         "country_id": 515
+      },
+      {
+         "id": 18732,
+         "code": "HUN",
+         "name": "Hungary",
+         "country_id": 674
+      },
+      {
+         "id": 18735,
+         "code": "LVA",
+         "name": "Latvia",
+         "country_id": 748
+      },
+      {
+         "id": 18743,
+         "code": "BEL",
+         "name": "Belgium",
+         "country_id": 556
+      },
+      {
+         "id": 18777,
+         "code": "FRO",
+         "name": "Faroe Islands",
+         "country_id": 2154
+      },
+      {
+         "id": 18778,
+         "code": "MDA",
+         "name": "Moldova",
+         "country_id": 2345
+      },
+      {
+         "id": 18779,
+         "code": "LUX",
+         "name": "Luxembourg",
+         "country_id": 3126
+      },
+      {
+         "id": 18781,
+         "code": "AND",
+         "name": "Andorra",
+         "country_id": 2931
+      },
+      {
+         "id": 18836,
+         "code": "MNE",
+         "name": "Montenegro",
+         "country_id": 998
+      },
+      {
+         "id": 18870,
+         "code": "LIE",
+         "name": "Liechtenstein",
+         "country_id": 21795
+      },
+      {
+         "id": 18872,
+         "code": "SMR",
+         "name": "San Marino",
+         "country_id": 3347
+      },
+      {
+         "id": 18873,
+         "code": "SRB",
+         "name": "Serbia",
+         "country_id": 296
+      },
+      {
+         "id": 27065,
+         "code": "LTU",
+         "name": "Lithuania",
+         "country_id": 2079
+      },
+      {
+         "id": 27487,
+         "code": "GIB",
+         "name": "Gibraltar",
+         "country_id": 3374
+      },
+      {
+         "id": 27488,
+         "code": "KVX",
+         "name": "Kosovo",
+         "country_id": 122
+      },
+      {
+         "id": 15251,
+         "code": "URY",
+         "name": "Uruguay",
+         "country_id": 158
+      },
+      {
+         "id": 18546,
+         "code": "EGY",
+         "name": "Egypt",
+         "country_id": 886
+      },
+      {
+         "id": 18551,
+         "code": "MAR",
+         "name": "Morocco",
+         "country_id": 1424
+      },
+      {
+         "id": 18554,
+         "code": "TUN",
+         "name": "Tunisia",
+         "country_id": 1439
+      },
+      {
+         "id": 18558,
+         "code": "SEN",
+         "name": "Senegal",
+         "country_id": 200
+      },
+      {
+         "id": 18562,
+         "code": "SAU",
+         "name": "Saudi Arabia",
+         "country_id": 35376
+      },
+      {
+         "id": 18567,
+         "code": "KOR",
+         "name": "Korea Republic",
+         "country_id": 712
+      },
+      {
+         "id": 18576,
+         "code": "MEX",
+         "name": "Mexico",
+         "country_id": 458
+      },
+      {
+         "id": 18597,
+         "code": "JPN",
+         "name": "Japan",
+         "country_id": 479
+      },
+      {
+         "id": 18598,
+         "code": "CRI",
+         "name": "Costa Rica",
+         "country_id": 1739
+      },
+      {
+         "id": 18644,
+         "code": "ARG",
+         "name": "Argentina",
+         "country_id": 44
+      },
+      {
+         "id": 18652,
+         "code": "IRN",
+         "name": "Iran",
+         "country_id": 488
+      },
+      {
+         "id": 18702,
+         "code": "RUS",
+         "name": "Russia",
+         "country_id": 227
+      },
+      {
+         "id": 18704,
+         "code": "BRA",
+         "name": "Brazil",
+         "country_id": 5
+      },
+      {
+         "id": 18717,
+         "code": "PAN",
+         "name": "Panama",
+         "country_id": 65437
+      },
+      {
+         "id": 18720,
+         "code": "COL",
+         "name": "Colombia",
+         "country_id": 353
+      },
+      {
+         "id": 18730,
+         "code": "AUS",
+         "name": "Australia",
+         "country_id": 98
+      },
+      {
+         "id": 18737,
+         "code": "NGA",
+         "name": "Nigeria",
+         "country_id": 716
+      },
+      {
+         "id": 18775,
+         "code": "PER",
+         "name": "Peru",
+         "country_id": 338
+      }
+   ]
+}
