@@ -1,6 +1,7 @@
 import json
 import os
 import datetime
+import math
 
 import writers
 
@@ -73,3 +74,8 @@ def convert_events_to_pretty_goals(events, home_goals, away_goals):
         return writers.Stdout.get_pretty_goals_clean_sheet("away", events)
     if home_goals > 0 and away_goals > 0:
         return writers.Stdout.get_pretty_goals(events)
+
+
+def convert_float_to_curreny(f):
+    f = '{:,.2f}'.format(float(f))
+    return f
