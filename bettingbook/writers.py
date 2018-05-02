@@ -62,6 +62,10 @@ class Stdout(BaseWriter):
         )
         self.colors = type('Enum', (), enums)
 
+        self.score_id = 1
+
+        self.bet_matches = []
+
     @staticmethod
     def show_profile(profiledata):
         click.secho("""Welcome back %s
@@ -137,6 +141,8 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
 
     def league_scores(self, total_data, parameters):
         """Prints the data in a pretty format"""
+        self.score_id = 1
+        self.bet_matches = []
         scores = sorted(total_data, key=lambda x: (x["league"]["data"]["country_id"], x['league_id']))
         for league, games in groupby(scores, key=lambda x: x['league_id']):
             league = convert.convert_leagueid_to_leaguename(league)
@@ -156,6 +162,8 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                 self.league_header(league + ' - ' + league_prefix[0])
             games = self.group_games(games, games_copy)
             self.print_matches(games, parameters)
+
+        return self.bet_matches
 
     def group_games(self, games, games_copy):
         keys = [list(key.keys()) for key in games_copy]
@@ -190,7 +198,9 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
             self.league_subheader(print_matchday, 'matchday')
         if parameters.show_odds:
             self.print_odds(match)
-        self.scores(self.parse_result(match))
+        if parameters.place_bet:
+            self.bet_matches.extend([match["id"]])
+        self.scores(self.parse_result(match), parameters.place_bet)
         if parameters.type_sort != "matches":
             self.print_datetime_status_matches(match)
         else:
@@ -222,7 +232,7 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
         click.secho(f"{league_subheader:-^62}", fg=self.colors.MISC)
         click.echo()
 
-    def scores(self, result):
+    def scores(self, result, place_bet):
         """Prints out the scores in a pretty format"""
         winning_team = self.calculate_winning_team(result.goalsHomeTeam, result.goalsAwayTeam, '')
         if winning_team == 0:
@@ -232,11 +242,18 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
         else:
             home_color = away_color = self.colors.TIE
 
-        click.secho("{:25} {:>2}".format(result.homeTeam, result.goalsHomeTeam),
+        if place_bet:
+            click.secho(f"{self.score_id}. ", nl=False)
+            self.score_id += 1
+            x = 21
+        else:
+            x = 25
+
+        click.secho(f"{result.homeTeam:{x}} {result.goalsHomeTeam:>2}",
                     fg=home_color, nl=False)
         click.secho("  vs ", nl=False)
-        click.secho('{:>2} {}'.format(result.goalsAwayTeam, result.awayTeam.rjust(26)), fg=away_color,
-                    nl=False)
+        click.secho(f"{result.goalsAwayTeam:>2} {result.awayTeam.rjust(26)}",
+                    fg=away_color, nl=False)
 
     def print_odds(self, match):
         odds = []
