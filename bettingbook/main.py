@@ -32,7 +32,7 @@ def create_config_file(apikey, name, timezone, filename):
     config.set('auth', 'api_key', apikey)
     config.add_section('profile')
     config.set('profile', 'name', name)
-    config.set('profile', 'balance', '100')
+    config.set('profile', 'balance', '100.00')
     config.set('profile', 'timezone', timezone)
     with open(filename, 'w') as cfgfile:
         config.write(cfgfile)
