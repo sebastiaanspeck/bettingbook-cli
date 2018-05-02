@@ -63,10 +63,9 @@ def convert_type_to_prefix(goal_type):
 
 
 def convert_events_to_pretty_goals(events, home_goals, away_goals):
-    goals = []
     # no home or away-goals scored (0-0)
     if home_goals == 0 and away_goals == 0:
-        return goals
+        return []
     # home scored and away didn't (x-0)
     if home_goals > 0 and away_goals == 0:
         return writers.Stdout.get_pretty_goals_clean_sheet("home", events)
