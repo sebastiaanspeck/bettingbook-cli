@@ -84,16 +84,35 @@ class Betting(object):
         odds = [home_odd, draw_odd, away_odd]
         return odds
 
+    @staticmethod
+    def get_league_name(match):
+        league_name = convert.convert_leagueid_to_leaguename(match['league_id'])
+        league_prefix = match['league']['data']['name']
+        if league_prefix == league_name:
+            league_name = league_name
+        else:
+            league_name = league_name + ' - ' + league_prefix
+        return league_name
+
     def get_input(self):
-        team = click.prompt("On which team do you want to bet? (1, X, 2)")
-        stake = convert.convert_float_to_curreny(click.prompt(f"What is your stake? (max. {self.balance})"))
-        while team.upper() not in ["1", "X", "2"]:
+        prediction = self.get_prediction()
+        stake = self.get_stake()
+        return prediction, stake
+
+    @staticmethod
+    def get_prediction():
+        prediction = click.prompt("On which team do you want to bet? (1, X, 2)")
+        while prediction.upper() not in ["1", "X", "2"]:
             print("Oops... You didn't entered 1, X or 2. Try again.")
-            team = click.prompt("On which team do you want to bet? (1, X, 2)")
+            prediction = click.prompt("On which team do you want to bet? (1, X, 2)")
+        return prediction
+
+    def get_stake(self):
+        stake = convert.convert_float_to_curreny(click.prompt(f"What is your stake? (max. {self.balance})"))
         while stake > self.balance or stake <= 0:
             print("Oops... You entered a stake higher than your balance or an invalid stake. Try again.")
             stake = convert.convert_float_to_curreny(click.prompt(f"What is your stake? (max. {self.balance})"))
-        return team, stake
+        return stake
 
     @staticmethod
     def calculate_potential_wins(team, stake, odds):
@@ -151,8 +170,9 @@ class Betting(object):
 
     def place_bet(self, match):
         odds = self.get_odds(match)
+        league_name = self.get_league_name(match)
         click.echo(f"Betting on {match['localTeam']['data']['name']} - {match['visitorTeam']['data']['name']} in "
-                   f"{match['league']['data']['name']} with odds: 1: {odds[0]}, X: {odds[1]}, 2: {odds[2]}")
+                   f"{league_name} with odds:\n1: {odds[0]}, X: {odds[1]}, 2: {odds[2]}")
         prediction, stake = self.get_input()
         stake = convert.convert_float_to_curreny(stake)
         potential_wins, odd = self.calculate_potential_wins(prediction, stake, odds)
@@ -164,9 +184,8 @@ class Betting(object):
 
     def main(self, matches):
         self.check_for_files(['active_odds.csv', 'finished_odds.csv'])
-        # click.clear()
         self.load_balance()
         self.check_active_odds()
-        click.secho("Matches on which you want to bet:")
+        click.secho("\nMatches on which you want to bet:\n")
         for match in matches:
             self.place_bet(match)
