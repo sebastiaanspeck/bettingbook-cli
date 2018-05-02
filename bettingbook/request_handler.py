@@ -4,7 +4,7 @@ import datetime
 import json
 
 import exceptions
-import betting
+from betting import Betting
 
 
 class RequestHandler(object):
@@ -152,13 +152,20 @@ class RequestHandler(object):
         match_bet = match_bet.split(',')
         matches = []
         for match_id in match_bet:
-            matches.extend([str(bet_matches[int(match_id)-1])])
+            try:
+                matches.extend([str(bet_matches[int(match_id)-1])])
+            except IndexError:
+                pass
         matches = ','.join(val for val in matches)
-        self.get_match_bet(matches)
+        match_data = self.get_match_bet(matches)
+        self.place_bet_betting(match_data)
 
     def get_match_bet(self, matches):
         url = f'fixtures/multi/{matches}'
         self.params['include'] = 'localTeam,visitorTeam,league,round,events,stage,flatOdds:filter(bookmaker_id|2)'
         matches = self._get(url)
-        # _ = self.writer.league_scores(matches, parameters)
-        betting.main(matches)
+        return matches
+
+    def place_bet_betting(self, matches):
+        bet = Betting(self.params, self.league_data, self.writer)
+        bet.main(matches)
