@@ -1,7 +1,8 @@
 import json
 import os
 import datetime
-import math
+from re import sub
+from decimal import Decimal
 
 import writers
 
@@ -78,4 +79,5 @@ def convert_events_to_pretty_goals(events, home_goals, away_goals):
 
 def convert_float_to_curreny(f):
     f = '{:,.2f}'.format(float(f))
+    f = Decimal(sub(r'[^\d.]', '', f))
     return f
