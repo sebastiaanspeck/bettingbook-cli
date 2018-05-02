@@ -32,7 +32,7 @@ def create_config_file(apikey, name, timezone, filename):
     config.set('auth', 'api_key', apikey)
     config.add_section('profile')
     config.set('profile', 'name', name)
-    config.set('profile', 'balance', 100)
+    config.set('profile', 'balance', '100')
     config.set('profile', 'timezone', timezone)
     with open(filename, 'w') as cfgfile:
         config.write(cfgfile)
@@ -114,6 +114,26 @@ def get_params(apikey, timezone):
     return params
 
 
+def check_options(history, bet, live, today):
+    if history and live or history and today:
+        raise IncorrectParametersException('--history and --days is not supported for --live/--today. '
+                                           'Use --matches to use these parameters')
+    if bet and live:
+        raise IncorrectParametersException('--bet is not supported for --live. '
+                                           'Use --matches or --today to use this parameters')
+
+
+def check_options_standings(league, history):
+    if not league:
+        raise IncorrectParametersException('Please specify a league. '
+                                           'Example --standings --league=EN1')
+    if history:
+        raise IncorrectParametersException('--history and --days is not supported for --standings. '
+                                           'Use --matches to use these parameters')
+    if league.endswith('C') and league not in ["WC", "EC"]:
+        raise IncorrectParametersException(f'Standings for {league} not supported')
+
+
 @click.command()
 @click.option('--apikey', default=load_config_file,
               help="API key to use.")
@@ -140,9 +160,11 @@ def get_params(apikey, timezone):
               help="Displays goal-scorers under the score.")
 @click.option('--odds', '-O', is_flag=True, default=False, show_default=True,
               help="Displays the odds above the score.")
+@click.option('--bet', '-B', is_flag=True, default=False, show_default=True,
+              help="Place a bet.")
 @click.option('--profile', '-P', is_flag=True,
               help="Show your profile (name, balance, timezone)")
-def main(apikey, timezone, live, today, matches, standings, league, days, history, details, odds, profile):
+def main(apikey, timezone, live, today, matches, standings, league, days, history, details, odds, bet, profile):
     params = get_params(apikey, timezone)
     profile_data = get_profile_data()
 
@@ -151,39 +173,32 @@ def main(apikey, timezone, live, today, matches, standings, league, days, histor
         rh = RequestHandler(params, LEAGUES_DATA, writer)
 
         Parameters = namedtuple("parameters", "url, msg, league_name, days, "
-                                "show_history, show_details, show_odds, type_sort")
+                                "show_history, show_details, show_odds, place_bet, type_sort")
 
         if live or today or matches:
-            if history and live or history and today:
-                raise IncorrectParametersException('--history and --days is not supported for --live/--today. '
-                                                   'Use --matches to use these parameters')
+            check_options(history, bet, live, today)
+            if bet:
+                odds = True
             if live:
                 parameters = Parameters('livescores/now',
                                         ["No live action currently",
                                          "There was problem getting live scores, check your parameters"],
-                                        league, days, history, details, odds, "live")
+                                        league, days, history, details, odds, bet, "live")
             elif today:
                 parameters = Parameters('livescores',
                                         ["No matches today",
                                          "There was problem getting todays scores, check your parameters"],
-                                        league, days, history, details, odds, "today")
+                                        league, days, history, details, odds, bet, "today")
             else:
                 parameters = Parameters('fixtures/between/',
                                         [[f"No matches in the past {str(days)} days."],
                                          [f"No matches in the coming {str(days)} days."]],
-                                        league, days, history, details, odds, "matches")
+                                        league, days, history, details, odds, bet, "matches")
             rh.get_matches(parameters)
             return
 
         if standings:
-            if not league:
-                raise IncorrectParametersException('Please specify a league. '
-                                                   'Example --standings --league=EN1')
-            if history:
-                raise IncorrectParametersException('--history and --days is not supported for --standings. '
-                                                   'Use --matches to use these parameters')
-            if league.endswith('C') and league not in ["WC", "EC"]:
-                raise IncorrectParametersException(f'Standings for {league} not supported')
+            check_options_standings(league, history)
             rh.get_standings(league, details)
             return
 
