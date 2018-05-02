@@ -4,6 +4,7 @@ import datetime
 import json
 
 import exceptions
+import betting
 
 
 class RequestHandler(object):
@@ -23,7 +24,7 @@ class RequestHandler(object):
 
         if req.status_code == requests.codes.ok:
             data = self.get_data(req, url)
-            return req, data
+            return data
 
         if req.status_code in [requests.codes.bad, requests.codes.server_error]:
             raise exceptions.APIErrorException('Invalid request. Check parameters.')
@@ -72,24 +73,30 @@ class RequestHandler(object):
                 return ids
         return None
 
-    def get_matches(self, parameters):
-        """
-        Queries the API and fetches the scores for fixtures
-        based upon the league and time parameter
-        """
-        now = datetime.datetime.now()
-
+    def set_params(self):
         league_ids = self.get_league_ids()
 
         self.params['leagues'] = ','.join(val for val in league_ids)
         self.params['include'] = 'localTeam,visitorTeam,league,round,events,stage,flatOdds:filter(bookmaker_id|2)'
 
-        if parameters.show_history:
-            start = datetime.datetime.strftime(now - datetime.timedelta(days=parameters.days), '%Y-%m-%d')
+    @staticmethod
+    def set_start_end(show_history, days):
+        now = datetime.datetime.now()
+        if show_history:
+            start = datetime.datetime.strftime(now - datetime.timedelta(days=days), '%Y-%m-%d')
             end = datetime.datetime.strftime(now - datetime.timedelta(days=1), '%Y-%m-%d')
         else:
             start = datetime.datetime.strftime(now + datetime.timedelta(days=1), '%Y-%m-%d')
-            end = datetime.datetime.strftime(now + datetime.timedelta(days=parameters.days), '%Y-%m-%d')
+            end = datetime.datetime.strftime(now + datetime.timedelta(days=days), '%Y-%m-%d')
+        return start, end
+
+    def get_matches(self, parameters):
+        """
+        Queries the API and fetches the scores for fixtures
+        based upon the league and time parameter
+        """
+        self.set_params()
+        start, end = self.set_start_end(parameters.show_history, parameters.days)
         if parameters.league_name:
             try:
                 league_id = self.get_league_abbrevation(parameters.league_name)
@@ -105,9 +112,9 @@ class RequestHandler(object):
 
     def get_match_data(self, parameters, start, end):
         if parameters.type_sort == "matches":
-            response, fixtures_results = self._get(parameters.url + f'{start}/{end}')
+            fixtures_results = self._get(parameters.url + f'{start}/{end}')
         else:
-            response, fixtures_results = self._get(parameters.url)
+            fixtures_results = self._get(parameters.url)
         # no fixtures in the timespan. display a help message and return
         if len(fixtures_results) == 0:
             if parameters.type_sort == "matches":
@@ -118,16 +125,18 @@ class RequestHandler(object):
             else:
                 click.secho(parameters.msg[0], fg="red", bold=True)
             return
-        self.writer.league_scores(fixtures_results, parameters)
+        bet_matches = self.writer.league_scores(fixtures_results, parameters)
+        if parameters.place_bet:
+            self.place_bet(bet_matches)
 
     def get_standings(self, league_name, show_details):
         for league_id in self.get_league_abbrevation(league_name):
             url = f'leagues/{league_id}'
             try:
-                _, league_data = self._get(url)
+                league_data = self._get(url)
                 current_season_id = league_data['current_season_id']
                 url = f'standings/season/{current_season_id}'
-                _, standings_data = self._get(url)
+                standings_data = self._get(url)
                 if len(standings_data) == 0:
                     click.secho(f"\nLOG: No standings availble for {league_name} with id {league_id}.\n",
                                 fg="red", bold=True)
@@ -137,3 +146,19 @@ class RequestHandler(object):
                 # Click handles incorrect League codes so this will only come up
                 # if that league does not have standings available. ie. Champions League
                 click.secho(f"No standings availble for {league_name}.", fg="red", bold=True)
+
+    def place_bet(self, bet_matches):
+        match_bet = click.prompt("Give the numbers of the matches on which ou want to bet (comma-separated)")
+        match_bet = match_bet.split(',')
+        matches = []
+        for match_id in match_bet:
+            matches.extend([str(bet_matches[int(match_id)-1])])
+        matches = ','.join(val for val in matches)
+        self.get_match_bet(matches)
+
+    def get_match_bet(self, matches):
+        url = f'fixtures/multi/{matches}'
+        self.params['include'] = 'localTeam,visitorTeam,league,round,events,stage,flatOdds:filter(bookmaker_id|2)'
+        matches = self._get(url)
+        # _ = self.writer.league_scores(matches, parameters)
+        betting.main(matches)
