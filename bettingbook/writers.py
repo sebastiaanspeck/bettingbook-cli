@@ -244,8 +244,11 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
 
         if place_bet:
             click.secho(f"{self.score_id}. ", nl=False)
+            if self.score_id < 10:
+                x = 22
+            else:
+                x = 21
             self.score_id += 1
-            x = 21
         else:
             x = 25
 

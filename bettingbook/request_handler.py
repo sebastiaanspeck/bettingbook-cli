@@ -150,19 +150,23 @@ class RequestHandler(object):
     def place_bet(self, bet_matches):
         match_bet = click.prompt("Give the numbers of the matches on which ou want to bet (comma-separated)")
         match_bet = match_bet.split(',')
-        matches = []
-        for match_id in match_bet:
-            try:
-                matches.extend([str(bet_matches[int(match_id)-1])])
-            except IndexError:
-                pass
-        matches = ','.join(val for val in matches)
-        match_data = self.get_match_bet(matches)
-        match_data = self.check_match_data(match_data)
-        if match_data == 'no_matches':
+        match_bet = self.check_match_bet(match_bet)
+        if match_bet == 'no_matches':
             click.secho("There are no valid matches selected.", fg="red", bold=True)
         else:
-            self.place_bet_betting(match_data)
+            matches = []
+            for match_id in match_bet:
+                try:
+                    matches.extend([str(bet_matches[int(match_id)-1])])
+                except IndexError:
+                    pass
+            matches = ','.join(val for val in matches)
+            match_data = self.get_match_bet(matches)
+            match_data = self.check_match_data(match_data)
+            if match_data == 'no_matches':
+                click.secho("There are no valid matches selected.", fg="red", bold=True)
+            else:
+                self.place_bet_betting(match_data)
 
     def get_match_bet(self, matches):
         url = f'fixtures/multi/{matches}'
@@ -171,9 +175,21 @@ class RequestHandler(object):
         return matches
 
     @staticmethod
+    def check_match_bet(match_bet):
+        matches = []
+        for match_id in match_bet:
+            if int(match_id) <= 0:
+                click.secho(f"The match with id {match_id} is an invalid match.", fg="red", bold=True)
+            else:
+                matches.extend([match_id])
+        if len(matches) == 0:
+            return 'no_matches'
+        return matches
+
+    @staticmethod
     def check_match_data(match_data):
         matches = []
-        for i, match in enumerate(match_data):
+        for match in match_data:
             if len(match['flatOdds']['data']) == 0:
                 click.secho(f"The match {match['localTeam']['data']['name']} - {match['visitorTeam']['data']['name']} "
                             f"doesn't have any odds available (yet).", fg="red", bold=True)

@@ -150,23 +150,46 @@ class Betting(object):
         click.secho(f"Updated balance: {self.balance}")
 
     @staticmethod
-    def write_to_active_odds(match_id, prediction, potential_wins):
+    def write_to_active_odds(data):
         with open('active_odds.csv', 'a', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow([match_id, prediction, potential_wins])
+            writer.writerow(data)
 
-    @staticmethod
-    def update_active_odds(data):
+    def update_active_odds(self, data):
         with open('active_odds.csv', 'w', newline='') as f:
             writer = csv.writer(f)
             for line in data:
                 writer.writerow(line)
+        self.remove_empty_lines_csv_file('active_odds.csv')
 
-    @staticmethod
-    def write_to_finished_odds(row):
+    def write_to_finished_odds(self, row):
         with open('finished_odds.csv', 'a', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(row)
+        self.remove_empty_lines_csv_file('finished_odds.csv')
+
+    @staticmethod
+    def remove_empty_lines_csv_file(file):
+        try:
+            file_object = open(file, 'r')
+            lines = csv.reader(file_object, delimiter=',', quotechar='"')
+            flag = 0
+            data = []
+            for line in lines:
+                if not line:
+                    flag = 1
+                    continue
+                else:
+                    data.append(line)
+            file_object.close()
+            if flag == 1:  # if blank line is present in file
+                file_object = open(file, 'w')
+                for line in data:
+                    str1 = ','.join(line)
+                    file_object.write(str1 + "\n")
+                file_object.close()
+        except Exception as e:
+            print(e)
 
     def place_bet(self, match):
         odds = self.get_odds(match)
@@ -178,7 +201,9 @@ class Betting(object):
         potential_wins, odd = self.calculate_potential_wins(prediction, stake, odds)
         if self.get_confirmation(prediction, stake, potential_wins):
             self.update_balance(stake, 'loss')
-            self.write_to_active_odds(match['id'], prediction, potential_wins)
+            data = [match['id'], prediction, potential_wins, stake, odd,
+                    match['localTeam']['data']['name'], match['visitorTeam']['data']['name']]
+            self.write_to_active_odds(data)
         else:
             print("Your bet is canceled")
 
