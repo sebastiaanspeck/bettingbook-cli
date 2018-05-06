@@ -82,8 +82,7 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                 click.secho(f"{'POS':6}  {'CLUB':30}    {'PLAYED':10}    {'WON':10}    {'DRAW':10}    {'LOST':10}    "
                             f"{'GOALS':10}    {'GOAL DIFF':10}    {'POINTS':10}")
             else:
-                click.secho("{:6}  {:30}    {:10}    {:10}    {:10}".format
-                            ("POS", "CLUB", "PLAYED", "GOAL DIFF", "POINTS"))
+                click.secho(f"{'POS':6}  {'CLUB':30}    {'PLAYED':10}    {'GOAL DIFF':10}    {'POINTS':10}")
             for team in leagues['standings']['data']:
                 goal_difference = team['total']['goal_difference']
                 position = team['position']
