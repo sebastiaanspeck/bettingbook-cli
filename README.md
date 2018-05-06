@@ -151,8 +151,8 @@ Todo
 ====
 - [ ] Add more competitions (divisions under the first divisions)
 - [ ] Add option to get matches for a specific team
-- [ ] Add betting functions
-- [ ] A built-in watch feature so you can run once with --live and just leave the program running.
+- [ ] Add built-in watch feature so you can run once with --live and just leave the program running.
+- [x] Add option to view active/finished bets.
 - [x] Add odds to match overviews
 - [x] Add color coding for Europa league and Champions League
 - [x] Add cups
@@ -161,6 +161,7 @@ Todo
 - [x] Add league filter for live scores
 - [x] Add league standings
 - [x] Add --details to league standings (details are won, draw, lost, goal for, goal against)
+- [x] Add betting functions
 
 License
 ====
