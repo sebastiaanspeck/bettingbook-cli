@@ -193,6 +193,9 @@ class RequestHandler(object):
             if len(match['flatOdds']['data']) == 0:
                 click.secho(f"The match {match['localTeam']['data']['name']} - {match['visitorTeam']['data']['name']} "
                             f"doesn't have any odds available (yet).", fg="red", bold=True)
+            elif match['time']['status'] != 'NS':
+                click.secho(f"The match {match['localTeam']['data']['name']} - {match['visitorTeam']['data']['name']} "
+                            f"has already started.", fg="red", bold=True)
             else:
                 matches.extend([match])
         if len(matches) == 0:
@@ -201,4 +204,4 @@ class RequestHandler(object):
 
     def place_bet_betting(self, matches):
         bet = Betting(self.params, self.league_data, self.writer)
-        bet.main(matches)
+        bet.place_bet(matches)
