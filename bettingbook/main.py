@@ -6,6 +6,7 @@ from collections import namedtuple
 from request_handler import RequestHandler
 from exceptions import IncorrectParametersException
 from writers import get_writer
+from betting import Betting
 
 try:
     from configparser import ConfigParser
@@ -164,13 +165,21 @@ def check_options_standings(league, history):
               help="Place a bet.")
 @click.option('--profile', '-P', is_flag=True,
               help="Show your profile (name, balance, timezone)")
-def main(apikey, timezone, live, today, matches, standings, league, days, history, details, odds, bet, profile):
+@click.option('--all-bets', '-AB', is_flag=True,
+              help="Show all your bets")
+@click.option('--open-bets', '-OB', is_flag=True,
+              help="Show your open bets")
+@click.option('--closed-bets', '-CB', is_flag=True,
+              help="Show your closed bets")
+def main(apikey, timezone, live, today, matches, standings, league, days, history, details, odds, bet, profile,
+         all_bets, open_bets, closed_bets):
     params = get_params(apikey, timezone)
     profile_data = get_profile_data()
 
     try:
         writer = get_writer()
         rh = RequestHandler(params, LEAGUES_DATA, writer)
+        betting = Betting(params, LEAGUES_DATA, writer)
 
         Parameters = namedtuple("parameters", "url, msg, league_name, days, "
                                 "show_history, show_details, show_odds, place_bet, type_sort")
@@ -205,6 +214,16 @@ def main(apikey, timezone, live, today, matches, standings, league, days, histor
         if profile:
             rh.show_profile(profile_data)
             return
+
+        if all_bets:
+            betting.view_bets('open')
+            betting.view_bets('closed')
+
+        if open_bets:
+            betting.view_bets('open')
+
+        if closed_bets:
+            betting.view_bets('closed')
 
     except IncorrectParametersException as e:
         click.secho(str(e), fg="red", bold=True)
