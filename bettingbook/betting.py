@@ -102,36 +102,52 @@ class Betting(object):
         potential_wins = row[2]
         if winning_team == 0 and predicted_team == '1' or winning_team == 1 and predicted_team == 'X' or \
            winning_team == 2 and predicted_team == '2':
-            click.echo(f"Woohoo! You predicited {match_data['visitorTeam']['data']['name']} - "
+            click.echo(f"Woohoo! You predicted {match_data['localTeam']['data']['name']} - "
                        f"{match_data['visitorTeam']['data']['name']} correct and won {potential_wins}")
             self.update_balance(convert.convert_float_to_curreny(potential_wins), operation='win')
-            row.append(['yes'])
+            row.append(winning_team, 'yes')
         else:
-            click.echo(f"Ah noo! You predicited {match_data['visitorTeam']['data']['name']} - "
+            click.echo(f"Ah noo! You predicted {match_data['localTeam']['data']['name']} - "
                        f"{match_data['visitorTeam']['data']['name']} incorrect")
-            row.append(['no'])
+            row.append(winning_team, 'no')
         self.write_to_closed_bets(row)
         del reader[i][0:]
         self.update_open_bets(reader)
 
-    @staticmethod
-    def get_odds(match):
-        odds = []
-        for i, odd in enumerate(match['flatOdds']['data']):
-            if match['flatOdds']['data'][i]['market_id'] == 1:
-                odds = odd['odds']
-        for i, _ in enumerate(odds):
-            if len(str(odds[i]['value'])) <= 3:
-                odds[i]['value'] = "{0:.2f}".format(odds[i]['value'])
-            if len(str(odds[i]['value'])) > 4:
-                odds[i]['value'] = "{0:.1f}".format(float(odds[i]['value']))
-            if odds[i]['label'] == "1":
-                home_odd = odds[i]['value']
-            elif odds[i]['label'] == "2":
-                away_odd = odds[i]['value']
-            elif odds[i]['label'] == "X":
-                draw_odd = odds[i]['value']
+    def get_odds(self, match):
+        def highest_odd(odd_in):
+            try:
+                return max(odd_in)
+            except ValueError:
+                return '0.00'
+
+        odds_dict = {"1": [], "X": [], "2": []}
+        for bookmaker in match["odds"]["data"]:
+            if bookmaker['name'] == "3Way Result":
+                for odds in bookmaker["bookmaker"]["data"]:
+                    for odd in odds["odds"]["data"]:
+                        odds_dict = self.fill_odds(odd, odds_dict)
+
+        for label, values in odds_dict.items():
+            odd = highest_odd(values)
+            if len(str(odd)) <= 3:
+                odd = "{0:.2f}".format(float(odd))
+            if len(str(odd)) > 4:
+                odd = "{0:.1f}".format(float(odd))
+
+            if label == "1":
+                home_odd = odd
+            elif label == "X":
+                draw_odd = odd
+            else:
+                away_odd = odd
+
         odds = [home_odd, draw_odd, away_odd]
+        return odds
+
+    @staticmethod
+    def fill_odds(odd, odds):
+        odds[odd["label"]].append(str(odd["value"]))
         return odds
 
     @staticmethod
@@ -223,7 +239,7 @@ class Betting(object):
             self.update_balance(daty[1], 'loss')
             data = [daty[4]['id'], daty[0], daty[1], daty[2], daty[3],
                     daty[4]['localTeam']['data']['name'], daty[4]['visitorTeam']['data']['name'],
-                    daty[4]['time']['starting_at']['date_time'], daty[5]]
+                    convert.convert_time(daty[4]["time"]["starting_at"]["date_time"]), daty[5]]
             self.write_to_open_bets(data)
         else:
             click.secho("Your bet is canceled")
@@ -234,20 +250,20 @@ class Betting(object):
         if len(bets) == 0:
             click.secho(f"\nNo {type_sort} bets found.", fg="red", bold=True)
         else:
-            click.secho(f"\n{type_sort.title()} bets:\n")
+            click.secho(f"\n{type_sort.title()} bets:\n", bold=True)
             if type_sort == 'open':
-                click.secho(f"{'MATCH':30} {'PREDICTION':15} {'ODD':10} {'STAKE':10} {'POTENTIAL WINS':20} "
-                            f"{'DATE AND TIME':20}")
+                click.secho(f"{'MATCH':50} {'PREDICTION':15} {'ODD':10} {'STAKE':10} {'POTENTIAL WINS':20} "
+                            f"{'DATE AND TIME':20}", bold=True)
             else:
-                click.secho(f"{'MATCH':30} {'PREDICTION':15} {'ODD':10} {'STAKE':10} {'POTENTIAL WINS':20} "
-                            f"{'DATE AND TIME':20} {'CORRECT':10}")
+                click.secho(f"{'MATCH':50} {'PREDICTION':15} {'ODD':10} {'STAKE':10} {'POTENTIAL WINS':20} "
+                            f"{'DATE AND TIME':20} {'RESULT':10} {'CORRECT':10}", bold=True)
             for bet in bets:
                 if type_sort == 'open':
-                    bet_str = f"{bet[5]+' - '+bet[6]:<30} {bet[1]:<15} {bet[4]:<10} " \
+                    bet_str = f"{bet[5]+' - '+bet[6]:<50} {bet[1]:<15} {bet[4]:<10} " \
                               f"{bet[2]:<10} {bet[3]:<20} {bet[7]:<20}"
                 else:
-                    bet_str = f"{bet[5]+' - '+bet[6]:<30} {bet[1]:<15} {bet[4]:<10} " \
-                              f"{bet[2]:<10} {bet[3]:<20} {bet[7]:<20} {bet[9]:<10}"
+                    bet_str = f"{bet[5]+' - '+bet[6]:<50} {bet[1]:<15} {bet[4]:<10} " \
+                              f"{bet[2]:<10} {bet[3]:<20} {bet[7]:<20} {bet[9]:<10} {bet[10]:<10}"
                 click.secho(bet_str)
 
     def main(self):

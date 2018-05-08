@@ -258,12 +258,20 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                     fg=away_color, nl=False)
 
     def print_odds(self, match):
-        odds = []
-        for i, odd in enumerate(match["flatOdds"]["data"]):
-            if match["flatOdds"]["data"][i]["market_id"] == 1:
-                odds = odd["odds"]
-        self.odds(self.parse_odd(odds, match["scores"]["localteam_score"],
+        odds_dict = {"1": [], "X": [], "2": []}
+        for bookmaker in match["odds"]["data"]:
+            if bookmaker['name'] == "3Way Result":
+                for odds in bookmaker["bookmaker"]["data"]:
+                    for odd in odds["odds"]["data"]:
+                        odds_dict = self.fill_odds(odd, odds_dict)
+
+        self.odds(self.parse_odd(odds_dict, match["scores"]["localteam_score"],
                                  match["scores"]["visitorteam_score"], match["time"]["status"]))
+
+    @staticmethod
+    def fill_odds(odd, odds):
+        odds[odd["label"]].append(str(odd["value"]))
+        return odds
 
     def print_datetime_status_matches(self, match):
         if match["time"]["status"] in ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK"]:
@@ -430,37 +438,38 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
     def parse_odd(self, odds, home_goals, away_goals, status):
         """Parses the odds and returns a Odds namedtuple"""
 
-        def winning_odd(odd):
-            if odd == [None, None, None]:
-                winning_team = self.calculate_winning_team(home_goals, away_goals, status)
-                return winning_team
-            for index, o in enumerate(odd):
-                if o:
-                    return index
+        def winning_odd():
+            winning_team = self.calculate_winning_team(home_goals, away_goals, status)
+            return winning_team
 
-        for i, _ in enumerate(odds):
-            if len(str(odds[i]["value"])) <= 3:
-                odds[i]["value"] = "{0:.2f}".format(odds[i]["value"])
-            if len(str(odds[i]["value"])) > 4:
-                odds[i]["value"] = "{0:.1f}".format(float(odds[i]["value"]))
-            if odds[i]["label"] == "1":
-                home_odd = odds[i]["value"]
-                home_winning = odds[i]["winning"]
-            elif odds[i]["label"] == "2":
-                away_odd = odds[i]["value"]
-                away_winning = odds[i]["winning"]
-            elif odds[i]["label"] == "X":
-                draw_odd = odds[i]["value"]
-                draw_winning = odds[i]["winning"]
-        try:
-            odds = self.Odds(
-                str(home_odd), str(draw_odd),  str(away_odd),
-                winning_odd([home_winning, draw_winning, away_winning]))
-        except UnboundLocalError:
-            odds = self.Odds(
-                '0.00', '0.00', '0.00',
-                'no_winner_yet')
+        def highest_odd(odd_in):
+            try:
+                return max(odd_in)
+            except ValueError:
+                return '0.00'
 
+        for label, values in odds.items():
+            odd = highest_odd(values)
+            if len(str(odd)) <= 3:
+                odd = "{0:.2f}".format(float(odd))
+            if len(str(odd)) > 4:
+                odd = "{0:.1f}".format(float(odd))
+
+            if label == "1":
+                home_odd = odd
+            elif label == "2":
+                away_odd = odd
+            else:
+                draw_odd = odd
+
+            try:
+                odds = self.Odds(
+                    str(home_odd), str(draw_odd),  str(away_odd),
+                    winning_odd())
+            except UnboundLocalError:
+                odds = self.Odds(
+                    '0.00', '0.00', '0.00',
+                    'no_winner_yet')
         return odds
 
     @staticmethod

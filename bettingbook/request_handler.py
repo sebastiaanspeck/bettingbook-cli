@@ -77,7 +77,7 @@ class RequestHandler(object):
         league_ids = self.get_league_ids()
 
         self.params['leagues'] = ','.join(val for val in league_ids)
-        self.params['include'] = 'localTeam,visitorTeam,league,round,events,stage,flatOdds:filter(bookmaker_id|2)'
+        self.params['include'] = 'localTeam,visitorTeam,league,round,events,stage,odds'
 
     @staticmethod
     def set_start_end(show_history, days):
@@ -170,7 +170,7 @@ class RequestHandler(object):
 
     def get_match_bet(self, matches):
         url = f'fixtures/multi/{matches}'
-        self.params['include'] = 'localTeam,visitorTeam,league,round,events,stage,flatOdds:filter(bookmaker_id|2)'
+        self.params['include'] = 'localTeam,visitorTeam,league,round,events,stage,odds'
         matches = self._get(url)
         return matches
 
@@ -190,7 +190,7 @@ class RequestHandler(object):
     def check_match_data(match_data):
         matches = []
         for match in match_data:
-            if len(match['flatOdds']['data']) == 0:
+            if len(match['odds']['data']) == 0:
                 click.secho(f"The match {match['localTeam']['data']['name']} - {match['visitorTeam']['data']['name']} "
                             f"doesn't have any odds available (yet).", fg="red", bold=True)
             elif match['time']['status'] != 'NS':
