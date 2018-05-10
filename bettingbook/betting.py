@@ -105,11 +105,11 @@ class Betting(object):
             click.echo(f"Woohoo! You predicted {match_data['localTeam']['data']['name']} - "
                        f"{match_data['visitorTeam']['data']['name']} correct and won {potential_wins}")
             self.update_balance(convert.convert_float_to_curreny(potential_wins), operation='win')
-            row.append(winning_team, 'yes')
+            row.extend((winning_team, "yes"))
         else:
             click.echo(f"Ah noo! You predicted {match_data['localTeam']['data']['name']} - "
                        f"{match_data['visitorTeam']['data']['name']} incorrect")
-            row.append(winning_team, 'no')
+            row.extend((winning_team, "no"))
         self.write_to_closed_bets(row)
         del reader[i][0:]
         self.update_open_bets(reader)
@@ -250,7 +250,7 @@ class Betting(object):
         if len(bets) == 0:
             click.secho(f"\nNo {type_sort} bets found.", fg="red", bold=True)
         else:
-            click.secho(f"\n{type_sort.title()} bets:\n", bold=True)
+            click.secho(f"\n{type_sort.title()} bets:", bold=True)
             if type_sort == 'open':
                 click.secho(f"{'MATCH':50} {'PREDICTION':15} {'ODD':10} {'STAKE':10} {'POTENTIAL WINS':20} "
                             f"{'DATE AND TIME':20}", bold=True)
