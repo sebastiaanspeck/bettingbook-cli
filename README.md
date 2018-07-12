@@ -149,9 +149,9 @@ AU | Awaiting Updates | Can occur when there is a connectivity issue or somethin
 
 Todo
 ====
-- [ ] Add more competitions (divisions under the first divisions)
+- [ ] Add more competitions (divisions under the first divisions) [Write out poll to determine which competitions specific]
 - [ ] Add option to get matches for a specific team
-- [ ] Add built-in watch feature so you can run once with --live and just leave the program running.
+- [x] Add built-in watch feature so you can run once with --live and just leave the program running.
 - [x] Add option to view active/finished bets.
 - [x] Add odds to match overviews
 - [x] Add color coding for Europa league and Champions League
