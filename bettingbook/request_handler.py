@@ -2,6 +2,8 @@ import requests
 import click
 import datetime
 import json
+import sched
+import time
 
 import exceptions
 from betting import Betting
@@ -111,6 +113,7 @@ class RequestHandler(object):
                 click.secho("No data available.", fg="red", bold=True)
 
     def get_match_data(self, parameters, start, end):
+        s = sched.scheduler(time.time, time.sleep)
         if parameters.type_sort == "matches":
             fixtures_results = self._get(parameters.url + f'{start}/{end}')
         else:
@@ -128,6 +131,9 @@ class RequestHandler(object):
         bet_matches = self.writer.league_scores(fixtures_results, parameters)
         if parameters.place_bet:
             self.place_bet(bet_matches)
+        if parameters.refresh:
+            s.enter(60, 1, self.get_match_data, (parameters, start, end,))
+            s.run()
 
     def get_standings(self, league_name, show_details):
         for league_id in self.get_league_abbrevation(league_name):
@@ -148,9 +154,8 @@ class RequestHandler(object):
                 click.secho(f"No standings availble for {league_name}.", fg="red", bold=True)
 
     def place_bet(self, bet_matches):
-        match_bet = click.prompt("Give the numbers of the matches on which ou want to bet (comma-separated)")
-        match_bet = match_bet.split(',')
-        match_bet = self.check_match_bet(match_bet)
+        match_bet = click.prompt("Give the numbers of the matches on which ou want to bet (comma-separated)").split(',')
+        match_bet = sorted(self.check_match_bet(match_bet, len(bet_matches)))
         if match_bet == 'no_matches':
             click.secho("There are no valid matches selected.", fg="red", bold=True)
         else:
@@ -175,13 +180,13 @@ class RequestHandler(object):
         return matches
 
     @staticmethod
-    def check_match_bet(match_bet):
-        matches = []
+    def check_match_bet(match_bet, max_match_id):
+        matches = set()
         for match_id in match_bet:
-            if int(match_id) <= 0:
+            if 0 <= int(match_id) >= max_match_id:
                 click.secho(f"The match with id {match_id} is an invalid match.", fg="red", bold=True)
             else:
-                matches.extend([match_id])
+                matches.add(match_id)
         if len(matches) == 0:
             return 'no_matches'
         return matches
