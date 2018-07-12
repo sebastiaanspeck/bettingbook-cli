@@ -161,6 +161,8 @@ def check_options_standings(league, history):
               help="Displays goal-scorers under the score.")
 @click.option('--odds', '-O', is_flag=True, default=False, show_default=True,
               help="Displays the odds above the score.")
+@click.option('--refresh', '-R', is_flag=True, default=False, show_default=True,
+              help="Refresh the data every minute.")
 @click.option('--bet', '-B', is_flag=True, default=False, show_default=True,
               help="Place a bet.")
 @click.option('--profile', '-P', is_flag=True,
@@ -171,7 +173,7 @@ def check_options_standings(league, history):
               help="Show your open bets")
 @click.option('--closed-bets', '-CB', is_flag=True,
               help="Show your closed bets")
-def main(apikey, timezone, live, today, matches, standings, league, days, history, details, odds, bet, profile,
+def main(apikey, timezone, live, today, matches, standings, league, days, history, details, odds, refresh, bet, profile,
          all_bets, open_bets, closed_bets):
     params = get_params(apikey, timezone)
     profile_data = get_profile_data()
@@ -182,7 +184,7 @@ def main(apikey, timezone, live, today, matches, standings, league, days, histor
         betting = Betting(params, LEAGUES_DATA, writer)
 
         Parameters = namedtuple("parameters", "url, msg, league_name, days, "
-                                "show_history, show_details, show_odds, place_bet, type_sort")
+                                "show_history, show_details, show_odds, refresh, place_bet, type_sort")
 
         if live or today or matches:
             check_options(history, bet, live, today)
@@ -192,17 +194,17 @@ def main(apikey, timezone, live, today, matches, standings, league, days, histor
                 parameters = Parameters('livescores/now',
                                         ["No live action currently",
                                          "There was problem getting live scores, check your parameters"],
-                                        league, days, history, details, odds, bet, "live")
+                                        league, days, history, details, odds, refresh, bet, "live")
             elif today:
                 parameters = Parameters('livescores',
                                         ["No matches today",
                                          "There was problem getting todays scores, check your parameters"],
-                                        league, days, history, details, odds, bet, "today")
+                                        league, days, history, details, odds, refresh, bet, "today")
             else:
                 parameters = Parameters('fixtures/between/',
                                         [[f"No matches in the past {str(days)} days."],
                                          [f"No matches in the coming {str(days)} days."]],
-                                        league, days, history, details, odds, bet, "matches")
+                                        league, days, history, details, odds, refresh, bet, "matches")
             rh.get_matches(parameters)
             return
 
