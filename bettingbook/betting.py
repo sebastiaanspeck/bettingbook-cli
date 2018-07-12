@@ -183,11 +183,12 @@ class Betting(object):
 
     @staticmethod
     def get_confirmation(prediction, stake, potential_wins):
-        confirmation = click.prompt(f"Are you sure to bet that team {prediction} will win with a stake of {stake}? "
+        msg = convert.convert_prediction_to_msg(prediction)
+        confirmation = click.prompt(f"Are you sure that the match will result in a {msg} with a stake of {stake}? "
                                     f"This can result in a potential win of {potential_wins}. (Y/N)")
         while confirmation.upper() not in ['Y', 'N']:
             click.secho("Oops... You didn't entered Y or N. Try again.", fg="red", bold=True)
-            confirmation = click.prompt(f"Are you sure to bet team {prediction} will win with a stake of {stake}? "
+            confirmation = click.prompt(f"{msg} with a stake of {stake}? "
                                         f"This can result in a potential win of {potential_wins}. (Y/N)")
         if confirmation.upper() == "Y":
             return True
@@ -242,7 +243,7 @@ class Betting(object):
                     convert.convert_time(daty[4]["time"]["starting_at"]["date_time"]), daty[5]]
             self.write_to_open_bets(data)
         else:
-            click.secho("Your bet is canceled")
+            click.secho("Your bet is canceled\n")
 
     def view_bets(self, type_sort):
         self.main()

@@ -37,6 +37,15 @@ def convert_time(time_str):
                                                                      '%Y-%m-%d'), '%d-%m-%Y')
 
 
+def convert_prediction_to_msg(prediction):
+    if prediction == '1':
+        return 'win for the home-team'
+    elif prediction.upper() == 'X':
+        return 'draw'
+    else:
+        return 'win for the away-team'
+
+
 def format_playername(name):
     try:
         player_name = name.split(' ', 1)
