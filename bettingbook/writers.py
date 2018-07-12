@@ -8,6 +8,7 @@ import convert
 from abc import ABCMeta, abstractmethod
 from itertools import groupby
 from collections import namedtuple
+from datetime import datetime
 
 
 def load_json(file):
@@ -140,9 +141,12 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
 
     def league_scores(self, total_data, parameters):
         """Prints the data in a pretty format"""
+        if parameters.refresh:
+            os.system('cls' if os.name == 'nt' else 'clear')
         self.score_id = 1
         self.bet_matches = []
         scores = sorted(total_data, key=lambda x: (x["league"]["data"]["country_id"], x['league_id']))
+        self.updatetime()
         for league, games in groupby(scores, key=lambda x: x['league_id']):
             league = convert.convert_leagueid_to_leaguename(league)
             games = sorted(games, key=lambda x: x["time"]["starting_at"]["date_time"])
@@ -161,7 +165,6 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                 self.league_header(league + ' - ' + league_prefix[0])
             games = self.group_games(games, games_copy)
             self.print_matches(games, parameters)
-
         return self.bet_matches
 
     def group_games(self, games, games_copy):
@@ -207,6 +210,10 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
         if parameters.show_details:
             self.print_details(match)
         click.echo()
+
+    def updatetime(self):
+        """Prints the time at which the data was updated"""
+        click.secho(f"Last update: {datetime.now():%d-%m-%Y %H:%M:%S}", fg=self.colors.MISC)
 
     def league_header(self, league):
         """Prints the league header"""
