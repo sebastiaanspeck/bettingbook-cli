@@ -249,7 +249,7 @@ class Betting(object):
 
     def view_bets(self, type_sort):
         self.main()
-        bets = sorted(self.get_bets(f'{type_sort}_bets.csv'), key=lambda x: (x[7]))
+        bets = sorted(self.get_bets(f'betting_files/{type_sort}_bets.csv'), key=lambda x: (x[7]))
         if len(bets) == 0:
             click.secho(f"\nNo {type_sort} bets found.", fg="red", bold=True)
         else:
