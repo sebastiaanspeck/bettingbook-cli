@@ -193,8 +193,12 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                 self.print_match(match, parameters, print_matchday, matchday)
 
     def print_match(self, match, parameters, print_matchday, matchday):
-        if parameters.type_sort == "today" and match["time"]["status"] in ["LIVE", "HT", "ET",
-                                                                           "PEN_LIVE", "AET", "BREAK"]:
+        if parameters.type_sort == "today" and match["time"]["status"] in ["LIVE", "HT", "ET", "PEN_LIVE", "AET",
+                                                                           "BREAK", "AU"]:
+            return
+        if parameters.type_sort == "live" and match["time"]["status"] in ["NS", "FT", "FT_PEN", "CANCL", "POSTP",
+                                                                          "INT", "ABAN", "SUSP", "AWARDED", "DELAYED",
+                                                                          "TBA", "WO", "AU"]:
             return
         if matchday == "Regular Season" and print_matchday != match["round"]["data"]["name"]:
             print_matchday = match["round"]["data"]["name"]
