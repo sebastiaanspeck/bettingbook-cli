@@ -283,13 +283,19 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
 
     def print_datetime_status_matches(self, match):
         if match["time"]["status"] in ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK"]:
+            if match["time"]["status"] == "HT":
+                click.secho(f'   HT',
+                            fg=self.colors.TIME)
             # print 0' instead of None'
-            if match["time"]["minute"] is None:
+            elif match["time"]["minute"] is None and match["time"]["added_time"] == 0:
                 click.secho(f'   0\'',
                             fg=self.colors.TIME)
             # print minute
-            else:
+            elif match["time"]["added_time"] == 0:
                 click.secho(f'   {match["time"]["minute"]}\'',
+                            fg=self.colors.TIME)
+            elif match["time"]["added_time"] != 0:
+                click.secho(f'   {match["time"]["minute"]}\'+{match["time"]["added_time"]}',
                             fg=self.colors.TIME)
         elif match["time"]["status"] in ["FT", "FT_PEN", "TBA", "NS", "CANCL", "POSTP", "INT", "ABAN",
                                          "SUSP", "AWARDED", "DELAYED", "WO", "AU"]:
