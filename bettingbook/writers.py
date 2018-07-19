@@ -155,7 +155,7 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
             games_copy = copy.deepcopy(games)
             league_prefix = list(set([x['league']['data']['name'] for x in games_copy]))
             match_status = list(set([x['time']['status'] for x in games_copy]))
-            if parameters.type_sort == "live" and match_status != ["LIVE"]:
+            if parameters.type_sort == "live" and "LIVE" not in match_status:
                 click.secho(parameters.msg[0], fg="red", bold=True)
                 continue
             if parameters.type_sort == "today" and match_status == ["LIVE"]:
