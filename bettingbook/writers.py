@@ -273,7 +273,6 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                 for odds in bookmaker["bookmaker"]["data"]:
                     for odd in odds["odds"]["data"]:
                         odds_dict = self.fill_odds(odd, odds_dict)
-
         self.odds(self.parse_odd(odds_dict, match["scores"]["localteam_score"],
                                  match["scores"]["visitorteam_score"], match["time"]["status"]))
 
