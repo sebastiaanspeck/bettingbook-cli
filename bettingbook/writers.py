@@ -254,6 +254,7 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
             self.score_id += 1
         else:
             x = 25
+
         click.secho(f"{result.homeTeam:{x}} {result.goalsHomeTeam:>2}",
                     fg=home_color, nl=False)
         click.secho("  vs ", nl=False)
@@ -359,13 +360,13 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
     @staticmethod
     def calculate_winning_team(home_goals, away_goals, game_status):
         # hometeam won
-        if home_goals > away_goals:
+        if home_goals > away_goals and game_status != "TBA":
             return 0
         # awayteam won
-        elif home_goals < away_goals:
+        elif home_goals < away_goals and game_status != "TBA":
             return 2
         # draw
-        elif home_goals == away_goals and game_status != 'NS':
+        elif home_goals == away_goals and game_status not in ['NS', 'TBA']:
             return 1
         # no winner yet
         else:
@@ -435,7 +436,7 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
     def parse_result(self, data):
         """Parses the results and returns a Result namedtuple"""
         def match_status(status, score):
-            return "-" if status == "NS" else score
+            return "-" if status in ["NS", "TBA"] else score
         result = self.Result(
             data["localTeam"]["data"]["name"],
             match_status(data["time"]["status"], data["scores"]["localteam_score"]),
