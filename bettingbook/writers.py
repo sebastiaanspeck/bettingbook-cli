@@ -289,10 +289,10 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                 click.secho(f'   0\'',
                             fg=self.colors.TIME)
             # print minute
-            elif match["time"]["added_time"] == 0:
+            elif match["time"]["added_time"] in [0, None]:
                 click.secho(f'   {match["time"]["minute"]}\'',
                             fg=self.colors.TIME)
-            elif match["time"]["added_time"] != 0:
+            elif match["time"]["added_time"] not in [0, None]:
                 click.secho(f'   {match["time"]["minute"]}\'+{match["time"]["added_time"]}',
                             fg=self.colors.TIME)
         elif match["time"]["status"] in ["FT", "FT_PEN", "TBA", "NS", "CANCL", "POSTP", "INT", "ABAN",
