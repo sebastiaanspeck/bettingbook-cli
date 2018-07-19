@@ -5,7 +5,7 @@ import copy
 
 import convert
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 from itertools import groupby
 from collections import namedtuple
 from datetime import datetime
@@ -31,14 +31,6 @@ class BaseWriter(object):
 
     def __init__(self, output_file):
         self.output_filename = output_file
-
-    @abstractmethod
-    def standings(self, league_table, league, details):
-        pass
-
-    @abstractmethod
-    def league_scores(self, total_data, parameters):
-        pass
 
 
 class Stdout(BaseWriter):
