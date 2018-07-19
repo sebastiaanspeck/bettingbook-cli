@@ -79,7 +79,6 @@ class RequestHandler(object):
 
     def set_params(self):
         league_ids = self.get_league_ids()
-
         self.params['leagues'] = ','.join(val for val in league_ids)
         self.params['include'] = 'localTeam,visitorTeam,league,round,events,stage,odds'
 
