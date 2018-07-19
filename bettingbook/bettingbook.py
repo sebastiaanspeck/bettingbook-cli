@@ -35,6 +35,9 @@ def create_config_file(apikey, name, timezone, filename):
     config.set('profile', 'name', name)
     config.set('profile', 'balance', '100.00')
     config.set('profile', 'timezone', timezone)
+    config.add_section('files')
+    config.set('betting_files', 'open_bets', 'betting_files/open_bets')
+    config.set('betting_files', 'closed_bets', 'betting_files/closed_bets')
     with open(filename, 'w') as cfgfile:
         config.write(cfgfile)
 
@@ -43,11 +46,11 @@ def get_missing_data_config():
     keys = []
     missing_options = []
     sections = [section for section in config.sections()]
-    missing_sections = [x for x in ['auth', 'profile'] if x not in sections]
+    missing_sections = [x for x in ['auth', 'profile', 'betting_files'] if x not in sections]
     for section in config.sections():
         keys.extend([key for (key, val) in config.items(section)])
         missing_options.extend([(key, val) for (key, val) in config.items(section) if val == ""])
-    missing_keys = [x for x in ['api_key', 'name', 'balance', 'timezone'] if x not in keys]
+    missing_keys = [x for x in ['api_key', 'name', 'balance', 'timezone', 'open_bets', 'closed_bets'] if x not in keys]
     return missing_sections, missing_keys, missing_options
 
 
@@ -62,10 +65,13 @@ def check_config_file(filename):
             if "profile" in missing_sections:
                 config.add_section('profile')
             update_config_file("profile", missing_key, value, filename)
-        elif missing_key:
+        elif missing_key == "api_key":
             if "auth" in missing_sections:
                 config.add_section('auth')
             update_config_file("auth", missing_key, value, filename)
+        elif missing_key in ["open_bets", "closed_bets"]:
+            if "betting_files" in missing_sections:
+                config.add_section('betting_files')
         missing_sections, missing_keys, missing_options = get_missing_data_config()
     for missing_option in missing_options:
         if missing_option[0] != "balance":
@@ -74,8 +80,10 @@ def check_config_file(filename):
             value = "100"
         if missing_option[0] in ["name", "balance", "timezone"]:
             update_config_file("profile", missing_option[0], value, filename)
-        elif missing_option[0]:
+        if missing_option[0] == "api_key":
             update_config_file("auth", missing_option[0], value, filename)
+        if missing_option[0] in ["open_bets", "closed_bets"]:
+            update_config_file("betting_files", missing_option[0], value, filename)
 
 
 def update_config_file(section, key, value, filename):
@@ -95,13 +103,6 @@ def load_config_file():
     check_config_file(filename)
 
 
-def get_profile_data():
-    profile_data = {}
-    for (key, val) in config.items('profile'):
-        profile_data[key] = val
-    return profile_data
-
-
 def get_params(apikey, timezone):
     params = {}
     if apikey:
@@ -113,6 +114,13 @@ def get_params(apikey, timezone):
     else:
         params['tz'] = config.get('profile', 'timezone')
     return params
+
+
+def get_data(section):
+    data = {}
+    for (key, val) in config.items(section):
+        data[key] = val
+    return data
 
 
 def check_options(history, bet, live, today):
@@ -176,12 +184,13 @@ def check_options_standings(league, history):
 def main(apikey, timezone, live, today, matches, standings, league, days, history, details, odds, refresh, bet, profile,
          all_bets, open_bets, closed_bets):
     params = get_params(apikey, timezone)
-    profile_data = get_profile_data()
+    profile_data = get_data('profile')
+    betting_files = get_data('betting_files')
 
     try:
         writer = get_writer()
-        rh = RequestHandler(params, LEAGUES_DATA, writer)
-        betting = Betting(params, LEAGUES_DATA, writer)
+        rh = RequestHandler(params, LEAGUES_DATA, writer, profile_data, betting_files)
+        betting = Betting(params, LEAGUES_DATA, writer, profile_data, betting_files)
 
         Parameters = namedtuple("parameters", "url, msg, league_name, days, "
                                 "show_history, show_details, show_odds, refresh, place_bet, type_sort")
