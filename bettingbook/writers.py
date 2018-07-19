@@ -88,7 +88,6 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                 goal_difference = team['total']['goal_difference']
                 position = team['position']
                 result = team['result']
-
                 if int(goal_difference) > 0:
                     goal_difference = goal_difference[1:]
 
@@ -259,7 +258,6 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
             self.score_id += 1
         else:
             x = 25
-
         click.secho(f"{result.homeTeam:{x}} {result.goalsHomeTeam:>2}",
                     fg=home_color, nl=False)
         click.secho("  vs ", nl=False)
@@ -346,7 +344,6 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
             home_color, draw_color, away_color = (self.colors.LOSE, self.colors.LOSE, self.colors.WIN)
         else:
             home_color, draw_color, away_color = (self.colors.ODDS, self.colors.ODDS, self.colors.ODDS)
-
         click.secho("{}".format(odds.oddHometeam.rjust(28)), fg=home_color, nl=False)
         click.secho(" {} ".format(odds.oddDraw), fg=draw_color, nl=False)
         click.secho("{}".format(odds.oddAwayteam), fg=away_color, nl=True)
@@ -440,7 +437,6 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
         """Parses the results and returns a Result namedtuple"""
         def match_status(status, score):
             return "-" if status == "NS" else score
-
         result = self.Result(
             data["localTeam"]["data"]["name"],
             match_status(data["time"]["status"], data["scores"]["localteam_score"]),
@@ -451,7 +447,6 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
 
     def parse_odd(self, odds, home_goals, away_goals, status):
         """Parses the odds and returns a Odds namedtuple"""
-
         def winning_odd():
             winning_team = self.calculate_winning_team(home_goals, away_goals, status)
             return winning_team
@@ -461,21 +456,18 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
                 return max(odd_in)
             except ValueError:
                 return '0.00'
-
         for label, values in odds.items():
             odd = highest_odd(values)
             if len(str(odd)) <= 3:
                 odd = "{0:.2f}".format(float(odd))
             if len(str(odd)) > 4:
                 odd = "{0:.1f}".format(float(odd))
-
             if label == "1":
                 home_odd = odd
             elif label == "2":
                 away_odd = odd
             else:
                 draw_odd = odd
-
             try:
                 odds = self.Odds(
                     str(home_odd), str(draw_odd),  str(away_odd),
