@@ -385,8 +385,11 @@ Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata
         for goal in events[team]:
             number_of_goals = len(events[team][goal][0]["minute"])
             if number_of_goals == 1:
-                str_scorer = ''.join([goal, ' (', str(events[team][goal][0]['minute'][0]),
-                                      str(events[team][goal][0]['type'][0]), ')'])
+                try:
+                    str_scorer = ''.join([goal, ' (', str(events[team][goal][0]['minute'][0]),
+                                          str(events[team][goal][0]['type'][0]), ')'])
+                except TypeError:
+                    continue
             else:
                 minutes = []
                 for key, val in enumerate(events[team][goal][0]["minute"]):
