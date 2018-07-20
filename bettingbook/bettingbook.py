@@ -166,15 +166,15 @@ def check_options_standings(league, history):
               help=("The number of days in the future for which you "
                     "want to see the scores, or the number of days "
                     "in the past when used with --history"))
-@click.option('--history', '-H', is_flag=True, default=False, show_default=True,
+@click.option('--history', '-H', is_flag=True, default=False,
               help="Displays past games when used with --time command.")
-@click.option('--details', '-D', is_flag=True, default=False, show_default=True,
+@click.option('--details', '-D', is_flag=True, default=False,
               help="Displays goal-scorers under the score.")
-@click.option('--odds', '-O', is_flag=True, default=False, show_default=True,
+@click.option('--odds', '-O', is_flag=True, default=False,
               help="Displays the odds above the score.")
-@click.option('--refresh', '-R', is_flag=True, default=False, show_default=True,
+@click.option('--refresh', '-R', is_flag=True, default=False,
               help="Refresh the data every minute.")
-@click.option('--bet', '-B', is_flag=True, default=False, show_default=True,
+@click.option('--bet', '-B', is_flag=True, default=False,
               help="Place a bet.")
 @click.option('--profile', '-P', is_flag=True,
               help="Show your profile (name, balance, timezone)")
