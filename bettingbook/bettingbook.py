@@ -123,13 +123,16 @@ def get_data(section):
     return data
 
 
-def check_options(history, bet, live, today):
+def check_options(history, bet, live, today, refresh, matches):
     if history and live or history and today:
         raise IncorrectParametersException('--history and --days is not supported for --live/--today. '
                                            'Use --matches to use these parameters')
     if bet and live:
         raise IncorrectParametersException('--bet is not supported for --live. '
                                            'Use --matches or --today to use this parameters')
+    if matches and refresh:
+        raise IncorrectParametersException('--refresh is not supported for --matches. '
+                                           'Use --live or --today to use this parameters')
 
 
 def check_options_standings(league, history):
@@ -196,7 +199,7 @@ def main(apikey, timezone, live, today, matches, standings, league, days, histor
                                 "show_history, show_details, show_odds, refresh, place_bet, type_sort")
 
         if live or today or matches:
-            check_options(history, bet, live, today)
+            check_options(history, bet, live, today, refresh, matches)
             if bet:
                 odds = True
             if live:
