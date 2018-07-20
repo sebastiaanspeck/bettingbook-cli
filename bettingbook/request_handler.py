@@ -4,6 +4,7 @@ import datetime
 import json
 import sched
 import time
+import pyperclip
 
 import exceptions
 from betting import Betting
@@ -25,6 +26,11 @@ class RequestHandler(object):
     def _get(self, url):
         """Handles soccer.sportsmonks requests"""
         req = requests.get(RequestHandler.BASE_URL + url, params=self.params)
+
+        # copy the url to view the raw JSON-data online
+        pyperclip.copy(f"{RequestHandler.BASE_URL + url}?api_token={self.params['api_token']}&tz={self.params['tz']}"
+                       f"&leagues={self.params['leagues']}&include={self.params['include']}")
+        pyperclip.paste()
 
         if req.status_code == requests.codes.ok:
             data = self.get_data(req, url)
