@@ -173,7 +173,7 @@ class Betting(object):
 
     def get_stake(self):
         stake = convert.convert_float_to_curreny(click.prompt(f"What is your stake? (max. "
-                                                              f"{self.profile_data['balance']})"))
+                                                              f"{self.profile_data['balance']})", type=float))
         balance = convert.convert_float_to_curreny(self.profile_data['balance'])
         while stake > balance or stake <= 0:
             click.secho("Oops... You entered a stake higher than your balance or an invalid stake. Try again.",
