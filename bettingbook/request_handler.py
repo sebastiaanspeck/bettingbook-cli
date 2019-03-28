@@ -190,10 +190,14 @@ class RequestHandler(object):
     def check_match_bet(match_bet, max_match_id):
         matches = set()
         for match_id in match_bet:
-            if 0 <= int(match_id) >= max_match_id:
+            try:
+                if 0 <= int(match_id) > max_match_id:
+                    click.secho(f"The match with id {match_id} is an invalid match.", fg="red", bold=True)
+                else:
+                    matches.add(match_id)
+            except ValueError:
                 click.secho(f"The match with id {match_id} is an invalid match.", fg="red", bold=True)
-            else:
-                matches.add(match_id)
+                continue
         if len(matches) == 0:
             return 'no_matches'
         return matches
