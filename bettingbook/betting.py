@@ -217,7 +217,7 @@ class Betting(object):
         config.set('profile', 'balance', str(balance))
         with open('config.ini', 'w') as cfgfile:
             config.write(cfgfile)
-        click.secho(f"Updated balance: {self.profile_data['balance']}")
+        click.secho(f"Updated balance: {balance}")
 
     def place_bet(self, matches):
         self.main()
