@@ -36,8 +36,8 @@ def create_config_file(apikey, name, timezone, filename):
     config.set('profile', 'balance', '100.00')
     config.set('profile', 'timezone', timezone)
     config.add_section('betting_files')
-    config.set('betting_files', 'open_bets', 'betting_files/open_bets')
-    config.set('betting_files', 'closed_bets', 'betting_files/closed_bets')
+    config.set('betting_files', 'open_bets', 'betting_files/open_bets.csv')
+    config.set('betting_files', 'closed_bets', 'betting_files/closed_bets.csv')
     with open(filename, 'w') as cfgfile:
         config.write(cfgfile)
 
