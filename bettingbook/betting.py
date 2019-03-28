@@ -90,7 +90,7 @@ class Betting(object):
         reader = self.get_bets(self.betting_files['open_bets'])
         for i, row in enumerate(reader):
             match_data = rh.get_match_bet(row[0])[0]
-            if match_data['time']['status'] in ['FT']:
+            if match_data['time']['status'] in ['FT', 'AET', 'FT_PEN']:
                 self.calculate_winning_odd(match_data, i, row, reader)
 
     def calculate_winning_odd(self, match_data, i, row, reader):
