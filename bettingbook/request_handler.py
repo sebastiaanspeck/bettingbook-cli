@@ -170,7 +170,7 @@ class RequestHandler(object):
             for match_id in match_bet:
                 try:
                     matches.extend([str(bet_matches[int(match_id)-1])])
-                except IndexError:
+                except (IndexError, ValueError):
                     pass
             matches = ','.join(val for val in matches)
             match_data = self.get_match_bet(matches)
