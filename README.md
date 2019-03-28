@@ -16,9 +16,11 @@ $ cd bettingbook-cli/bettingbook
 ```
 
 #### Note:
-Currently only tested on Windows. Might work on other platforms, but this is not yet tested.
+Currently only tested on Windows and MacOS. Might work on other platforms, but this is not yet tested.
 
 To get colorized terminal output on Windows, make sure to install [ansicon](https://github.com/adoxa/ansicon/releases/latest) and [colorama](https://pypi.python.org/pypi/colorama).
+
+You need click, pyperclip and requests. You can install these using pip.
 
 Usage
 ====
