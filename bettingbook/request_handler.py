@@ -161,7 +161,7 @@ class RequestHandler(object):
                 click.secho(f"No standings availble for {league_name}.", fg="red", bold=True)
 
     def place_bet(self, bet_matches):
-        match_bet = click.prompt("Give the numbers of the matches on which ou want to bet (comma-separated)").split(',')
+        match_bet = click.prompt("Give the numbers of the matches on which you want to bet (comma-separated)").split(',')
         match_bet = sorted(self.check_match_bet(match_bet, len(bet_matches)))
         if match_bet == 'no_matches':
             click.secho("There are no valid matches selected.", fg="red", bold=True)
