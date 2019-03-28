@@ -183,6 +183,7 @@ class RequestHandler(object):
     def get_match_bet(self, matches):
         url = f'fixtures/multi/{matches}'
         self.params['include'] = 'localTeam,visitorTeam,league,round,events,stage,odds'
+        self.params['leagues'] = ''
         matches = self._get(url)
         return matches
 
