@@ -8,20 +8,19 @@ import pyperclip
 
 import exceptions
 from betting import Betting
-
+from config_handler import ConfigHandler
 
 class RequestHandler(object):
     BASE_URL = 'https://soccer.sportmonks.com/api/v2.0/'
 
-    def __init__(self, params, league_data, writer, profile_data, betting_files):
+    def __init__(self, params, league_data, writer):
         self.params = params
         self.league_data = league_data
         self.writer = writer
-        self.profile_data = profile_data
-        self.betting_files = betting_files
 
-    def show_profile(self, profiledata):
-        self.writer.show_profile(profiledata)
+    def show_profile(self):
+        ch = ConfigHandler()
+        self.writer.show_profile(ch.get_data('profile'))
 
     def _get(self, url):
         """Handles soccer.sportsmonks requests"""
@@ -220,5 +219,5 @@ class RequestHandler(object):
         return matches
 
     def place_bet_betting(self, matches):
-        bet = Betting(self.params, self.league_data, self.writer, self.profile_data, self.betting_files)
+        bet = Betting(self.params, self.league_data, self.writer)
         bet.place_bet(matches)
