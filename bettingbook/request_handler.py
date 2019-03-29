@@ -95,7 +95,7 @@ class RequestHandler(object):
             start = datetime.datetime.strftime(now - datetime.timedelta(days=days), '%Y-%m-%d')
             end = datetime.datetime.strftime(now - datetime.timedelta(days=1), '%Y-%m-%d')
         else:
-            start = datetime.datetime.strftime(now + datetime.timedelta(days=1), '%Y-%m-%d')
+            start = datetime.datetime.strftime(now, '%Y-%m-%d')
             end = datetime.datetime.strftime(now + datetime.timedelta(days=days), '%Y-%m-%d')
         return start, end
 
