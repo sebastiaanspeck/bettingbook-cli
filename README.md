@@ -43,7 +43,7 @@ $ main.py --today
 ### Get scores for all leagues with a set time period
 
 ```bash
-$ main.py --matches --days=10 # get scores for all the seven leagues over the coming 10 days
+$ main.py --matches --days=10 # get scores for all leagues over the coming 10 days
 ```
 
 ### Get scores for a particular league
