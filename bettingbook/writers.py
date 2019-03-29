@@ -63,7 +63,8 @@ class Stdout(BaseWriter):
     def show_profile(profiledata):
         click.secho("""Welcome back %s
 Your balance: %s
-Your timezone: %s""" % (profiledata['name'], profiledata['balance'], profiledata['timezone']), fg="green", nl=False)
+Your timezone: %s
+""" % (profiledata['name'], profiledata['balance'], profiledata['timezone']), fg="green", nl=False)
 
     def standings(self, league_table, leagueid, show_details):
         """ Prints the league standings in a pretty way """
