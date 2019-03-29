@@ -154,6 +154,7 @@ Todo
 - [ ] Add more competitions (divisions under the first divisions) [Write out poll to determine which competitions specific]
 - [ ] Add option to get matches for a specific team
 - [ ] Add support to show cards
+- [ ] Update balance at runtime
 - [x] Add built-in watch feature so you can run once with --live and just leave the program running.
 - [x] Add option to view active/finished bets.
 - [x] Add odds to match overviews
