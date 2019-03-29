@@ -6,7 +6,6 @@ import datetime
 import convert
 import request_handler
 
-
 try:
     from configparser import ConfigParser
 except ImportError:
@@ -27,14 +26,21 @@ class Betting(object):
     def check_for_files(files):
         for file in files:
             filename = os.path.join(os.getcwd(), file)
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
             if not os.path.exists(filename):
-                with open(file, "w"):
-                    pass
+                open(filename, "w+")
 
     @staticmethod
     def load_config_file():
         filename = os.path.join(os.getcwd(), 'config.ini')
         config.read(filename)
+
+    @staticmethod
+    def get_data(section):
+        data = {}
+        for (key, val) in config.items(section):
+            data[key] = val
+        return data    
 
     @staticmethod
     def get_bets(filename):
@@ -172,14 +178,14 @@ class Betting(object):
         return prediction
 
     def get_stake(self):
+        balance = convert.convert_float_to_curreny(self.get_data('profile')['balance'])
         stake = convert.convert_float_to_curreny(click.prompt(f"What is your stake? (max. "
-                                                              f"{self.profile_data['balance']})", type=float))
-        balance = convert.convert_float_to_curreny(self.profile_data['balance'])
+                                                              f"{balance})", type=float))
         while stake > balance or stake <= 0:
             click.secho("Oops... You entered a stake higher than your balance or an invalid stake. Try again.",
                         fg="red", bold=True)
             stake = convert.convert_float_to_curreny(click.prompt(f"What is your stake? (max. "
-                                                                  f"{self.profile_data['balance']})"))
+                                                                  f"{balance})"))
         return stake
 
     @staticmethod
@@ -209,7 +215,7 @@ class Betting(object):
         return potential_wins, odd
 
     def update_balance(self, stake, operation):
-        balance = convert.convert_float_to_curreny(self.profile_data['balance'])
+        balance = convert.convert_float_to_curreny(self.get_data('profile')['balance'])
         if operation == 'loss':
             balance = balance - stake
         elif operation == 'win':
