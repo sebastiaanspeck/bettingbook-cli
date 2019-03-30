@@ -71,25 +71,27 @@ Your timezone: %s
         for leagues in league_table:
             self.standings_header(convert.convert_leagueid_to_leaguename(leagueid), show_details, leagues['name'])
             number_of_teams = len(leagues['standings']['data'])
-            positions = []
+            positions = set()
             if show_details:
                 click.secho(f"{'POS':6}  {'CLUB':30}    {'PLAYED':10}    {'WON':10}    {'DRAW':10}    {'LOST':10}    "
-                            f"{'GOALS':10}    {'GOAL DIFF':10}    {'POINTS':10}")
+                            f"{'GOALS':10}    {'GOAL DIFF':10}    {'POINTS':10}    {'RECENT FORM':10}")
             else:
                 click.secho(f"{'POS':6}  {'CLUB':30}    {'PLAYED':10}    {'GOAL DIFF':10}    {'POINTS':10}")
             for team in leagues['standings']['data']:
                 goal_difference = team['total']['goal_difference']
                 position = team['position']
                 result = team['result']
-                if int(goal_difference) > 0:
-                    goal_difference = goal_difference[1:]
+                recent_form = " ".join(team['recent_form'])
+                goals = str(team['overall']['goals_scored']) + ":" + str(team['overall']['goals_against'])
+
+                while len(goals) < 4:
+                    goals = goals + " "
 
                 if show_details:
                     team_str = (f"{position:<7} {team['team_name']:<33} {str(team['overall']['games_played']):<14}"
                                 f"{str(team['overall']['won']):<13} {str(team['overall']['draw']):<13} "
-                                f"{str(team['overall']['lost']):<13} {str(team['overall']['goals_scored'])}:"
-                                f"{str(team['overall']['goals_against']):<10} "
-                                f"{goal_difference:<13} {team['total']['points']}")
+                                f"{str(team['overall']['lost']):<13} {goals:<13} "
+                                f"{goal_difference:<13} {team['total']['points']:<13} {recent_form}")
                 else:
                     team_str = (f"{position:<7} {team['team_name']:<33} {str(team['overall']['games_played']):<14}"
                                 f"{goal_difference:<13} {team['total']['points']}")
@@ -99,29 +101,26 @@ Your timezone: %s
             self.print_colors(positions)
 
     def color_results(self, result, team_str, positions):
-        if 'Champions League' in result or result == "Promotion":
-            if result == "Promotion" and not(self.alreadyin('promotion', positions)):
-                positions.extend([['promotion', self.colors.CL_POSITION]])
-            elif "Champions League" in result and not(self.alreadyin('CL (play-offs)', positions)):
-                positions.extend([['CL (play-offs)', self.colors.CL_POSITION]])
+        if result is None:
+            click.secho(team_str, fg=self.colors.POSITION)
+        elif 'Champions League' in result or result == "Promotion":
+            if result == "Promotion":
+                positions.add(('promotion', self.colors.CL_POSITION))
+            elif "Champions League" in result:
+                positions.add(('CL (play-offs)', self.colors.CL_POSITION))
             click.secho(team_str, bold=True, fg=self.colors.CL_POSITION)
         elif 'Europa League' in result or result == "Promotion Play-off":
-            if result == "Promotion Play-off" and not(self.alreadyin('promotion (play-offs', positions)):
-                positions.extend([['promotion (play-offs)', self.colors.EL_POSITION]])
-            elif "Europa League" in result and not(self.alreadyin('EL (play-offs)', positions)):
-                positions.extend([['EL (play-offs)', self.colors.EL_POSITION]])
+            if result == "Promotion Play-off":
+                positions.add(('promotion (play-offs)', self.colors.EL_POSITION))
+            elif "Europa League" in result:
+                positions.add(('EL (play-offs)', self.colors.EL_POSITION))
             click.secho(team_str, fg=self.colors.EL_POSITION)
         elif 'Relegation' in result:
-            if not(self.alreadyin('relegation (play-offs)', positions)):
-                positions.extend([['relegation (play-offs)', self.colors.RL_POSITION]])
+            positions.add(('relegation (play-offs)', self.colors.RL_POSITION))
             click.secho(team_str, fg=self.colors.RL_POSITION)
         else:
             click.secho(team_str, fg=self.colors.POSITION)
         return positions
-
-    @staticmethod
-    def alreadyin(test, listy):
-        return bool([x for x in listy if test == x[0]])
 
     @staticmethod
     def print_colors(positions):
@@ -223,7 +222,7 @@ Your timezone: %s
         """Prints the league header"""
         league_name = f" {league} - {prefix} "
         if details:
-            click.secho(f"{league_name:#^132}", fg=self.colors.MISC)
+            click.secho(f"{league_name:#^151}", fg=self.colors.MISC)
         else:
             click.secho(f"{league_name:#^76}", fg=self.colors.MISC)
         click.echo()

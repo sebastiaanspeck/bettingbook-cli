@@ -27,8 +27,12 @@ class RequestHandler(object):
         req = requests.get(RequestHandler.BASE_URL + url, params=self.params)
 
         # copy the url to view the raw JSON-data online
-        pyperclip.copy(f"{RequestHandler.BASE_URL + url}?api_token={self.params['api_token']}&tz={self.params['tz']}"
-                       f"&leagues={self.params['leagues']}&include={self.params['include']}")
+        py_url = RequestHandler.BASE_URL + url + "?"
+        for k,v in self.params.items():
+            py_url = py_url + k + "=" + v + "&"
+        py_url = py_url[:-1]
+        
+        pyperclip.copy(py_url)
         pyperclip.paste()
 
         if req.status_code == requests.codes.ok:
@@ -39,7 +43,7 @@ class RequestHandler(object):
             raise exceptions.APIErrorException('Invalid request. Check parameters.')
 
         if req.status_code == requests.codes.forbidden:
-            raise exceptions.APIErrorException('This resource is restricted')
+            raise exceptions.APIErrorException('The data you requested is not accessible from your plan.')
 
         if req.status_code == requests.codes.not_found:
             raise exceptions.APIErrorException('This resource does not exist. Check parameters')
@@ -110,13 +114,13 @@ class RequestHandler(object):
                 league_id = self.get_league_abbrevation(parameters.league_name)
                 self.params['leagues'] = ','.join(str(val) for val in league_id)
                 self.get_match_data(parameters, start, end)
-            except exceptions.APIErrorException:
-                click.secho("No data for the given league.", fg="red", bold=True)
+            except exceptions.APIErrorException as e:
+                click.secho(str(e), fg="red", bold=True)
         else:
             try:
                 self.get_match_data(parameters, start, end)
-            except exceptions.APIErrorException:
-                click.secho("No data available.", fg="red", bold=True)
+            except exceptions.APIErrorException as e:
+                click.secho(str(e), fg="red", bold=True)
 
     def get_match_data(self, parameters, start, end):
         s = sched.scheduler(time.time, time.sleep)
@@ -150,15 +154,11 @@ class RequestHandler(object):
                 url = f'standings/season/{current_season_id}'
                 standings_data = self._get(url)
                 if len(standings_data) == 0:
-                    click.secho(f"\nLOG: No standings availble for {league_name} with id {league_id}.\n",
-                                fg="red", bold=True)
                     continue
                 self.writer.standings(standings_data, league_id, show_details)
-            except exceptions.APIErrorException:
-                # Click handles incorrect League codes so this will only come up
-                # if that league does not have standings available. ie. Champions League
-                click.secho(f"No standings availble for {league_name}.", fg="red", bold=True)
-
+            except exceptions.APIErrorException as e:
+                click.secho(str(e), fg="red", bold=True)
+                
     def place_bet(self, bet_matches):
         match_bet = click.prompt("Give the numbers of the matches on which you want to bet (comma-separated)").split(',')
         match_bet = sorted(self.check_match_bet(match_bet, len(bet_matches)))
@@ -182,7 +182,6 @@ class RequestHandler(object):
     def get_match_bet(self, matches):
         url = f'fixtures/multi/{matches}'
         self.params['include'] = 'localTeam,visitorTeam,league,round,events,stage,odds'
-        self.params['leagues'] = ''
         matches = self._get(url)
         return matches
 

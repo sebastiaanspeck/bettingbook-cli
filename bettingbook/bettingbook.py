@@ -102,8 +102,9 @@ def main(apikey, timezone, live, today, matches, standings, league, days, histor
 
     try:
         writer = get_writer()
+        ch = ConfigHandler()
         rh = RequestHandler(params, LEAGUES_DATA, writer)
-        betting = Betting(params, LEAGUES_DATA, writer)
+        betting = Betting(params, LEAGUES_DATA, writer, rh, ch)
 
         Parameters = namedtuple("parameters", "url, msg, league_name, days, "
                                 "show_history, show_details, show_odds, refresh, place_bet, type_sort")

@@ -8,20 +8,38 @@ except ImportError:
 config = ConfigParser()
 
 class ConfigHandler(object):
+    FILENAME = os.path.join(os.getcwd(), 'config.ini')
+    
     def __init__(self):
         pass
 
-    @staticmethod
+    def load_config_file(self):
+        filename = ConfigHandler.FILENAME
+        if not os.path.exists(filename):
+            apikey = str(input("Give the API-key: "))
+            name = str(input("Give your name: "))
+            timezone = str(input("Give your timezone (e.a. Europe/Amsterdam): "))
+            self.create_config_file(apikey, name, timezone, filename)
+        config.read(filename)
+        self.check_config_file(filename)
+
     def get(self, section, value):
+        self.load_config_file()
         return config.get(section, value)
 
-    @staticmethod
-    def get_data(section):
+    def get_data(self, section):
         self.load_config_file()
         data = {}
         for (key, val) in config.items(section):
             data[key] = val
         return data
+    
+    def update_config_file(self, section, key, value):
+        self.load_config_file()
+        filename = ConfigHandler.FILENAME
+        config.set(section, key, value)
+        with open(filename, 'w') as cfgfile:
+            config.write(cfgfile)
     
     @staticmethod
     def create_config_file(apikey, name, timezone, filename):
@@ -37,8 +55,8 @@ class ConfigHandler(object):
         with open(filename, 'w') as cfgfile:
             config.write(cfgfile)
 
-
-    def get_missing_data_config(self):
+    @staticmethod
+    def get_missing_data_config():
         keys = []
         missing_options = []
         sections = [section for section in config.sections()]
@@ -80,20 +98,3 @@ class ConfigHandler(object):
                 self.update_config_file("auth", missing_option[0], value, filename)
             if missing_option[0] in ["open_bets", "closed_bets"]:
                 self.update_config_file("betting_files", missing_option[0], value, filename)
-
-
-    def update_config_file(section, key, value, filename):
-        config.set(section, key, value)
-        with open(filename, 'w') as cfgfile:
-            config.write(cfgfile)
-
-
-    def load_config_file(self):
-        filename = os.path.join(os.getcwd(), 'config.ini')
-        if not os.path.exists(filename):
-            apikey = str(input("Give the API-key: "))
-            name = str(input("Give your name: "))
-            timezone = str(input("Give your timezone (e.a. Europe/Amsterdam): "))
-            self.create_config_file(apikey, name, timezone, filename)
-        config.read(filename)
-        self.check_config_file(filename)

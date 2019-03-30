@@ -4,8 +4,6 @@ import csv
 import datetime
 
 import convert
-import request_handler
-from config_handler import ConfigHandler
 
 try:
     from configparser import ConfigParser
@@ -16,10 +14,12 @@ config = ConfigParser()
 
 
 class Betting(object):
-    def __init__(self, params, league_data, writer):
+    def __init__(self, params, league_data, writer, request_handler, config_handler):
         self.params = params
         self.league_data = league_data
         self.writer = writer
+        self.request_handler = request_handler
+        self.config_handler = config_handler
 
     @staticmethod
     def check_for_files(files):
@@ -36,19 +36,17 @@ class Betting(object):
         return reader
 
     def write_to_bets_file(self, data, bet_type):
-        ch = ConfigHandler()
-        with open(ch.get_data('betting_files')[bet_type], 'a', newline='') as f:
+        with open(self.config_handler.get_data('betting_files')[bet_type], 'a', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(data)
-        self.remove_empty_lines_csv_file(ch.get_data('betting_files')[bet_type])
+        self.remove_empty_lines_csv_file(self.config_handler.get_data('betting_files')[bet_type])
 
     def update_open_bets_file(self, data):
-        ch = ConfigHandler()
-        with open(ch.get_data('betting_files')['open_bets'], 'w', newline='') as f:
+        with open(self.config_handler.get_data('betting_files')['open_bets'], 'w', newline='') as f:
             writer = csv.writer(f)
             for line in data:
                 writer.writerow(line)
-        self.remove_empty_lines_csv_file(ch.get_data('betting_files')['open_bets'])
+        self.remove_empty_lines_csv_file(self.config_handler.get_data('betting_files')['open_bets'])
 
     @staticmethod
     def remove_empty_lines_csv_file(file):
@@ -74,11 +72,9 @@ class Betting(object):
             click.secho(e)
 
     def check_open_bets(self):
-        rh = request_handler.RequestHandler(self.params, self.league_data, self.writer)
-        ch = ConfigHandler()
-        reader = self.get_bets(ch.get_data('betting_files')['open_bets'])
+        reader = self.get_bets(self.config_handler.get_data('betting_files')['open_bets'])
         for i, row in enumerate(reader):
-            match_data = rh.get_match_bet(row[0])[0]
+            match_data = self.request_handler.get_match_bet(row[0])[0]
             if match_data['time']['status'] in ['FT', 'AET', 'FT_PEN']:
                 self.calculate_winning_odd(match_data, i, row, reader)
 
@@ -98,7 +94,7 @@ class Betting(object):
             click.echo(f"Ah noo! You predicted {match_data['localTeam']['data']['name']} - "
                        f"{match_data['visitorTeam']['data']['name']} incorrect")
             row.extend((winning_team, "no"))
-        self.write_to_bets_file(row, 'closed')
+        self.write_to_bets_file(row, 'closed_bets')
         del reader[i][0:]
         self.update_open_bets_file(reader)
 
@@ -162,8 +158,7 @@ class Betting(object):
 
     @staticmethod
     def get_stake():
-        ch = ConfigHandler()
-        balance = convert.convert_float_to_curreny(ch.get_data('profile')['balance'])
+        balance = convert.convert_float_to_curreny(self.config_handler.get_data('profile')['balance'])
         stake = convert.convert_float_to_curreny(click.prompt(f"What is your stake? (max. "
                                                               f"{balance})", type=float))
         while stake > balance or stake <= 0:
@@ -192,13 +187,12 @@ class Betting(object):
         return potential_wins, odd
 
     def update_balance(self, stake, operation):
-        ch = ConfigHandler()
-        balance = convert.convert_float_to_curreny(ch.get_data('profile')['balance'])
+        balance = convert.convert_float_to_curreny(self.config_handler.get_data('profile')['balance'])
         if operation == 'loss':
             balance = balance - stake
         elif operation == 'win':
             balance = balance + stake
-        ch.update_config_file('profile', 'balance' str(balance))
+        self.config_handler.update_config_file('profile', 'balance', str(balance))
         click.secho(f"Updated balance: {balance}\n")
 
     def place_bet(self, matches):
@@ -225,14 +219,13 @@ class Betting(object):
             data = [daty[4]['id'], daty[0], daty[1], daty[2], daty[3],
                     daty[4]['localTeam']['data']['name'], daty[4]['visitorTeam']['data']['name'],
                     convert.convert_time(daty[4]["time"]["starting_at"]["date_time"]), daty[5]]
-            self.write_to_bets_file(data, 'open')
+            self.write_to_bets_file(data, 'open_bets')
         else:
             click.secho("Your bet is canceled\n")
 
     def view_bets(self, type_sort):
-        ch = ConfigHandler()
         self.main()
-        bets = sorted(self.get_bets(ch.get_data('betting_files')[f'{type_sort}_bets']), key=lambda x: (x[7]))
+        bets = sorted(self.get_bets(self.config_handler.get_data('betting_files')[f'{type_sort}_bets']), key=lambda x: (x[7]))
         if len(bets) == 0:
             click.secho(f"\nNo {type_sort} bets found.", fg="red", bold=True)
         else:
@@ -253,6 +246,5 @@ class Betting(object):
                 click.secho(bet_str)
 
     def main(self):
-        ch = ConfigHandler()
-        self.check_for_files(ch.get_data('betting_files').values())
+        self.check_for_files(self.config_handler.get_data('betting_files').values())
         self.check_open_bets()
