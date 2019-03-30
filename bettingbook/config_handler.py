@@ -7,6 +7,7 @@ except ImportError:
 
 config = ConfigParser()
 
+
 class ConfigHandler(object):
     FILENAME = os.path.join(os.getcwd(), 'config.ini')
     
@@ -14,14 +15,13 @@ class ConfigHandler(object):
         pass
 
     def load_config_file(self):
-        filename = ConfigHandler.FILENAME
-        if not os.path.exists(filename):
+        if not os.path.exists(ConfigHandler.FILENAME):
             apikey = str(input("Give the API-key: "))
             name = str(input("Give your name: "))
             timezone = str(input("Give your timezone (e.a. Europe/Amsterdam): "))
-            self.create_config_file(apikey, name, timezone, filename)
-        config.read(filename)
-        self.check_config_file(filename)
+            self.create_config_file(apikey, name, timezone)
+        config.read(ConfigHandler.FILENAME)
+        self.check_config_file()
 
     def get(self, section, value):
         self.load_config_file()
@@ -36,13 +36,12 @@ class ConfigHandler(object):
     
     def update_config_file(self, section, key, value):
         self.load_config_file()
-        filename = ConfigHandler.FILENAME
         config.set(section, key, value)
-        with open(filename, 'w') as cfgfile:
+        with open(ConfigHandler.FILENAME, 'w') as cfgfile:
             config.write(cfgfile)
     
     @staticmethod
-    def create_config_file(apikey, name, timezone, filename):
+    def create_config_file(apikey, name, timezone):
         config.add_section('auth')
         config.set('auth', 'api_key', apikey)
         config.add_section('profile')
@@ -52,7 +51,7 @@ class ConfigHandler(object):
         config.add_section('betting_files')
         config.set('betting_files', 'open_bets', 'betting_files/open_bets.csv')
         config.set('betting_files', 'closed_bets', 'betting_files/closed_bets.csv')
-        with open(filename, 'w') as cfgfile:
+        with open(ConfigHandler.FILENAME, 'w') as cfgfile:
             config.write(cfgfile)
 
     @staticmethod
@@ -67,8 +66,7 @@ class ConfigHandler(object):
         missing_keys = [x for x in ['api_key', 'name', 'balance', 'timezone', 'open_bets', 'closed_bets'] if x not in keys]
         return missing_sections, missing_keys, missing_options
 
-
-    def check_config_file(self, filename):
+    def check_config_file(self):
         missing_sections, missing_keys, missing_options = self.get_missing_data_config()
         for missing_key in missing_keys:
             if missing_key != "balance":
@@ -78,11 +76,11 @@ class ConfigHandler(object):
             if missing_key in ["name", "balance", "timezone"]:
                 if "profile" in missing_sections:
                     config.add_section('profile')
-                update_config_file("profile", missing_key, value, filename)
+                self.update_config_file("profile", missing_key, value)
             elif missing_key == "api_key":
                 if "auth" in missing_sections:
                     config.add_section('auth')
-                update_config_file("auth", missing_key, value, filename)
+                self.update_config_file("auth", missing_key, value)
             elif missing_key in ["open_bets", "closed_bets"]:
                 if "betting_files" in missing_sections:
                     config.add_section('betting_files')
@@ -93,8 +91,8 @@ class ConfigHandler(object):
             else:
                 value = "100"
             if missing_option[0] in ["name", "balance", "timezone"]:
-                self.update_config_file("profile", missing_option[0], value, filename)
+                self.update_config_file("profile", missing_option[0], value)
             if missing_option[0] == "api_key":
-                self.update_config_file("auth", missing_option[0], value, filename)
+                self.update_config_file("auth", missing_option[0], value)
             if missing_option[0] in ["open_bets", "closed_bets"]:
-                self.update_config_file("betting_files", missing_option[0], value, filename)
+                self.update_config_file("betting_files", missing_option[0], value)

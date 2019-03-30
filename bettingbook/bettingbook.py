@@ -17,6 +17,7 @@ def load_json(file):
         data = json.load(jfile)
     return data
 
+
 LEAGUES_DATA = load_json("leagues.json")['leagues']
 LEAGUES = [list(x.keys())[0] for x in LEAGUES_DATA]
 
@@ -56,7 +57,9 @@ def check_options_standings(league, history):
     if league.endswith('C') and league not in ["WC", "EC"]:
         raise IncorrectParametersException(f'Standings for {league} not supported')
 
+
 ch = ConfigHandler()
+
 
 @click.command()
 @click.option('--apikey', default=ch.load_config_file,
@@ -102,7 +105,6 @@ def main(apikey, timezone, live, today, matches, standings, league, days, histor
 
     try:
         writer = get_writer()
-        ch = ConfigHandler()
         rh = RequestHandler(params, LEAGUES_DATA, writer)
         betting = Betting(params, LEAGUES_DATA, writer, rh, ch)
 
@@ -115,7 +117,7 @@ def main(apikey, timezone, live, today, matches, standings, league, days, histor
                 odds = True
             if live:
                 parameters = Parameters('livescores/now',
-                                        ["No live action currently",
+                                        ["No live action at this moment",
                                          "There was problem getting live scores, check your parameters"],
                                         league, days, history, details, odds, refresh, bet, "live")
             elif today:

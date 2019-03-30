@@ -10,6 +10,7 @@ import exceptions
 from betting import Betting
 from config_handler import ConfigHandler
 
+
 class RequestHandler(object):
     BASE_URL = 'https://soccer.sportmonks.com/api/v2.0/'
 
@@ -28,7 +29,7 @@ class RequestHandler(object):
 
         # copy the url to view the raw JSON-data online
         py_url = RequestHandler.BASE_URL + url + "?"
-        for k,v in self.params.items():
+        for k, v in self.params.items():
             py_url = py_url + k + "=" + v + "&"
         py_url = py_url[:-1]
         
