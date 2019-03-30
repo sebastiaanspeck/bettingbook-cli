@@ -83,7 +83,6 @@ class Betting(object):
                                                           match_data['scores']['visitorteam_score'],
                                                           match_data['time']['status'])
         predicted_team = row[1]
-        potential_wins = row[2]
         potential_wins = row[3]
         if winning_team == predicted_team:
             click.echo(f"Woohoo! You predicted {match_data['localTeam']['data']['name']} - "
