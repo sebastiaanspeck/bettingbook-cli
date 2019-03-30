@@ -239,9 +239,9 @@ Your timezone: %s
     def scores(self, result, place_bet):
         """Prints out the scores in a pretty format"""
         winning_team = self.calculate_winning_team(result.goalsHomeTeam, result.goalsAwayTeam, '')
-        if winning_team == 0:
+        if winning_team == "1":
             home_color, away_color = (self.colors.WIN, self.colors.LOSE)
-        elif winning_team == 2:
+        elif winning_team == "2":
             home_color, away_color = (self.colors.LOSE, self.colors.WIN)
         else:
             home_color = away_color = self.colors.TIE
@@ -362,13 +362,13 @@ Your timezone: %s
     def calculate_winning_team(home_goals, away_goals, game_status):
         # hometeam won
         if home_goals > away_goals and game_status != "TBA":
-            return 0
+            return "1"
         # awayteam won
         elif home_goals < away_goals and game_status != "TBA":
-            return 2
+            return "2"
         # draw
         elif home_goals == away_goals and game_status not in ['NS', 'TBA']:
-            return 1
+            return "X"
         # no winner yet
         else:
             return 'no_winner_yet'

@@ -84,8 +84,8 @@ class Betting(object):
                                                           match_data['time']['status'])
         predicted_team = row[1]
         potential_wins = row[2]
-        if winning_team == 0 and predicted_team == '1' or winning_team == 1 and predicted_team == 'X' or \
-           winning_team == 2 and predicted_team == '2':
+        potential_wins = row[3]
+        if winning_team == predicted_team:
             click.echo(f"Woohoo! You predicted {match_data['localTeam']['data']['name']} - "
                        f"{match_data['visitorTeam']['data']['name']} correct and won {potential_wins}")
             self.update_balance(convert.convert_float_to_curreny(potential_wins), operation='win')
