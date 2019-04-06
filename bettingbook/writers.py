@@ -274,7 +274,7 @@ Your timezone: %s
 
     @staticmethod
     def fill_odds(odd, odds):
-        odds[odd["label"]].append(str(odd["value"]))
+        odds[odd["label"]].append(float(odd["value"]))
         return odds
 
     def print_datetime_status_matches(self, match):
@@ -454,7 +454,7 @@ Your timezone: %s
 
         def highest_odd(odd_in):
             try:
-                return max(odd_in)
+                return sum(odd_in)/len(odd_in)
             except ValueError:
                 return '0.00'
         for label, values in odds.items():
