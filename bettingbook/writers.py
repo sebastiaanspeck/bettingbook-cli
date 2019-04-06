@@ -247,11 +247,11 @@ Your timezone: %s
             home_color = away_color = self.colors.TIE
 
         if place_bet:
-            click.secho(f"{self.score_id}. ", nl=False)
             if self.score_id < 10:
-                x = 22
+                click.secho(f"{self.score_id}.  ", nl=False)
             else:
-                x = 21
+                click.secho(f"{self.score_id}. ", nl=False)
+            x = 21
             self.score_id += 1
         else:
             x = 25
