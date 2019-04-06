@@ -79,6 +79,7 @@ class RequestHandler(object):
         league_ids = self.get_league_ids()
         self.params['leagues'] = ','.join(val for val in league_ids)
         self.params['include'] = 'localTeam,visitorTeam,league,round,events,stage,odds'
+        self.params['markets'] = '1'
 
     @staticmethod
     def set_start_end(show_history, days):
