@@ -105,7 +105,7 @@ def main(apikey, timezone, live, today, matches, standings, league, days, histor
 
     try:
         writer = get_writer()
-        rh = RequestHandler(params, LEAGUES_DATA, writer)
+        rh = RequestHandler(params, LEAGUES_DATA, writer, ch)
         betting = Betting(params, LEAGUES_DATA, writer, rh, ch)
 
         Parameters = namedtuple("parameters", "url, msg, league_name, days, "
