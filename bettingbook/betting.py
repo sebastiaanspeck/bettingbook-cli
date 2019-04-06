@@ -155,8 +155,7 @@ class Betting(object):
             prediction = click.prompt("On which team do you want to bet? (1, X, 2)")
         return prediction
 
-    @staticmethod
-    def get_stake():
+    def get_stake(self):
         balance = convert.convert_float_to_curreny(self.config_handler.get_data('profile')['balance'])
         stake = convert.convert_float_to_curreny(click.prompt(f"What is your stake? (max. "
                                                               f"{balance})", type=float))
