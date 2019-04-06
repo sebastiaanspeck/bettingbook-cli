@@ -200,9 +200,9 @@ Your timezone: %s
             self.bet_matches.extend([match["id"]])
         self.scores(self.parse_result(match), parameters.place_bet)
         if parameters.type_sort != "matches":
-            self.print_datetime_status_matches(match)
-        else:
             self.print_datetime_status(match)
+        else:
+            self.print_datetime_status_matches(match)
         if parameters.show_details:
             self.print_details(match)
         click.echo()
