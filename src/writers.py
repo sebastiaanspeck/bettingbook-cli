@@ -303,12 +303,12 @@ Your timezone: %s
 
     def print_datetime_status_matches(self, match):
         if match["time"]["status"] in ["FT", "FT_PEN", "AET", "TBA"]:
-            click.secho(f'   {convert.convert_time(match["time"]["starting_at"]["date"])} '
+            click.secho(f'   {convert.convert_datetime(match["time"]["starting_at"]["date"])} '
                         f'{match["time"]["status"]}',
                         fg=self.colors.TIME)
         elif match["time"]["status"] in ["NS", "CANCL", "POSTP", "INT", "ABAN", "SUSP", "AWARDED",
                                          "DELAYED", "WO", "AU"]:
-            click.secho(f'   {convert.convert_time(match["time"]["starting_at"]["date_time"])} '
+            click.secho(f'   {convert.convert_datetime(match["time"]["starting_at"]["date_time"])} '
                         f'{match["time"]["status"]}',
                         fg=self.colors.TIME)
 
