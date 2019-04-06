@@ -191,6 +191,9 @@ Your timezone: %s
                                                                           "INT", "ABAN", "SUSP", "AWARDED", "DELAYED",
                                                                           "TBA", "WO", "AU"]:
             return
+        if parameters.type_sort == "matches" and match["time"]["status"] in ["LIVE", "HT", "ET", "PEN_LIVE", "AET",
+                                                                             "BREAK", "AU"]:
+            return
         if matchday == "Regular Season" and print_matchday != match["round"]["data"]["name"]:
             print_matchday = match["round"]["data"]["name"]
             self.league_subheader(print_matchday, 'matchday')
