@@ -40,7 +40,7 @@ def check_options(history, bet, live, today, refresh, matches):
         raise IncorrectParametersException('--history and --days is not supported for --live/--today. '
                                            'Use --matches to use these parameters')
     if bet and live:
-        raise IncorrectParametersException('--bet is not supported for --live. '
+        raise IncorrectParametersException('--bet is not yet supported for --live. '
                                            'Use --matches or --today to use this parameters')
     if matches and refresh:
         raise IncorrectParametersException('--refresh is not supported for --matches. '

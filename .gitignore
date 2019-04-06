@@ -104,4 +104,4 @@ ENV/
 
 .DS_STORE
 .idea/
-/bettingbook/betting_files
+/src/betting_files
