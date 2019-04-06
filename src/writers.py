@@ -148,11 +148,9 @@ Your timezone: %s
             match_status = set([x['time']['status'] for x in games_copy])
             if parameters.type_sort == "live" and match_status == {"NS"} or \
                     parameters.type_sort == "live" and match_status == {"FT"}:
-                click.secho(parameters.msg[0], fg="red", bold=True)
                 continue
             if parameters.type_sort == "today" and match_status == {"LIVE"}:
                 continue
-
             if league_prefix[0] == league:
                 self.league_header(league)
             else:
