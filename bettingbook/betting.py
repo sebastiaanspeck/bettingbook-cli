@@ -113,10 +113,7 @@ class Betting(object):
 
         for label, values in odds_dict.items():
             odd = highest_odd(values)
-            if len(str(odd)) <= 3:
-                odd = "{0:.2f}".format(float(odd))
-            if len(str(odd)) > 4:
-                odd = "{0:.1f}".format(float(odd))
+            odd = "{0:.2f}".format(odd)
             if label == "1":
                 home_odd = odd
             elif label == "X":
