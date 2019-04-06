@@ -292,9 +292,14 @@ Your timezone: %s
                             fg=self.colors.TIME)
         elif match["time"]["status"] in ["FT", "FT_PEN", "TBA", "NS", "CANCL", "POSTP", "INT", "ABAN",
                                          "SUSP", "AWARDED", "DELAYED", "WO", "AU"]:
-            click.secho(f'   {convert.convert_time(match["time"]["starting_at"]["date_time"])} '
-                        f'{match["time"]["status"]}',
-                        fg=self.colors.TIME)
+            if parameters.type_sort == "live":
+                click.secho(f'   {convert.convert_datetime(match["time"]["starting_at"]["date_time"])} '
+                            f'{match["time"]["status"]}',
+                            fg=self.colors.TIME)
+            elif parameters.type_sort == "today":
+                click.secho(f'   {convert.convert_time(match["time"]["starting_at"]["time"])} '
+                            f'{match["time"]["status"]}',
+                            fg=self.colors.TIME)
 
     def print_datetime_status(self, match):
         if match["time"]["status"] in ["FT", "FT_PEN", "AET", "TBA"]:
