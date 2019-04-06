@@ -12,15 +12,15 @@ An API key from [sportsmonks.com](https://sportmonks.com/) will be required and 
 
 ```bash
 $ git clone https://github.com/sebastiaanspeck/bettingbook-cli.git
-$ cd bettingbook-cli/bettingbook
+$ cd bettingbook-cli/src
 ```
 
-#### Note:
-Currently only tested on Windows and MacOS. Might work on other platforms, but this is not yet tested.
+#### Notes:
+- Currently only tested on Windows and MacOS. Might work on other platforms, but this is not yet tested.
 
-To get colorized terminal output on Windows, make sure to install [ansicon](https://github.com/adoxa/ansicon/releases/latest) and [colorama](https://pypi.python.org/pypi/colorama).
+- To get colorized terminal output on Windows, make sure to install [ansicon](https://github.com/adoxa/ansicon/releases/latest) and [colorama](https://pypi.python.org/pypi/colorama).
 
-You need click, pyperclip and requests. You can install these using pip.
+- You need click and requests. You can install these using pip.
 
 Usage
 ====
@@ -99,7 +99,7 @@ $ main.py --help
 
 ### Supported leagues & cups
 
-For a full list of supported leagues & cups [see this](bettingbook/leagues.json).
+For a full list of supported leagues & cups [see this](src/leagues.json).
 
 ### Commands and possible arguments
 - --live (-L):
@@ -154,7 +154,8 @@ Todo
 - [ ] Add more competitions (divisions under the first divisions) [Write out poll to determine which competitions specific]
 - [ ] Add option to get matches for a specific team
 - [ ] Add support to show cards
-- [ ] Update balance at runtime
+- [ ] Add support for live betting
+- [x] Update balance at runtime
 - [x] Add built-in watch feature so you can run once with --live and just leave the program running.
 - [x] Add option to view active/finished bets.
 - [x] Add odds to match overviews
@@ -173,4 +174,4 @@ Open sourced under [MIT License](LICENSE)
 
 Notes
 ===
-This project is still in development
+This project is still in development. It works but it may contain bugs. If you find a bug, please open report issue via Github.
