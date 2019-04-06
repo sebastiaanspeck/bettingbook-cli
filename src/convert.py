@@ -27,14 +27,17 @@ def convert_leagueid_to_leaguename(league):
     return None
 
 
-def convert_time(time_str):
+def convert_datetime(datetime_str):
     """Converts the API UTC time string to the local user time."""
     try:
-        return datetime.datetime.strftime(datetime.datetime.strptime(time_str,
+        return datetime.datetime.strftime(datetime.datetime.strptime(datetime_str,
                                                                      '%Y-%m-%d %H:%M:%S'), '%d-%m-%Y %H:%M')
     except ValueError:
-        return datetime.datetime.strftime(datetime.datetime.strptime(time_str,
-                                                                     '%Y-%m-%d'), '%d-%m-%Y')
+        return datetime.datetime.strftime(datetime.datetime.strptime(datetime_str, '%Y-%m-%d'), '%d-%m-%Y')
+
+
+def convert_time(time_str):
+    return datetime.datetime.strftime(datetime.datetime.strptime(time_str, '%H:%M:%S'), '%H:%M')
 
 
 def convert_prediction_to_msg(prediction):
