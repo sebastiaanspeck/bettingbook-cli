@@ -200,7 +200,7 @@ Your timezone: %s
             self.bet_matches.extend([match["id"]])
         self.scores(self.parse_result(match), parameters.place_bet)
         if parameters.type_sort != "matches":
-            self.print_datetime_status(match)
+            self.print_datetime_status(match, parameters)
         else:
             self.print_datetime_status_matches(match)
         if parameters.show_details:
@@ -274,7 +274,7 @@ Your timezone: %s
         odds[odd["label"]].append(float(odd["value"]))
         return odds
 
-    def print_datetime_status_matches(self, match):
+    def print_datetime_status(self, match, parameters):
         if match["time"]["status"] in ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK"]:
             if match["time"]["status"] == "HT":
                 click.secho(f'   HT',
@@ -301,7 +301,7 @@ Your timezone: %s
                             f'{match["time"]["status"]}',
                             fg=self.colors.TIME)
 
-    def print_datetime_status(self, match):
+    def print_datetime_status_matches(self, match):
         if match["time"]["status"] in ["FT", "FT_PEN", "AET", "TBA"]:
             click.secho(f'   {convert.convert_time(match["time"]["starting_at"]["date"])} '
                         f'{match["time"]["status"]}',
