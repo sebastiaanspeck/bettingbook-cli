@@ -21,6 +21,10 @@ class RequestHandler(object):
     def show_profile(self):
         self.writer.show_profile(self.config_handler.get_data('profile'))
 
+    def show_leagues(self):
+        leagues = self._get('leagues')
+        self.writer.show_leagues(leagues)
+
     def _get(self, url):
         """Handles soccer.sportsmonks requests"""
         req = requests.get(RequestHandler.BASE_URL + url, params=self.params)

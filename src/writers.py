@@ -66,6 +66,12 @@ class Stdout(BaseWriter):
 Your balance: {profile_data['balance']}
 Your timezone: {profile_data['timezone']}""", fg="green")
 
+    @staticmethod
+    def show_leagues(leagues):
+        click.secho("Showing the leagues that are in your Sportmonks API Plan. ")
+        for league in leagues:
+            click.secho(f"id: {league['id']} and name: {league['name']}")
+
     def standings(self, standings_data, league_id, show_details):
         """ Prints the league standings in a pretty way """
         for standing in standings_data:

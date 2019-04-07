@@ -99,8 +99,10 @@ ch = ConfigHandler()
               help="Show your open bets")
 @click.option('--closed-bets', '-CB', is_flag=True,
               help="Show your closed bets")
+@click.option('--possible_leagues', '-PL', is_flag=True,
+              help="Show all leagues that are in your Sportmonks API Plan.")
 def main(api_token, timezone, live, today, matches, standings, league, days, history, details, odds, refresh, bet,
-         profile, all_bets, open_bets, closed_bets):
+         profile, all_bets, open_bets, closed_bets, possible_leagues):
     params = get_params(api_token, timezone)
 
     try:
@@ -151,6 +153,9 @@ def main(api_token, timezone, live, today, matches, standings, league, days, his
 
         if closed_bets:
             betting.view_bets('closed')
+        if possible_leagues:
+            rh.show_leagues()
+            return
 
     except IncorrectParametersException as e:
         click.secho(str(e), fg="red", bold=True)
