@@ -1,6 +1,6 @@
 import json
 import os
-import datetime
+import datetime as dt
 from re import sub
 from decimal import Decimal
 
@@ -18,7 +18,7 @@ def load_json(file):
 LEAGUES_DATA = load_json("leagues.json")["leagues"]
 
 
-def convert_leagueid_to_leaguename(league):
+def league_id_to_league_name(league):
     for leagues in LEAGUES_DATA:
         leaguename = list(leagues.values())[1]
         leagueids = list(leagues.values())[0]
@@ -27,20 +27,21 @@ def convert_leagueid_to_leaguename(league):
     return None
 
 
-def convert_datetime(datetime_str):
-    """Converts the API UTC time string to the local user time."""
-    try:
-        return datetime.datetime.strftime(datetime.datetime.strptime(datetime_str,
-                                                                     '%Y-%m-%d %H:%M:%S'), '%d-%m-%Y %H:%M')
-    except ValueError:
-        return datetime.datetime.strftime(datetime.datetime.strptime(datetime_str, '%Y-%m-%d'), '%d-%m-%Y')
+def datetime(datetime_str):
+    """Converts the API UTC datetime string to the local user datetime."""
+    return dt.datetime.strftime(dt.datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S'), '%d-%m-%Y %H:%M')
 
 
-def convert_time(time_str):
-    return datetime.datetime.strftime(datetime.datetime.strptime(time_str, '%H:%M:%S'), '%H:%M')
+def date(date_str):
+    """Converts the API UTC date string to the local user date."""
+    return dt.datetime.strftime(dt.datetime.strptime(date_str, '%Y-%m-%d'), '%d-%m-%Y')
 
 
-def convert_prediction_to_msg(prediction):
+def time(time_str):
+    return dt.datetime.strftime(dt.datetime.strptime(time_str, '%H:%M:%S'), '%H:%M')
+
+
+def prediction_to_msg(prediction):
     if prediction == '1':
         return 'win for the home-team'
     elif prediction.upper() == 'X':
@@ -49,7 +50,7 @@ def convert_prediction_to_msg(prediction):
         return 'win for the away-team'
 
 
-def format_playername(name):
+def player_name(name):
     try:
         player_name = name.split(' ', 1)
     except AttributeError:
@@ -61,11 +62,11 @@ def format_playername(name):
     return player_name
 
 
-def convert_teamid_to_teamname(teamid, hometeam):
     return teamid == str(hometeam)
+def team_id_to_team_name(team_id, home_team):
 
 
-def convert_type_to_prefix(goal_type):
+def goal_type_to_prefix(goal_type):
     if goal_type == "goal":
         return ''
     elif goal_type == "penalty":
@@ -74,21 +75,20 @@ def convert_type_to_prefix(goal_type):
         return ' OG'
 
 
-def convert_events_to_pretty_goals(events, home_goals, away_goals):
+def events_to_pretty_goals(events, home_goals, away_goals):
     # no home or away-goals scored (0-0)
     if home_goals == 0 and away_goals == 0:
         return []
     # home scored and away didn't (x-0)
     if home_goals > 0 and away_goals == 0:
         return writers.Stdout.get_pretty_goals_clean_sheet("home", events)
-    # away didn't score and away did (0-x)
     if home_goals == 0 and away_goals > 0:
         return writers.Stdout.get_pretty_goals_clean_sheet("away", events)
     if home_goals > 0 and away_goals > 0:
         return writers.Stdout.get_pretty_goals(events)
 
 
-def convert_float_to_curreny(f):
+def float_to_currency(f):
     f = '{:,.2f}'.format(float(f))
     f = Decimal(sub(r'[^\d.]', '', f))
     return f

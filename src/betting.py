@@ -87,7 +87,7 @@ class Betting(object):
         if winning_team == predicted_team:
             click.echo(f"Woohoo! You predicted {match_data['localTeam']['data']['name']} - "
                        f"{match_data['visitorTeam']['data']['name']} correct and won {potential_wins}")
-            self.update_balance(convert.convert_float_to_curreny(potential_wins), operation='win')
+            self.update_balance(convert.float_to_currency(potential_wins), operation='win')
             row.extend((winning_team, "yes"))
         else:
             click.echo(f"Ah noo! You predicted {match_data['localTeam']['data']['name']} - "
@@ -131,7 +131,7 @@ class Betting(object):
 
     @staticmethod
     def get_league_name(match):
-        league_name = convert.convert_leagueid_to_leaguename(match['league_id'])
+        league_name = convert.league_id_to_league_name(match['league_id'])
         league_prefix = match['league']['data']['name']
         if league_prefix == league_name:
             league_name = league_name
@@ -153,19 +153,19 @@ class Betting(object):
         return prediction
 
     def get_stake(self):
-        balance = convert.convert_float_to_curreny(self.config_handler.get_data('profile')['balance'])
-        stake = convert.convert_float_to_curreny(click.prompt(f"What is your stake? (max. "
-                                                              f"{balance})", type=float))
+        balance = convert.float_to_currency(self.config_handler.get_data('profile')['balance'])
+        stake = convert.float_to_currency(click.prompt(f"What is your stake? (max. "
+                                                       f"{balance})", type=float))
         while stake > balance or stake <= 0:
             click.secho("Oops... You entered a stake higher than your balance or an invalid stake. Try again.",
                         fg="red", bold=True)
-            stake = convert.convert_float_to_curreny(click.prompt(f"What is your stake? (max. "
-                                                                  f"{balance})"), type=float)
+            stake = convert.float_to_currency(click.prompt(f"What is your stake? (max. "
+                                                           f"{balance})"), type=float)
         return stake
 
     @staticmethod
     def get_confirmation(prediction, stake, potential_wins):
-        msg = convert.convert_prediction_to_msg(prediction)
+        msg = convert.prediction_to_msg(prediction)
         return click.confirm(f"Are you sure that the match will result in a {msg} with a stake of {stake}? "
                                     f"This can result in a potential win of {potential_wins}")
 
@@ -177,12 +177,12 @@ class Betting(object):
             odd = odds[1]
         else:
             odd = odds[2]
-        odd = convert.convert_float_to_curreny(odd)
-        potential_wins = convert.convert_float_to_curreny(stake*odd)
+        odd = convert.float_to_currency(odd)
+        potential_wins = convert.float_to_currency(stake * odd)
         return potential_wins, odd
 
     def update_balance(self, stake, operation):
-        balance = convert.convert_float_to_curreny(self.config_handler.get_data('profile')['balance'])
+        balance = convert.float_to_currency(self.config_handler.get_data('profile')['balance'])
         if operation == 'loss':
             balance = balance - stake
         elif operation == 'win':
@@ -203,7 +203,7 @@ class Betting(object):
         click.echo(f"Betting on {match['localTeam']['data']['name']} - {match['visitorTeam']['data']['name']} in "
                    f"{league_name} with odds:\n1: {odds[0]}, X: {odds[1]}, 2: {odds[2]}")
         prediction, stake = self.get_input()
-        stake = convert.convert_float_to_curreny(stake)
+        stake = convert.float_to_currency(stake)
         potential_wins, odd = self.calculate_potential_wins(prediction, stake, odds)
         data = [prediction, stake, potential_wins, odd, match, date]
         self.place_bet_confirmation(data)
@@ -213,7 +213,7 @@ class Betting(object):
             self.update_balance(daty[1], 'loss')
             data = [daty[4]['id'], daty[0], daty[1], daty[2], daty[3],
                     daty[4]['localTeam']['data']['name'], daty[4]['visitorTeam']['data']['name'],
-                    convert.convert_time(daty[4]["time"]["starting_at"]["date_time"]), daty[5]]
+                    convert.datetime(daty[4]["time"]["starting_at"]["date_time"]), daty[5]]
             self.write_to_bets_file(data, 'open_bets')
         else:
             click.secho("Your bet is canceled\n")

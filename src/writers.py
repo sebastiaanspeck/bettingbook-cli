@@ -70,7 +70,7 @@ Your timezone: %s
     def standings(self, league_table, league_id, show_details):
         """ Prints the league standings in a pretty way """
         for leagues in league_table:
-            self.standings_header(convert.convert_leagueid_to_leaguename(leagueid), show_details, leagues['name'])
+            self.standings_header(convert.league_id_to_league_name(league_id), show_details, leagues['name'])
             number_of_teams = len(leagues['standings']['data'])
             positions = set()
             if show_details:
@@ -142,7 +142,7 @@ Your timezone: %s
         scores = sorted(total_data, key=lambda x: (x["league"]["data"]["country_id"], x['league_id']))
         self.update_time()
         for league, games in groupby(scores, key=lambda x: x['league_id']):
-            league = convert.convert_leagueid_to_leaguename(league)
+            league = convert.league_id_to_league_name(league)
             games = sorted(games, key=lambda x: x["time"]["starting_at"]["date_time"])
             if league is None:
                 continue
@@ -305,23 +305,23 @@ Your timezone: %s
         elif match["time"]["status"] in ["FT", "FT_PEN", "TBA", "NS", "CANCL", "POSTP", "INT", "ABAN",
                                          "SUSP", "AWARDED", "DELAYED", "WO", "AU"]:
             if parameters.type_sort == "live":
-                click.secho(f'   {convert.convert_datetime(match["time"]["starting_at"]["date_time"])} '
+                click.secho(f'   {convert.datetime(match["time"]["starting_at"]["date_time"])} '
                             f'{match["time"]["status"]}',
                             fg=self.colors.TIME)
             elif parameters.type_sort == "today":
-                click.secho(f'   {convert.convert_time(match["time"]["starting_at"]["time"])} '
+                click.secho(f'   {convert.time(match["time"]["starting_at"]["time"])} '
                             f'{match["time"]["status"]}',
                             fg=self.colors.TIME)
 
     def print_datetime_status_matches(self, match):
         """Prints the date/time in a pretty format based on the match status"""
         if match["time"]["status"] in ["FT", "FT_PEN", "AET", "TBA"]:
-            click.secho(f'   {convert.convert_datetime(match["time"]["starting_at"]["date"])} '
+            click.secho(f'   {convert.date(match["time"]["starting_at"]["date"])} '
                         f'{match["time"]["status"]}',
                         fg=self.colors.TIME)
         elif match["time"]["status"] in ["NS", "CANCL", "POSTP", "INT", "ABAN", "SUSP", "AWARDED",
                                          "DELAYED", "WO", "AU"]:
-            click.secho(f'   {convert.convert_datetime(match["time"]["starting_at"]["date_time"])} '
+            click.secho(f'   {convert.datetime(match["time"]["starting_at"]["date_time"])} '
                         f'{match["time"]["status"]}',
                         fg=self.colors.TIME)
 
@@ -331,9 +331,9 @@ Your timezone: %s
         events = sorted(match["events"]["data"], key=lambda x: x["id"])
         for event in events:
             if event["type"] in ["goal", "penalty", "own-goal"] and event["minute"] is not None:
-                player_name = convert.format_playername(event["player_name"])
-                home_team = convert.convert_teamid_to_teamname(event["team_id"], match["localTeam"]["data"]["id"])
-                goal_type = convert.convert_type_to_prefix(event["type"])
+                player_name = convert.player_name(event["player_name"])
+                home_team = convert.team_id_to_team_name(event["team_id"], match["localTeam"]["data"]["id"])
+                goal_type = convert.goal_type_to_prefix(event["type"])
                 goals.extend([[home_team, player_name, event["minute"], goal_type]])
         goals = sorted(goals, key=lambda x: x[0])
         events = {"home": [], "away": []}
@@ -344,8 +344,8 @@ Your timezone: %s
                 events["away"].extend([{goal[1]: [{"minute": [goal[2]], "type": [goal[3]]}]}])
         events["home"] = self.merge_duplicate_keys(events["home"])
         events["away"] = self.merge_duplicate_keys(events["away"])
-        goals = convert.convert_events_to_pretty_goals(events, match["scores"]["localteam_score"],
-                                                       match["scores"]["visitorteam_score"])
+        goals = convert.events_to_pretty_goals(events, match["scores"]["localteam_score"],
+                                               match["scores"]["visitorteam_score"])
         self.goals(goals)
 
     def odds(self, odds):
