@@ -73,10 +73,10 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             number_of_teams = len(standing['standings']['data'])
             positions = list()
             if show_details:
-                click.secho(f"{'POS':6}  {'CLUB':30}    {'PLAYED':10}    {'WON':10}    {'DRAW':10}    {'LOST':10}    "
-                            f"{'GOALS':10}    {'GOAL DIFF':10}    {'POINTS':10}    {'RECENT FORM':10}")
+                click.secho(f"{'POS':6}  {'CLUB':30}    {'PLAYED':8}    {'WON':8}    {'DRAW':8}    {'LOST':8}    "
+                            f"{'GOALS':8}    {'GOAL DIFF':8}    {'POINTS':8}    {'RECENT FORM':8}")
             else:
-                click.secho(f"{'POS':6}  {'CLUB':30}    {'PLAYED':10}    {'GOAL DIFF':10}    {'POINTS':10}")
+                click.secho(f"{'POS':6}  {'CLUB':30}    {'PLAYED':8}    {'GOAL DIFF':8}    {'POINTS':8}")
             for team in standing['standings']['data']:
                 goal_difference = team['total']['goal_difference']
                 position = team['position']
@@ -88,13 +88,13 @@ Your timezone: {profile_data['timezone']}""", fg="green")
                     goals = goals + " "
 
                 if show_details:
-                    team_str = (f"{position:<7} {team['team_name']:<33} {str(team['overall']['games_played']):<14}"
-                                f"{str(team['overall']['won']):<13} {str(team['overall']['draw']):<13} "
-                                f"{str(team['overall']['lost']):<13} {goals:<13} "
-                                f"{goal_difference:<13} {team['total']['points']:<13} {recent_form}")
+                    team_str = (f"{position:<7} {team['team_name']:<33} {str(team['overall']['games_played']):<12}"
+                                f"{str(team['overall']['won']):<11} {str(team['overall']['draw']):<11} "
+                                f"{str(team['overall']['lost']):<11} {goals:<11} "
+                                f"{goal_difference:<12} {team['total']['points']:<11} {recent_form}")
                 else:
-                    team_str = (f"{position:<7} {team['team_name']:<33} {str(team['overall']['games_played']):<14}"
-                                f"{goal_difference:<13} {team['total']['points']}")
+                    team_str = (f"{position:<7} {team['team_name']:<33} {str(team['overall']['games_played']):<12}"
+                                f"{goal_difference:<12} {team['total']['points']}")
                 positions = self.color_position(result, team_str, positions)
                 if team['position'] == number_of_teams:
                     click.echo()
@@ -229,9 +229,9 @@ Your timezone: {profile_data['timezone']}""", fg="green")
         """Prints the league header"""
         league_name = f" {league} - {prefix} "
         if details:
-            click.secho(f"{league_name:#^151}", fg=self.colors.MISC)
+            click.secho(f"{league_name:#^138}", fg=self.colors.MISC)
         else:
-            click.secho(f"{league_name:#^76}", fg=self.colors.MISC)
+            click.secho(f"{league_name:#^73}", fg=self.colors.MISC)
         click.echo()
 
     def league_subheader(self, subheader, type_header):
