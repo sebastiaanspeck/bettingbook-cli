@@ -83,8 +83,10 @@ def events_to_pretty_goals(events, home_goals, away_goals):
     # home scored and away didn't (x-0)
     if home_goals > 0 and away_goals == 0:
         return writers.Stdout.get_pretty_goals_clean_sheet("home", events)
+    # home didn't score and away did (0-x)
     if home_goals == 0 and away_goals > 0:
         return writers.Stdout.get_pretty_goals_clean_sheet("away", events)
+    # both teams scored at least once
     if home_goals > 0 and away_goals > 0:
         return writers.Stdout.get_pretty_goals(events)
 
