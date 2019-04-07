@@ -13,8 +13,8 @@ from betting import Betting
 def load_json(file):
     """Load JSON file at app start"""
     here = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(here, file)) as jfile:
-        data = json.load(jfile)
+    with open(os.path.join(here, file)) as json_file:
+        data = json.load(json_file)
     return data
 
 
@@ -22,12 +22,12 @@ LEAGUES_DATA = load_json("leagues.json")['leagues']
 LEAGUES = [list(x.keys())[0] for x in LEAGUES_DATA]
 
 
-def get_params(apikey, timezone):
+def get_params(api_token, timezone):
     params = {}
-    if apikey:
-        params['api_token'] = apikey
+    if api_token:
+        params['api_token'] = api_token
     else:
-        params['api_token'] = ch.get('auth', 'api_key')
+        params['api_token'] = ch.get('auth', 'api_token')
     if timezone:
         params['tz'] = timezone
     else:
@@ -62,7 +62,7 @@ ch = ConfigHandler()
 
 
 @click.command()
-@click.option('--apikey', default=ch.load_config_file,
+@click.option('--api_token', default=ch.load_config_file,
               help="API key to use.")
 @click.option('--timezone', default=ch.load_config_file,
               help="Timezone to use. See https://bit.ly/2glGdNY "
@@ -99,9 +99,9 @@ ch = ConfigHandler()
               help="Show your open bets")
 @click.option('--closed-bets', '-CB', is_flag=True,
               help="Show your closed bets")
-def main(apikey, timezone, live, today, matches, standings, league, days, history, details, odds, refresh, bet, profile,
-         all_bets, open_bets, closed_bets):
-    params = get_params(apikey, timezone)
+def main(api_token, timezone, live, today, matches, standings, league, days, history, details, odds, refresh, bet,
+         profile, all_bets, open_bets, closed_bets):
+    params = get_params(api_token, timezone)
 
     try:
         writer = get_writer()
@@ -123,7 +123,7 @@ def main(apikey, timezone, live, today, matches, standings, league, days, histor
             elif today:
                 parameters = Parameters('livescores',
                                         ["No matches today",
-                                         "There was problem getting todays scores, check your parameters"],
+                                         "There was problem getting today's scores, check your parameters"],
                                         league, days, history, details, odds, refresh, bet, "today")
             else:
                 parameters = Parameters('fixtures/between/',

@@ -67,11 +67,11 @@ class RequestHandler(object):
                 league_ids.extend([league_id])
         return league_ids
 
-    def get_league_abbrevation(self, league_name):
+    def get_league_abbreviation(self, league_name):
         for x in self.league_data:
-            abbrevation = list(x.keys())[0]
+            abbreviation = list(x.keys())[0]
             ids = list(x.values())[0]
-            if league_name == abbrevation:
+            if league_name == abbreviation:
                 return ids
         return None
 
@@ -101,7 +101,7 @@ class RequestHandler(object):
         start, end = self.set_start_end(parameters.show_history, parameters.days)
         if parameters.league_name:
             try:
-                league_id = self.get_league_abbrevation(parameters.league_name)
+                league_id = self.get_league_abbreviation(parameters.league_name)
                 self.params['leagues'] = ','.join(str(val) for val in league_id)
                 self.get_match_data(parameters, start, end)
             except exceptions.APIErrorException as e:
@@ -136,7 +136,7 @@ class RequestHandler(object):
             s.run()
 
     def get_standings(self, league_name, show_details):
-        for league_id in self.get_league_abbrevation(league_name):
+        for league_id in self.get_league_abbreviation(league_name):
             url = f'leagues/{league_id}'
             try:
                 league_data = self._get(url)

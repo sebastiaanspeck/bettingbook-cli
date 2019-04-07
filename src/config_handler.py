@@ -16,10 +16,10 @@ class ConfigHandler(object):
 
     def load_config_file(self):
         if not os.path.exists(ConfigHandler.FILENAME):
-            apikey = str(input("Give the API-key: "))
+            api_token = str(input("Give the API-token: "))
             name = str(input("Give your name: "))
             timezone = str(input("Give your timezone (e.a. Europe/Amsterdam): "))
-            self.create_config_file(apikey, name, timezone)
+            self.create_config_file(api_token, name, timezone)
         config.read(ConfigHandler.FILENAME)
         self.check_config_file()
 
@@ -41,9 +41,9 @@ class ConfigHandler(object):
             config.write(cfgfile)
     
     @staticmethod
-    def create_config_file(apikey, name, timezone):
+    def create_config_file(api_token, name, timezone):
         config.add_section('auth')
-        config.set('auth', 'api_key', apikey)
+        config.set('auth', 'api_token', api_token)
         config.add_section('profile')
         config.set('profile', 'name', name)
         config.set('profile', 'balance', '100.00')

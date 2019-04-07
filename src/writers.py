@@ -14,8 +14,8 @@ from datetime import datetime
 def load_json(file):
     """Load JSON file at app start"""
     here = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(here, file)) as jfile:
-        data = json.load(jfile)
+    with open(os.path.join(here, file)) as json_file:
+        data = json.load(json_file)
     return data
 
 
@@ -37,9 +37,9 @@ class Stdout(BaseWriter):
 
     def __init__(self, output_file):
         super().__init__(output_file)
-        self.Result = namedtuple("Result", "homeTeam, goalsHomeTeam, awayTeam, goalsAwayTeam")
+        self.Result = namedtuple("Result", "home_team, goals_home_team, away_team, goals_away_team")
 
-        self.Odds = namedtuple("Odds", "oddHometeam, oddDraw, oddAwayteam, winningOdd")
+        self.Odds = namedtuple("Odds", "odd_home_team, odd_draw, odd_away_team, winning_odd")
 
         enums = dict(
             WIN="green",
@@ -60,13 +60,13 @@ class Stdout(BaseWriter):
         self.bet_matches = []
 
     @staticmethod
-    def show_profile(profiledata):
+    def show_profile(profile_data):
         click.secho("""Welcome back %s
 Your balance: %s
 Your timezone: %s
-""" % (profiledata['name'], profiledata['balance'], profiledata['timezone']), fg="green", nl=False)
+""" % (profile_data['name'], profile_data['balance'], profile_data['timezone']), fg="green", nl=False)
 
-    def standings(self, league_table, leagueid, show_details):
+    def standings(self, league_table, league_id, show_details):
         """ Prints the league standings in a pretty way """
         for leagues in league_table:
             self.standings_header(convert.convert_leagueid_to_leaguename(leagueid), show_details, leagues['name'])
@@ -95,12 +95,12 @@ Your timezone: %s
                 else:
                     team_str = (f"{position:<7} {team['team_name']:<33} {str(team['overall']['games_played']):<14}"
                                 f"{goal_difference:<13} {team['total']['points']}")
-                positions = self.color_results(result, team_str, positions)
+                positions = self.color_position(result, team_str, positions)
                 if team['position'] == number_of_teams:
                     click.echo()
             self.print_colors(positions)
 
-    def color_results(self, result, team_str, positions):
+    def color_position(self, result, team_str, positions):
         if result is None:
             click.secho(team_str, fg=self.colors.POSITION)
         elif 'Champions League' in result or result == "Promotion":
@@ -137,7 +137,7 @@ Your timezone: %s
         self.score_id = 1
         self.bet_matches = []
         scores = sorted(total_data, key=lambda x: (x["league"]["data"]["country_id"], x['league_id']))
-        self.updatetime()
+        self.update_time()
         for league, games in groupby(scores, key=lambda x: x['league_id']):
             league = convert.convert_leagueid_to_leaguename(league)
             games = sorted(games, key=lambda x: x["time"]["starting_at"]["date_time"])
@@ -210,7 +210,7 @@ Your timezone: %s
             self.print_details(match)
         click.echo()
 
-    def updatetime(self):
+    def update_time(self):
         """Prints the time at which the data was updated"""
         click.secho(f"Last update: {datetime.now():%d-%m-%Y %H:%M:%S}", fg=self.colors.MISC)
 
@@ -239,7 +239,7 @@ Your timezone: %s
 
     def scores(self, result, place_bet):
         """Prints out the scores in a pretty format"""
-        winning_team = self.calculate_winning_team(result.goalsHomeTeam, result.goalsAwayTeam, '')
+        winning_team = self.calculate_winning_team(result.goals_home_team, result.goals_away_team, '')
         if winning_team == "1":
             home_color, away_color = (self.colors.WIN, self.colors.LOSE)
         elif winning_team == "2":
@@ -257,10 +257,10 @@ Your timezone: %s
         else:
             x = 25
 
-        click.secho(f"{result.homeTeam:{x}} {result.goalsHomeTeam:>2}",
+        click.secho(f"{result.home_team:{x}} {result.goals_home_team:>2}",
                     fg=home_color, nl=False)
         click.secho("  vs ", nl=False)
-        click.secho(f"{result.goalsAwayTeam:>2} {result.awayTeam.rjust(26)}",
+        click.secho(f"{result.goals_away_team:>2} {result.away_team.rjust(26)}",
                     fg=away_color, nl=False)
 
     def print_odds(self, match):
@@ -339,28 +339,28 @@ Your timezone: %s
 
     def odds(self, odds):
         """Prints out the odds in a pretty format"""
-        if odds.winningOdd == 0:
+        if odds.winning_odd == 0:
             home_color, draw_color, away_color = (self.colors.WIN, self.colors.LOSE, self.colors.LOSE)
-        elif odds.winningOdd == 1:
+        elif odds.winning_odd == 1:
             home_color, draw_color, away_color = (self.colors.LOSE, self.colors.WIN, self.colors.LOSE)
-        elif odds.winningOdd == 2:
+        elif odds.winning_odd == 2:
             home_color, draw_color, away_color = (self.colors.LOSE, self.colors.LOSE, self.colors.WIN)
         else:
             home_color, draw_color, away_color = (self.colors.ODDS, self.colors.ODDS, self.colors.ODDS)
-        click.secho("{}".format(odds.oddHometeam.rjust(28)), fg=home_color, nl=False)
-        click.secho(" {} ".format(odds.oddDraw), fg=draw_color, nl=False)
-        click.secho("{}".format(odds.oddAwayteam), fg=away_color, nl=True)
+        click.secho("{}".format(odds.odd_home_team.rjust(28)), fg=home_color, nl=False)
+        click.secho(" {} ".format(odds.odd_draw), fg=draw_color, nl=False)
+        click.secho("{}".format(odds.odd_away_team), fg=away_color, nl=True)
 
     @staticmethod
     def merge_duplicate_keys(dicts):
         d = {}
-        for dicty in dicts:
-            for key in dicty:
+        for i_dict in dicts:
+            for key in i_dict:
                 try:
-                    d[key][0]["minute"] += dicty[key][0]["minute"]
-                    d[key][0]["type"] += dicty[key][0]["type"]
+                    d[key][0]["minute"] += i_dict[key][0]["minute"]
+                    d[key][0]["type"] += i_dict[key][0]["type"]
                 except KeyError:
-                    d[key] = dicty[key]
+                    d[key] = i_dict[key]
         return d
 
     @staticmethod
@@ -457,13 +457,13 @@ Your timezone: %s
             winning_team = self.calculate_winning_team(home_goals, away_goals, status)
             return winning_team
 
-        def highest_odd(odd_in):
+        def average_odd(odd_in):
             try:
-                return sum(odd_in)/len(odd_in)
+                return sum(odd_in) / len(odd_in)
             except ValueError:
                 return '0.00'
         for label, values in odds.items():
-            odd = highest_odd(values)
+            odd = average_odd(values)
             odd = "{0:.2f}".format(odd)
             if label == "1":
                 home_odd = odd
@@ -473,7 +473,7 @@ Your timezone: %s
                 draw_odd = odd
             try:
                 odds = self.Odds(
-                    str(home_odd), str(draw_odd),  str(away_odd),
+                    str(home_odd), str(draw_odd), str(away_odd),
                     winning_odd())
             except UnboundLocalError:
                 odds = self.Odds(

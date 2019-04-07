@@ -98,9 +98,9 @@ class Betting(object):
         self.update_open_bets_file(reader)
 
     def get_odds(self, match):
-        def highest_odd(odd_in):
+        def average_odd(odd_in):
             try:
-                return sum(odd_in)/len(odd_in)
+                return sum(odd_in) / len(odd_in)
             except ValueError:
                 return '0.00'
 
@@ -112,7 +112,7 @@ class Betting(object):
                         odds_dict = self.fill_odds(odd, odds_dict)
 
         for label, values in odds_dict.items():
-            odd = highest_odd(values)
+            odd = average_odd(values)
             odd = "{0:.2f}".format(odd)
             if label == "1":
                 home_odd = odd
