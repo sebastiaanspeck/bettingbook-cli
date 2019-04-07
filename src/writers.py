@@ -62,10 +62,9 @@ class Stdout(BaseWriter):
     @staticmethod
     def show_profile(profile_data):
         """Show the profile data"""
-        click.secho("""Welcome back %s
-Your balance: %s
-Your timezone: %s
-""" % (profile_data['name'], profile_data['balance'], profile_data['timezone']), fg="green", nl=False)
+        click.secho(f"""Welcome back {profile_data['name']}
+Your balance: {profile_data['balance']}
+Your timezone: {profile_data['timezone']}""", fg="green")
 
     def standings(self, standings_data, league_id, show_details):
         """ Prints the league standings in a pretty way """
