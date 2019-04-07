@@ -61,6 +61,7 @@ class Stdout(BaseWriter):
 
     @staticmethod
     def show_profile(profile_data):
+        """Show the profile data"""
         click.secho("""Welcome back %s
 Your balance: %s
 Your timezone: %s
@@ -101,6 +102,7 @@ Your timezone: %s
             self.print_colors(positions)
 
     def color_position(self, result, team_str, positions):
+        """Based on the result, color the position"""
         if result is None:
             click.secho(team_str, fg=self.colors.POSITION)
         elif 'Champions League' in result or result == "Promotion":
@@ -124,6 +126,7 @@ Your timezone: %s
 
     @staticmethod
     def print_colors(positions):
+        """Print the color which explains the corresponding position"""
         for position in positions:
             try:
                 click.secho(f"This color is {position[0]} position", fg=position[1])
@@ -160,6 +163,7 @@ Your timezone: %s
         return self.bet_matches
 
     def group_games(self, games, games_copy):
+        """Group the games based on round or stage"""
         keys = [list(key.keys()) for key in games_copy]
         uniq_keys = set()
         for key in keys:
@@ -174,6 +178,7 @@ Your timezone: %s
         return games
 
     def print_matches(self, games, parameters):
+        """Print the matches"""
         for matchday, matches in games:
             print_matchday = ''
             if len(str(matchday)) < 3:
@@ -184,6 +189,7 @@ Your timezone: %s
                 self.print_match(match, parameters, print_matchday, matchday)
 
     def print_match(self, match, parameters, print_matchday, matchday):
+        """Print match and all other match-details"""
         if parameters.type_sort == "today" and match["time"]["status"] in ["LIVE", "HT", "ET", "PEN_LIVE", "AET",
                                                                            "BREAK", "AU"]:
             return
@@ -264,6 +270,7 @@ Your timezone: %s
                     fg=away_color, nl=False)
 
     def print_odds(self, match):
+        """Print the odds"""
         odds_dict = {"1": [], "X": [], "2": []}
         for bookmaker in match["odds"]["data"]:
             for odds in bookmaker["bookmaker"]["data"]:
@@ -274,10 +281,12 @@ Your timezone: %s
 
     @staticmethod
     def fill_odds(odd, odds):
+        """Fills the odds with all odds"""
         odds[odd["label"]].append(float(odd["value"]))
         return odds
 
     def print_datetime_status(self, match, parameters):
+        """Prints the date/time in a pretty format based on the match status"""
         if match["time"]["status"] in ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK"]:
             if match["time"]["status"] == "HT":
                 click.secho(f'   HT',
@@ -305,6 +314,7 @@ Your timezone: %s
                             fg=self.colors.TIME)
 
     def print_datetime_status_matches(self, match):
+        """Prints the date/time in a pretty format based on the match status"""
         if match["time"]["status"] in ["FT", "FT_PEN", "AET", "TBA"]:
             click.secho(f'   {convert.convert_datetime(match["time"]["starting_at"]["date"])} '
                         f'{match["time"]["status"]}',
@@ -316,6 +326,7 @@ Your timezone: %s
                         fg=self.colors.TIME)
 
     def print_details(self, match):
+        """Prints the match details in a pretty format"""
         goals = []
         events = sorted(match["events"]["data"], key=lambda x: x["id"])
         for event in events:
@@ -338,7 +349,7 @@ Your timezone: %s
         self.goals(goals)
 
     def odds(self, odds):
-        """Prints out the odds in a pretty format"""
+        """Prints the odds in a pretty format"""
         if odds.winning_odd == 0:
             home_color, draw_color, away_color = (self.colors.WIN, self.colors.LOSE, self.colors.LOSE)
         elif odds.winning_odd == 1:
@@ -353,6 +364,7 @@ Your timezone: %s
 
     @staticmethod
     def merge_duplicate_keys(dicts):
+        """Merge duplicate keys in dicts"""
         d = {}
         for i_dict in dicts:
             for key in i_dict:
@@ -366,6 +378,7 @@ Your timezone: %s
     @staticmethod
     def calculate_winning_team(home_goals, away_goals, game_status):
         # hometeam won
+        """Calculate the winning team"""
         if home_goals > away_goals and game_status != "TBA":
             return "1"
         # awayteam won
@@ -380,6 +393,7 @@ Your timezone: %s
 
     @staticmethod
     def get_pretty_goals_clean_sheet(team, events):
+        """Get the goals in a pretty-format"""
         goals = []
         for goal in events[team]:
             number_of_goals = len(events[team][goal][0]["minute"])
@@ -402,6 +416,7 @@ Your timezone: %s
 
     @staticmethod
     def get_pretty_goals(events):
+        """Get the goals in a pretty-format"""
         goals = []
         for goal in events["home"]:
             number_of_goals = len(events["home"][goal][0]["minute"])
@@ -441,8 +456,11 @@ Your timezone: %s
 
     def parse_result(self, data):
         """Parses the results and returns a Result namedtuple"""
+
         def match_status(status, score):
+            """If the status is NS or TBA, return "-", else return the score """
             return "-" if status in ["NS", "TBA"] else score
+
         result = self.Result(
             data["localTeam"]["data"]["name"],
             match_status(data["time"]["status"], data["scores"]["localteam_score"]),
@@ -453,11 +471,14 @@ Your timezone: %s
 
     def parse_odd(self, odds, home_goals, away_goals, status):
         """Parses the odds and returns a Odds namedtuple"""
+
         def winning_odd():
+            """Returns the winning_odd"""
             winning_team = self.calculate_winning_team(home_goals, away_goals, status)
             return winning_team
 
         def average_odd(odd_in):
+            """Calculates the average odd"""
             try:
                 return sum(odd_in) / len(odd_in)
             except ValueError:
@@ -483,6 +504,7 @@ Your timezone: %s
 
     @staticmethod
     def groupby_round(matches):
+        """Group the matches by round"""
         for match in matches:
             try:
                 match['round']['data']['name']
