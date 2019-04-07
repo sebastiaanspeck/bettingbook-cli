@@ -378,11 +378,11 @@ Your timezone: %s
 
     @staticmethod
     def calculate_winning_team(home_goals, away_goals, game_status):
-        # hometeam won
+        # home team won
         """Calculate the winning team"""
         if home_goals > away_goals and game_status != "TBA":
             return "1"
-        # awayteam won
+        # away team won
         elif home_goals < away_goals and game_status != "TBA":
             return "2"
         # draw
