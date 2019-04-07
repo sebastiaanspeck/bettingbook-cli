@@ -38,6 +38,7 @@ def date(date_str):
 
 
 def time(time_str):
+    """Converts the API UTC time string to the local user time."""
     return dt.datetime.strftime(dt.datetime.strptime(time_str, '%H:%M:%S'), '%H:%M')
 
 
