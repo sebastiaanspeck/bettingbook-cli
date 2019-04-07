@@ -63,6 +63,9 @@
     }, {
       "EC": ["1326"],
       "name": "European Championship"
+    }, {
+      "UNL": ["1538"],
+      "name": "UEFA Nations League"
     }
   ]
 }
