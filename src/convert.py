@@ -20,10 +20,10 @@ LEAGUES_DATA = load_json("leagues.json")["leagues"]
 
 def league_id_to_league_name(league):
     for leagues in LEAGUES_DATA:
-        leaguename = list(leagues.values())[1]
-        leagueids = list(leagues.values())[0]
-        if str(league) in leagueids:
-            return leaguename
+        league_name = list(leagues.values())[1]
+        league_ids = list(leagues.values())[0]
+        if str(league) in league_ids:
+            return league_name
     return None
 
 
@@ -52,18 +52,18 @@ def prediction_to_msg(prediction):
 
 def player_name(name):
     try:
-        player_name = name.split(' ', 1)
+        name = name.split(' ', 1)
     except AttributeError:
         return name
-    if len(player_name) == 1:
-        player_name = player_name[0]
+    if len(name) == 1:
+        name = name[0]
     else:
-        player_name = player_name[1]
-    return player_name
+        name = name[1]
+    return name
 
 
-    return teamid == str(hometeam)
 def team_id_to_team_name(team_id, home_team):
+    return team_id == str(home_team)
 
 
 def goal_type_to_prefix(goal_type):
