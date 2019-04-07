@@ -67,18 +67,18 @@ Your balance: %s
 Your timezone: %s
 """ % (profile_data['name'], profile_data['balance'], profile_data['timezone']), fg="green", nl=False)
 
-    def standings(self, league_table, league_id, show_details):
+    def standings(self, standings_data, league_id, show_details):
         """ Prints the league standings in a pretty way """
-        for leagues in league_table:
-            self.standings_header(convert.league_id_to_league_name(league_id), show_details, leagues['name'])
-            number_of_teams = len(leagues['standings']['data'])
             positions = set()
+        for standing in standings_data:
+            self.standings_header(convert.league_id_to_league_name(league_id), show_details, standing['name'])
+            number_of_teams = len(standing['standings']['data'])
             if show_details:
                 click.secho(f"{'POS':6}  {'CLUB':30}    {'PLAYED':10}    {'WON':10}    {'DRAW':10}    {'LOST':10}    "
                             f"{'GOALS':10}    {'GOAL DIFF':10}    {'POINTS':10}    {'RECENT FORM':10}")
             else:
                 click.secho(f"{'POS':6}  {'CLUB':30}    {'PLAYED':10}    {'GOAL DIFF':10}    {'POINTS':10}")
-            for team in leagues['standings']['data']:
+            for team in standing['standings']['data']:
                 goal_difference = team['total']['goal_difference']
                 position = team['position']
                 result = team['result']
