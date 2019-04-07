@@ -84,7 +84,7 @@ ch = ConfigHandler()
 @click.option('--history', '-H', is_flag=True, default=False,
               help="Displays past games when used with --time command.")
 @click.option('--details', '-D', is_flag=True, default=False,
-              help="Displays goal-scorers under the score.")
+              help="Displays goal-scorers under the score and a more detailed standing.")
 @click.option('--odds', '-O', is_flag=True, default=False,
               help="Displays the odds above the score.")
 @click.option('--refresh', '-R', is_flag=True, default=False,
