@@ -69,10 +69,10 @@ Your timezone: %s
 
     def standings(self, standings_data, league_id, show_details):
         """ Prints the league standings in a pretty way """
-            positions = set()
         for standing in standings_data:
             self.standings_header(convert.league_id_to_league_name(league_id), show_details, standing['name'])
             number_of_teams = len(standing['standings']['data'])
+            positions = list()
             if show_details:
                 click.secho(f"{'POS':6}  {'CLUB':30}    {'PLAYED':10}    {'WON':10}    {'DRAW':10}    {'LOST':10}    "
                             f"{'GOALS':10}    {'GOAL DIFF':10}    {'POINTS':10}    {'RECENT FORM':10}")
@@ -99,6 +99,7 @@ Your timezone: %s
                 positions = self.color_position(result, team_str, positions)
                 if team['position'] == number_of_teams:
                     click.echo()
+            positions = self.remove_duplicates(positions)
             self.print_colors(positions)
 
     def color_position(self, result, team_str, positions):
@@ -107,18 +108,18 @@ Your timezone: %s
             click.secho(team_str, fg=self.colors.POSITION)
         elif 'Champions League' in result or result == "Promotion":
             if result == "Promotion":
-                positions.add(('promotion', self.colors.CL_POSITION))
+                positions.append(('promotion', self.colors.CL_POSITION))
             elif "Champions League" in result:
-                positions.add(('CL (play-offs)', self.colors.CL_POSITION))
+                positions.append(('CL (play-offs)', self.colors.CL_POSITION))
             click.secho(team_str, bold=True, fg=self.colors.CL_POSITION)
         elif 'Europa League' in result or result == "Promotion Play-off":
             if result == "Promotion Play-off":
-                positions.add(('promotion (play-offs)', self.colors.EL_POSITION))
+                positions.append(('promotion (play-offs)', self.colors.EL_POSITION))
             elif "Europa League" in result:
-                positions.add(('EL (play-offs)', self.colors.EL_POSITION))
+                positions.append(('EL (play-offs)', self.colors.EL_POSITION))
             click.secho(team_str, fg=self.colors.EL_POSITION)
         elif 'Relegation' in result:
-            positions.add(('relegation (play-offs)', self.colors.RL_POSITION))
+            positions.append(('relegation (play-offs)', self.colors.RL_POSITION))
             click.secho(team_str, fg=self.colors.RL_POSITION)
         else:
             click.secho(team_str, fg=self.colors.POSITION)
@@ -513,3 +514,14 @@ Your timezone: %s
             except KeyError:
                 return False
         return True
+
+    @staticmethod
+    def remove_duplicates(li):
+        my_set = set()
+        res = []
+        for e in li:
+            if e not in my_set:
+                res.append(e)
+                my_set.add(e)
+        #
+        return res
