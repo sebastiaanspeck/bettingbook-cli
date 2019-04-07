@@ -272,10 +272,10 @@ Your timezone: %s
     def print_odds(self, match):
         """Print the odds"""
         odds_dict = {"1": [], "X": [], "2": []}
-        for bookmaker in match["odds"]["data"]:
-            for odds in bookmaker["bookmaker"]["data"]:
-                for odd in odds["odds"]["data"]:
-                    odds_dict = self.fill_odds(odd, odds_dict)
+
+        for odds in match["flatOdds"]["data"]:
+            for odd in odds["odds"]:
+                odds_dict = self.fill_odds(odd, odds_dict)
         self.odds(self.parse_odd(odds_dict, match["scores"]["localteam_score"],
                                  match["scores"]["visitorteam_score"], match["time"]["status"]))
 
