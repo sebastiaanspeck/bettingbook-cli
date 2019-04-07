@@ -8,6 +8,7 @@ import time
 import exceptions
 from betting import Betting
 
+
 class RequestHandler(object):
     BASE_URL = 'https://soccer.sportmonks.com/api/v2.0/'
 
@@ -148,9 +149,9 @@ class RequestHandler(object):
                 self.writer.standings(standings_data, league_id, show_details)
             except exceptions.APIErrorException as e:
                 click.secho(str(e), fg="red", bold=True)
-                
+
     def place_bet(self, bet_matches):
-        match_bet = click.prompt("Give the numbers of the matches on which you want to bet (comma-separated)").split(',')
+        match_bet = click.prompt("Give the numbers of the matches you want to bet on (comma-separated)").split(',')
         match_bet = sorted(self.check_match_bet(match_bet, len(bet_matches)))
         if match_bet == 'no_matches':
             click.secho("There are no valid matches selected.", fg="red", bold=True)
@@ -158,7 +159,7 @@ class RequestHandler(object):
             matches = []
             for match_id in match_bet:
                 try:
-                    matches.extend([str(bet_matches[int(match_id)-1])])
+                    matches.extend([str(bet_matches[int(match_id) - 1])])
                 except (IndexError, ValueError):
                     pass
             matches = ','.join(val for val in matches)

@@ -63,7 +63,8 @@ class ConfigHandler(object):
         for section in config.sections():
             keys.extend([key for (key, val) in config.items(section)])
             missing_options.extend([(key, val) for (key, val) in config.items(section) if val == ""])
-        missing_keys = [x for x in ['api_key', 'name', 'balance', 'timezone', 'open_bets', 'closed_bets'] if x not in keys]
+        missing_keys = [x for x in ['api_token', 'name', 'balance', 'timezone', 'open_bets', 'closed_bets']
+                        if x not in keys]
         return missing_sections, missing_keys, missing_options
 
     def check_config_file(self):

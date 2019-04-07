@@ -108,6 +108,7 @@ class Betting(object):
             for odd in odds["odds"]:
                 odds_dict = self.fill_odds(odd, odds_dict)
 
+        home_odd, draw_odd, away_odd = '', '', ''
         for label, values in odds_dict.items():
             odd = average_odd(values)
             odd = "{0:.2f}".format(odd)
@@ -164,7 +165,7 @@ class Betting(object):
     def get_confirmation(prediction, stake, potential_wins):
         msg = convert.prediction_to_msg(prediction)
         return click.confirm(f"Are you sure that the match will result in a {msg} with a stake of {stake}? "
-                                    f"This can result in a potential win of {potential_wins}")
+                             f"This can result in a potential win of {potential_wins}")
 
     @staticmethod
     def calculate_potential_wins(team, stake, odds):
@@ -217,7 +218,8 @@ class Betting(object):
 
     def view_bets(self, type_sort):
         self.main()
-        bets = sorted(self.get_bets(self.config_handler.get_data('betting_files')[f'{type_sort}_bets']), key=lambda x: (x[7]))
+        bets = sorted(self.get_bets(self.config_handler.get_data('betting_files')[f'{type_sort}_bets']),
+                      key=lambda x: (x[7]))
         if len(bets) == 0:
             click.secho(f"\nNo {type_sort} bets found.", fg="red", bold=True)
         else:
@@ -230,11 +232,11 @@ class Betting(object):
                             f"{'DATE AND TIME':20} {'RESULT':10} {'CORRECT':10}", bold=True)
             for bet in bets:
                 if type_sort == 'open':
-                    bet_str = f"{bet[5]+' - '+bet[6]:<50} {bet[1]:<15} {bet[4]:<10} " \
-                              f"{bet[2]:<10} {bet[3]:<20} {bet[7]:<20}"
+                    bet_str = f"{bet[5] + ' - ' + bet[6]:<50} {bet[1]:<15} {bet[4]:<10} " \
+                        f"{bet[2]:<10} {bet[3]:<20} {bet[7]:<20}"
                 else:
-                    bet_str = f"{bet[5]+' - '+bet[6]:<50} {bet[1]:<15} {bet[4]:<10} " \
-                              f"{bet[2]:<10} {bet[3]:<20} {bet[7]:<20} {bet[9]:<10} {bet[10]:<10}"
+                    bet_str = f"{bet[5] + ' - ' + bet[6]:<50} {bet[1]:<15} {bet[4]:<10} " \
+                        f"{bet[2]:<10} {bet[3]:<20} {bet[7]:<20} {bet[9]:<10} {bet[10]:<10}"
                 click.secho(bet_str)
 
     def main(self):
