@@ -28,18 +28,27 @@ class RequestHandler(object):
         if req.status_code == requests.codes.ok:
             data = self.get_data(req, url)
             return data
+        else:
+            msg, code = self.get_error(req)
+            click.secho(f"The API returned the next error code: {code} with message: {msg}",
+                        fg="red", bold=True)
 
-        if req.status_code in [requests.codes.bad, requests.codes.server_error]:
-            raise exceptions.APIErrorException('Invalid request. Check parameters.')
+        if req.status_code in [requests.codes.bad, requests.codes.server_error, requests.codes.unauthorized]:
+            raise exceptions.APIErrorException("Invalid request. Check your parameters.")
+        elif req.status_code == requests.codes.forbidden:
+            raise exceptions.APIErrorException("The data you requested is not accessible from your plan.")
+        elif req.status_code == requests.codes.not_found:
+            raise exceptions.APIErrorException("This resource does not exist. Check parameters")
+        elif req.status_code == requests.codes.too_many_requests:
+            raise exceptions.APIErrorException("You have exceeded your allowed requests per minute/day")
+        else:
+            raise exceptions.APIErrorException("Whoops... Something went wrong!")
 
-        if req.status_code == requests.codes.forbidden:
-            raise exceptions.APIErrorException('The data you requested is not accessible from your plan.')
-
-        if req.status_code == requests.codes.not_found:
-            raise exceptions.APIErrorException('This resource does not exist. Check parameters')
-
-        if req.status_code == requests.codes.too_many_requests:
-            raise exceptions.APIErrorException('You have exceeded your allowed requests per minute/day')
+    @staticmethod
+    def get_error(req):
+        parts = json.loads(req.text)
+        error = parts.get('error')
+        return error['message'], error['code']
 
     def get_data(self, req, url):
         parts = json.loads(req.text)
