@@ -147,12 +147,16 @@ def main(api_token, timezone, live, today, matches, standings, league, days, his
         if all_bets:
             betting.view_bets('open')
             betting.view_bets('closed')
+            return
 
         if open_bets:
             betting.view_bets('open')
+            return
 
         if closed_bets:
             betting.view_bets('closed')
+            return
+
         if possible_leagues:
             rh.show_leagues()
             return
