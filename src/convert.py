@@ -18,11 +18,11 @@ def load_json(file):
 LEAGUES_DATA = load_json("leagues.json")["leagues"]
 
 
-def league_id_to_league_name(league):
+def league_id_to_league_name(league_id):
     for leagues in LEAGUES_DATA:
         league_name = list(leagues.values())[1]
         league_ids = list(leagues.values())[0]
-        if str(league) in league_ids:
+        if str(league_id) in league_ids:
             return league_name
     return ''
 
