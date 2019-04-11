@@ -494,8 +494,8 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             """Calculates the average odd"""
             try:
                 return sum(odd_in) / len(odd_in)
-            except ValueError:
-                return '0.00'
+            except (ValueError, ZeroDivisionError):
+                return 0.00
 
         home_odd, draw_odd, away_odd = '', '', ''
         for label, values in odds.items():

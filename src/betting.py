@@ -101,8 +101,8 @@ class Betting(object):
         def average_odd(odd_in):
             try:
                 return sum(odd_in) / len(odd_in)
-            except ValueError:
-                return '0.00'
+            except (ValueError, ZeroDivisionError):
+                return 0.00
         odds_dict = {"1": [], "X": [], "2": []}
         for odds in match["flatOdds"]["data"]:
             for odd in odds["odds"]:
