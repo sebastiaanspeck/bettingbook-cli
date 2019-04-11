@@ -27,6 +27,15 @@ def league_id_to_league_name(league):
     return None
 
 
+def league_id_to_league_abbreviation(league_id):
+    for leagues in LEAGUES_DATA:
+        league_abbr = list(leagues.keys())[0]
+        league_ids = list(leagues.values())[0]
+        if str(league_id) in league_ids:
+            return league_abbr
+    return ''
+
+
 def datetime(datetime_str):
     """Converts the API UTC datetime string to the local user datetime."""
     return dt.datetime.strftime(dt.datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S'), '%d-%m-%Y %H:%M')
