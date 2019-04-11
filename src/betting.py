@@ -206,13 +206,13 @@ class Betting(object):
         data = [prediction, stake, potential_wins, odd, match, date]
         self.place_bet_confirmation(data)
 
-    def place_bet_confirmation(self, daty):
-        if self.get_confirmation(daty[0], daty[1], daty[2]):
-            self.update_balance(daty[1], 'loss')
-            data = [daty[4]['id'], daty[0], daty[1], daty[2], daty[3],
-                    daty[4]['localTeam']['data']['name'], daty[4]['visitorTeam']['data']['name'],
-                    convert.datetime(daty[4]["time"]["starting_at"]["date_time"]), daty[5]]
-            self.write_to_bets_file(data, 'open_bets')
+    def place_bet_confirmation(self, data_in):
+        if self.get_confirmation(data_in[0], data_in[1], data_in[2]):
+            self.update_balance(data_in[1], 'loss')
+            data_out = [data_in[4]['id'], data_in[0], data_in[1], data_in[2], data_in[3],
+                        data_in[4]['localTeam']['data']['name'], data_in[4]['visitorTeam']['data']['name'],
+                        convert.datetime(data_in[4]["time"]["starting_at"]["date_time"]), data_in[5]]
+            self.write_to_bets_file(data_out, 'open_bets')
         else:
             click.secho("Your bet is canceled\n")
 
