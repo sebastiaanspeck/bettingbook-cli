@@ -79,10 +79,10 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             number_of_teams = len(standing['standings']['data'])
             positions = list()
             if show_details:
-                click.secho(f"{'POS':6}  {'CLUB':30}    {'PLAYED':8}    {'WON':8}    {'DRAW':8}    {'LOST':8}    "
+                click.secho(f"{'POS':6}  {'CLUB':20}    {'PLAYED':8}    {'WON':8}    {'DRAW':8}    {'LOST':8}    "
                             f"{'GOALS':8}    {'GOAL DIFF':8}    {'POINTS':8}    {'RECENT FORM':8}")
             else:
-                click.secho(f"{'POS':6}  {'CLUB':30}    {'PLAYED':8}    {'GOAL DIFF':8}    {'POINTS':8}")
+                click.secho(f"{'POS':6}  {'CLUB':20}    {'PLAYED':8}    {'GOAL DIFF':6}    {'POINTS':8}")
             for team in standing['standings']['data']:
                 goal_difference = team['total']['goal_difference']
                 position = team['position']
@@ -94,13 +94,13 @@ Your timezone: {profile_data['timezone']}""", fg="green")
                     goals = goals + " "
 
                 if show_details:
-                    team_str = (f"{position:<7} {team['team_name']:<33} {str(team['overall']['games_played']):<12}"
-                                f"{str(team['overall']['won']):<11} {str(team['overall']['draw']):<11} "
-                                f"{str(team['overall']['lost']):<11} {goals:<11} "
-                                f"{goal_difference:<12} {team['total']['points']:<11} {recent_form}")
+                    team_str = (f"{position:<7} {team['team_name']:<20} {str(team['overall']['games_played']):>9}"
+                                f"{str(team['overall']['won']):>9} {str(team['overall']['draw']):>12} "
+                                f"{str(team['overall']['lost']):>11} {goals:>12} "
+                                f"{goal_difference:>15} {team['total']['points']:>9} {recent_form:>16}")
                 else:
-                    team_str = (f"{position:<7} {team['team_name']:<33} {str(team['overall']['games_played']):<12}"
-                                f"{goal_difference:<12} {team['total']['points']}")
+                    team_str = (f"{position:<7} {team['team_name']:<20} {str(team['overall']['games_played']):>9}"
+                                f"{goal_difference:>15} {team['total']['points']:>9}")
                 positions = self.color_position(result, team_str, positions)
                 if team['position'] == number_of_teams:
                     click.echo()
