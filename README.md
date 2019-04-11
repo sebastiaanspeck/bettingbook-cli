@@ -87,9 +87,11 @@ $ bettingbook.py --help
 - England:
   - EN1: Premier League
   - ENC: FA Cup
+- Portugal:
+  - PT1: Primeira Liga  
 - Netherlands:
   - NL1: Eredivisie
-  - NL2: Jupiler League/Eerste Divisie
+  - NL2: Eerste Divisie/Keuken Kampioen Divisie
   - NLC: KNVB Beker
 - Belgium:
   - BE1: Pro League
