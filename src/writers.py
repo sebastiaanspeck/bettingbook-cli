@@ -69,8 +69,15 @@ Your timezone: {profile_data['timezone']}""", fg="green")
     @staticmethod
     def show_leagues(leagues):
         click.secho("Showing the leagues that are in your Sportmonks API Plan. ")
+        click.secho(f"{'ID':7} {'NAME':30} {'ABBREVIATION':15} {'LEAGUE NAME':15}", bold=True)
+        league_data = []
         for league in leagues:
-            click.secho(f"id: {league['id']} and name: {league['name']}")
+            league_abbreviation = convert.league_id_to_league_abbreviation(league['id'])
+            league_name = convert.league_id_to_league_name(league['id'])
+            league_data.append([league['id'], league['name'], league_abbreviation, league_name])
+        league_data = sorted(league_data, key=lambda x: (x[2]))
+        for league in league_data:
+            click.secho(f"{league[0]:<7} {league[1]:<30} {league[2]:<15} {league[3]:<15}")
 
     def standings(self, standings_data, league_id, show_details):
         """ Prints the league standings in a pretty way """
