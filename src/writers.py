@@ -157,7 +157,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
         for league, games in groupby(scores, key=lambda x: x['league_id']):
             league = convert.league_id_to_league_name(league)
             games = sorted(games, key=lambda x: x["time"]["starting_at"]["date_time"])
-            if league is None:
+            if league is '':
                 continue
             games_copy = copy.deepcopy(games)
             league_prefix = list(set([x['league']['data']['name'] for x in games_copy]))

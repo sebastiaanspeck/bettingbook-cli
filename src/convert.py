@@ -24,7 +24,7 @@ def league_id_to_league_name(league):
         league_ids = list(leagues.values())[0]
         if str(league) in league_ids:
             return league_name
-    return None
+    return ''
 
 
 def league_id_to_league_abbreviation(league_id):
