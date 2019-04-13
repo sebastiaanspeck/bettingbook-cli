@@ -114,12 +114,13 @@ class RequestHandler(object):
         self.set_params()
         start, end = self.set_start_end(parameters.show_history, parameters.days)
         if parameters.league_name:
-            try:
-                league_id = self.get_league_abbreviation(parameters.league_name)
-                self.params['leagues'] = ','.join(str(val) for val in league_id)
-                self.get_match_data(parameters, start, end)
-            except exceptions.APIErrorException as e:
-                click.secho(str(e), fg="red", bold=True)
+            for league in parameters.league_name:
+                try:
+                    league_id = self.get_league_abbreviation(league)
+                    self.params['leagues'] = ','.join(str(val) for val in league_id)
+                    self.get_match_data(parameters, start, end)
+                except exceptions.APIErrorException as e:
+                    click.secho(str(e), fg="red", bold=True)
         else:
             try:
                 self.get_match_data(parameters, start, end)
@@ -149,19 +150,20 @@ class RequestHandler(object):
             s.enter(60, 1, self.get_match_data, (parameters, start, end,))
             s.run()
 
-    def get_standings(self, league_name, show_details):
-        for league_id in self.get_league_abbreviation(league_name):
-            url = f'leagues/{league_id}'
-            try:
-                league_data = self._get(url)
-                current_season_id = league_data['current_season_id']
-                url = f'standings/season/{current_season_id}'
-                standings_data = self._get(url)
-                if len(standings_data) == 0:
-                    continue
-                self.writer.standings(standings_data, league_id, show_details)
-            except exceptions.APIErrorException as e:
-                click.secho(str(e), fg="red", bold=True)
+    def get_standings(self, leagues, show_details):
+        for league in leagues:
+            for league_id in self.get_league_abbreviation(league):
+                url = f'leagues/{league_id}'
+                try:
+                    league_data = self._get(url)
+                    current_season_id = league_data['current_season_id']
+                    url = f'standings/season/{current_season_id}'
+                    standings_data = self._get(url)
+                    if len(standings_data) == 0:
+                        continue
+                    self.writer.standings(standings_data, league_id, show_details)
+                except exceptions.APIErrorException as e:
+                    click.secho(str(e), fg="red", bold=True)
 
     def place_bet(self, bet_matches):
         match_bet = click.prompt("Give the numbers of the matches you want to bet on (comma-separated)").split(',')

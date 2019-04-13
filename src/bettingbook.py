@@ -38,15 +38,16 @@ def check_options(history, bet, live, today, refresh, matches):
                                            'Use --live or --today to use this parameters')
 
 
-def check_options_standings(league, history):
-    if not league:
+def check_options_standings(leagues, history):
+    if not leagues:
         raise IncorrectParametersException('Please specify a league. '
                                            'Example --standings --league=EN1')
     if history:
         raise IncorrectParametersException('--history and --days is not supported for --standings. '
                                            'Use --matches to use these parameters')
-    if league.endswith('C') and league not in ["WC", "EC"]:
-        raise IncorrectParametersException(f'Standings for {league} not supported')
+    for league in leagues:
+        if league.endswith('C') and league not in ["WC", "EC"]:
+            raise IncorrectParametersException(f'Standings for {league} not supported')
 
 
 ch = ConfigHandler()
@@ -66,7 +67,7 @@ ch = ConfigHandler()
               help="Shows matches from various leagues for a longer period.")
 @click.option('--standings', '-S', is_flag=True,
               help="Standings for a particular league.")
-@click.option('--league', '-l', type=click.Choice(LEAGUES),
+@click.option('--league', '-l', type=click.Choice(LEAGUES), multiple=True,
               help="Show fixtures from a particular league.")
 @click.option('--days', '-d', default=7, show_default=True,
               help=("The number of days in the future for which you "
