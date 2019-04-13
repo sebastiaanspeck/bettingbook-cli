@@ -108,7 +108,7 @@ $ bettingbook.py --help
 
 ### Supported leagues & cups
 
-For a full list of supported leagues & cups [see this](src/leagues.json).
+For a full list of supported leagues & cups [see this](src/league_files/all_leagues.json).
 
 ### Commands and possible arguments
 - --live (-L):
