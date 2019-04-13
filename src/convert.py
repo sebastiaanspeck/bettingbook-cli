@@ -1,21 +1,12 @@
-import json
-import os
 import datetime as dt
 from re import sub
 from decimal import Decimal
 
+from json_handler import JsonHandler
 import writers
 
-
-def load_json(file):
-    """Load JSON file at app start"""
-    here = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(here, file)) as json_file:
-        data = json.load(json_file)
-    return data
-
-
-LEAGUES_DATA = load_json("leagues.json")["leagues"]
+jh = JsonHandler()
+LEAGUES_DATA = jh.load_leagues()
 
 
 def league_id_to_league_name(league_id):

@@ -1,5 +1,4 @@
 import click
-import json
 import os
 import copy
 
@@ -10,16 +9,10 @@ from itertools import groupby
 from collections import namedtuple
 from datetime import datetime
 
+from json_handler import JsonHandler
 
-def load_json(file):
-    """Load JSON file at app start"""
-    here = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(here, file)) as json_file:
-        data = json.load(json_file)
-    return data
-
-
-LEAGUES_DATA = load_json("leagues.json")["leagues"]
+jh = JsonHandler()
+LEAGUES_DATA = jh.load_leagues()
 
 
 def get_writer(output_format='stdout', output_file=None):

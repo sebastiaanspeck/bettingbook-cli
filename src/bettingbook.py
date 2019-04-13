@@ -1,24 +1,15 @@
-import os
 import click
-import json
 from collections import namedtuple
 
 from config_handler import ConfigHandler
 from request_handler import RequestHandler
+from json_handler import JsonHandler
 from exceptions import IncorrectParametersException
 from writers import get_writer
 from betting import Betting
 
-
-def load_json(file):
-    """Load JSON file at app start"""
-    here = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(here, file)) as json_file:
-        data = json.load(json_file)
-    return data
-
-
-LEAGUES_DATA = load_json("leagues.json")['leagues']
+jh = JsonHandler()
+LEAGUES_DATA = jh.load_leagues()
 LEAGUES = [list(x.keys())[0] for x in LEAGUES_DATA]
 
 
