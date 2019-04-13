@@ -21,8 +21,12 @@ class RequestHandler(object):
     def show_profile(self):
         self.writer.show_profile(self.config_handler.get_data('profile'))
 
+    def get_leagues(self):
+        self.params['include'] = 'country'
+        return self._get('leagues')
+
     def show_leagues(self):
-        leagues = self._get('leagues')
+        leagues = self.get_leagues()
         self.writer.show_leagues(leagues)
 
     def _get(self, url):
