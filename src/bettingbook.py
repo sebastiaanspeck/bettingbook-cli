@@ -101,6 +101,7 @@ def main(api_token, timezone, live, today, matches, standings, league, days, his
         writer = get_writer()
         rh = RequestHandler(params, LEAGUES_DATA, writer, ch)
         betting = Betting(params, LEAGUES_DATA, writer, rh, ch)
+        betting.check_open_bets()
 
         Parameters = namedtuple("parameters", "url, msg, league_name, days, "
                                 "show_history, show_details, show_odds, refresh, place_bet, type_sort")
