@@ -159,9 +159,9 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             if skip_league:
                 continue
             if league_prefix[0] == league:
-                self.league_header(league)
+                self.league_header(league, parameters.place_bet)
             else:
-                self.league_header(league + ' - ' + league_prefix[0])
+                self.league_header(league + ' - ' + league_prefix[0], parameters.place_bet)
             games = self.group_games(games, games_copy)
             self.print_matches(games, parameters)
         return self.bet_matches
@@ -187,9 +187,9 @@ Your timezone: {profile_data['timezone']}""", fg="green")
         for matchday, matches in games:
             print_matchday = ''
             if len(str(matchday)) < 3:
-                self.league_subheader(matchday, 'matchday')
+                self.league_subheader(matchday, 'matchday', parameters.place_bet)
             else:
-                self.league_subheader(matchday, 'stage')
+                self.league_subheader(matchday, 'stage', parameters.place_bet)
             for match in matches:
                 self.print_match(match, parameters, print_matchday, matchday, skip_match_statuses)
 
@@ -199,9 +199,9 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             return
         if matchday == "Regular Season" and print_matchday != match["round"]["data"]["name"]:
             print_matchday = match["round"]["data"]["name"]
-            self.league_subheader(print_matchday, 'matchday')
+            self.league_subheader(print_matchday, 'matchday', parameters.place_bet)
         if parameters.show_odds:
-            self.print_odds(match)
+            self.print_odds(match, parameters.place_bet)
         if parameters.place_bet:
             self.bet_matches.extend([match["id"]])
         self.scores(self.parse_result(match), parameters.place_bet)
@@ -217,10 +217,13 @@ Your timezone: {profile_data['timezone']}""", fg="green")
         """Prints the time at which the data was updated"""
         click.secho(f"Last update: {datetime.now():%d-%m-%Y %H:%M:%S}", fg=self.colors.MISC)
 
-    def league_header(self, league):
+    def league_header(self, league, place_bet):
         """Prints the league header"""
         league_name = f" {league} "
-        click.secho(f"{league_name:=^62}", fg=self.colors.MISC)
+        if place_bet:
+            click.secho(f"===={league_name:=^62}", fg=self.colors.MISC)
+        else:
+            click.secho(f"{league_name:=^62}", fg=self.colors.MISC)
 
     def standings_header(self, league, details, prefix=None):
         """Prints the league header"""
@@ -231,13 +234,16 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             click.secho(f"{league_name:#^73}", fg=self.colors.MISC)
         click.echo()
 
-    def league_subheader(self, subheader, type_header):
+    def league_subheader(self, subheader, type_header, place_bet):
         """Prints the league matchday"""
         if type_header == 'matchday':
             league_subheader = " Matchday {0} ".format(subheader)
         else:
             league_subheader = " {0} ".format(subheader)
-        click.secho(f"{league_subheader:-^62}", fg=self.colors.MISC)
+        if place_bet:
+            click.secho(f"----{league_subheader:-^62}", fg=self.colors.MISC)
+        else:
+            click.secho(f"{league_subheader:-^62}", fg=self.colors.MISC)
         click.echo()
 
     def scores(self, result, place_bet):
@@ -255,18 +261,15 @@ Your timezone: {profile_data['timezone']}""", fg="green")
                 click.secho(f"{self.score_id}.  ", nl=False)
             else:
                 click.secho(f"{self.score_id}. ", nl=False)
-            x = 21
             self.score_id += 1
-        else:
-            x = 25
 
-        click.secho(f"{result.home_team:{x}} {result.goals_home_team:>2}",
+        click.secho(f"{result.home_team:{25}} {result.goals_home_team:>2}",
                     fg=home_color, nl=False)
         click.secho("  vs ", nl=False)
         click.secho(f"{result.goals_away_team:>2} {result.away_team.rjust(26)}",
                     fg=away_color, nl=False)
 
-    def print_odds(self, match):
+    def print_odds(self, match, place_bet):
         """Print the odds"""
         odds_dict = {"1": [], "X": [], "2": []}
 
@@ -274,7 +277,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             for odd in odds["odds"]:
                 odds_dict = self.fill_odds(odd, odds_dict)
         self.odds(self.parse_odd(odds_dict, match["scores"]["localteam_score"],
-                                 match["scores"]["visitorteam_score"], match["time"]["status"]))
+                                 match["scores"]["visitorteam_score"], match["time"]["status"]), place_bet)
 
     @staticmethod
     def fill_odds(odd, odds):
@@ -345,7 +348,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
                                                match["scores"]["visitorteam_score"])
         self.goals(goals)
 
-    def odds(self, odds):
+    def odds(self, odds, place_bet):
         """Prints the odds in a pretty format"""
         if odds.winning_odd == 0:
             home_color, draw_color, away_color = (self.colors.WIN, self.colors.LOSE, self.colors.LOSE)
@@ -355,7 +358,10 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             home_color, draw_color, away_color = (self.colors.LOSE, self.colors.LOSE, self.colors.WIN)
         else:
             home_color, draw_color, away_color = (self.colors.ODDS, self.colors.ODDS, self.colors.ODDS)
-        click.secho("{}".format(odds.odd_home_team.rjust(28)), fg=home_color, nl=False)
+        x = 28
+        if place_bet:
+            x = 32
+        click.secho("{}".format(odds.odd_home_team.rjust(x)), fg=home_color, nl=False)
         click.secho(" {} ".format(odds.odd_draw), fg=draw_color, nl=False)
         click.secho("{}".format(odds.odd_away_team), fg=away_color, nl=True)
 
@@ -519,7 +525,6 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             if e not in my_set:
                 res.append(e)
                 my_set.add(e)
-        #
         return res
 
     @staticmethod
