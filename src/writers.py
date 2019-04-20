@@ -155,10 +155,8 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             games_copy = copy.deepcopy(games)
             league_prefix = list(set([x['league']['data']['name'] for x in games_copy]))
             match_status = set([x['time']['status'] for x in games_copy])
-            if parameters.type_sort == "live" and match_status == {"NS"} or \
-                    parameters.type_sort == "live" and match_status == {"FT"}:
-                continue
-            if parameters.type_sort == "today" and match_status == {"LIVE"}:
+            skip_league = self.get_skip_league(match_status, parameters.type_sort, parameters.place_bet)
+            if skip_league:
                 continue
             if league_prefix[0] == league:
                 self.league_header(league)
@@ -185,6 +183,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
 
     def print_matches(self, games, parameters):
         """Print the matches"""
+        skip_match_statuses = self.get_match_statuses_to_skip(parameters.type_sort, parameters.place_bet)
         for matchday, matches in games:
             print_matchday = ''
             if len(str(matchday)) < 3:
@@ -192,19 +191,11 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             else:
                 self.league_subheader(matchday, 'stage')
             for match in matches:
-                self.print_match(match, parameters, print_matchday, matchday)
+                self.print_match(match, parameters, print_matchday, matchday, skip_match_statuses)
 
-    def print_match(self, match, parameters, print_matchday, matchday):
+    def print_match(self, match, parameters, print_matchday, matchday, skip_match_statuses):
         """Print match and all other match-details"""
-        if parameters.type_sort == "today" and match["time"]["status"] in ["LIVE", "HT", "ET", "PEN_LIVE", "AET",
-                                                                           "BREAK", "AU"]:
-            return
-        if parameters.type_sort == "live" and match["time"]["status"] in ["NS", "FT", "FT_PEN", "CANCL", "POSTP",
-                                                                          "INT", "ABAN", "SUSP", "AWARDED", "DELAYED",
-                                                                          "TBA", "WO", "AU"]:
-            return
-        if parameters.type_sort == "matches" and match["time"]["status"] in ["LIVE", "HT", "ET", "PEN_LIVE", "AET",
-                                                                             "BREAK", "AU"]:
+        if match["time"]["status"] in skip_match_statuses:
             return
         if matchday == "Regular Season" and print_matchday != match["round"]["data"]["name"]:
             print_matchday = match["round"]["data"]["name"]
@@ -530,3 +521,30 @@ Your timezone: {profile_data['timezone']}""", fg="green")
                 my_set.add(e)
         #
         return res
+
+    @staticmethod
+    def get_match_statuses_to_skip(type_sort, place_bet):
+        if type_sort == "today" and place_bet is True:
+            return ["FT", "FT_PEN", "CANCL", "POSTP", "INT", "ABAN",
+                    "SUSP", "AWARDED", "DELAYED", "TBA", "WO", "AU",
+                    "LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK", "AU"]
+        elif type_sort == "today" or type_sort == "matches":
+            return ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK", "AU"]
+        elif type_sort == "live":
+            return ["NS", "FT", "FT_PEN", "CANCL", "POSTP", "INT", "ABAN",
+                    "SUSP", "AWARDED", "DELAYED", "TBA", "WO", "AU"]
+        else:
+            return []
+
+    @staticmethod
+    def get_skip_league(match_status, type_sort, place_bet):
+        if type_sort == "live" and match_status == {"NS"}:
+            return True
+        elif type_sort == "live" and match_status == {"FT"}:
+            return True
+        elif type_sort == "today" and match_status == {"LIVE"}:
+            return True
+        elif type_sort == "today" and place_bet and match_status == {"FT"}:
+            return True
+        else:
+            return False
