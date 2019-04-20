@@ -218,8 +218,11 @@ class Betting(object):
 
     def view_bets(self, type_sort):
         self.main()
+        sort_reverse = True
+        if type_sort == "open":
+            sort_reverse = False
         bets = sorted(self.get_bets(self.config_handler.get_data('betting_files')[f'{type_sort}_bets']),
-                      key=lambda x: (x[7]))
+                      key=lambda x: (x[7]), reverse=sort_reverse)
         if len(bets) == 0:
             click.secho(f"\nNo {type_sort} bets found.", fg="red", bold=True)
         else:
@@ -230,14 +233,18 @@ class Betting(object):
             else:
                 click.secho(f"{'MATCH':50} {'PREDICTION':15} {'ODD':10} {'STAKE':10} {'POTENTIAL WINS':20} "
                             f"{'DATE AND TIME':20} {'RESULT':10} {'CORRECT':10}", bold=True)
+            iteration = 0
+            max_iterations = int(self.config_handler.get('profile', 'number_of_bets'))
             for bet in bets:
-                if type_sort == 'open':
-                    bet_str = f"{bet[5] + ' - ' + bet[6]:<50} {bet[1]:<15} {bet[4]:<10} " \
-                        f"{bet[2]:<10} {bet[3]:<20} {bet[7]:<20}"
-                else:
-                    bet_str = f"{bet[5] + ' - ' + bet[6]:<50} {bet[1]:<15} {bet[4]:<10} " \
-                        f"{bet[2]:<10} {bet[3]:<20} {bet[7]:<20} {bet[9]:<10} {bet[10]:<10}"
-                click.secho(bet_str)
+                if iteration <= max_iterations:
+                    if type_sort == 'open':
+                        bet_str = f"{bet[5] + ' - ' + bet[6]:<50} {bet[1]:<15} {bet[4]:<10} " \
+                            f"{bet[2]:<10} {bet[3]:<20} {bet[7]:<20}"
+                    else:
+                        bet_str = f"{bet[5] + ' - ' + bet[6]:<50} {bet[1]:<15} {bet[4]:<10} " \
+                            f"{bet[2]:<10} {bet[3]:<20} {bet[7]:<20} {bet[9]:<10} {bet[10]:<10}"
+                    click.secho(bet_str)
+                iteration += 1
 
     def main(self):
         self.check_for_files(self.config_handler.get_data('betting_files').values())
