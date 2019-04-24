@@ -547,5 +547,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             return True
         elif type_sort == "today" and place_bet and match_status == {"FT"}:
             return True
+        elif type_sort == "matches" and not any(status in match_status for status in ["NS", "FT"]):
+            return True
         else:
             return False
