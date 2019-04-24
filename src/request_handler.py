@@ -32,6 +32,7 @@ class RequestHandler(object):
     def _get(self, url):
         """Handles soccer.sportsmonks requests"""
         req = requests.get(RequestHandler.BASE_URL + url, params=self.params)
+        self.reset_params()
 
         if req.status_code == requests.codes.ok:
             data = self.get_data(req, url)
@@ -51,6 +52,10 @@ class RequestHandler(object):
             raise exceptions.APIErrorException("You have exceeded your allowed requests per minute/day")
         else:
             raise exceptions.APIErrorException("Whoops... Something went wrong!")
+
+    def reset_params(self):
+        self.params = {'api_token': self.config_handler.get('auth', 'api_token'),
+                       'tz': self.config_handler.get('profile', 'timezone')}
 
     @staticmethod
     def get_error(req):
