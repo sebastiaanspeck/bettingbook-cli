@@ -33,9 +33,9 @@ class ConfigHandler(object):
         for (key, val) in config.items(section):
             data[key] = val
         return data
-    
-    def update_config_file(self, section, key, value):
-        self.load_config_file()
+
+    @staticmethod
+    def update_config_file(section, key, value):
         config.set(section, key, value)
         with open(ConfigHandler.FILENAME, 'w') as cfgfile:
             config.write(cfgfile)
