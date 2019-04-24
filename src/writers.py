@@ -185,21 +185,17 @@ Your timezone: {profile_data['timezone']}""", fg="green")
         """Print the matches"""
         skip_match_statuses = self.get_match_statuses_to_skip(parameters.type_sort, parameters.place_bet)
         for matchday, matches in games:
-            print_matchday = ''
             if len(str(matchday)) < 3:
                 self.league_subheader(matchday, 'matchday', parameters.place_bet)
             else:
                 self.league_subheader(matchday, 'stage', parameters.place_bet)
             for match in matches:
-                self.print_match(match, parameters, print_matchday, matchday, skip_match_statuses)
+                self.print_match(match, parameters, skip_match_statuses)
 
-    def print_match(self, match, parameters, print_matchday, matchday, skip_match_statuses):
+    def print_match(self, match, parameters, skip_match_statuses):
         """Print match and all other match-details"""
         if match["time"]["status"] in skip_match_statuses:
             return
-        if matchday == "Regular Season" and print_matchday != match["round"]["data"]["name"]:
-            print_matchday = match["round"]["data"]["name"]
-            self.league_subheader(print_matchday, 'matchday', parameters.place_bet)
         if parameters.show_odds:
             self.print_odds(match, parameters.place_bet)
         if parameters.place_bet:
