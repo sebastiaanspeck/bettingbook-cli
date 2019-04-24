@@ -76,6 +76,10 @@ class ConfigHandler(object):
                 value = str(input(f"Give the value for {missing_key}: "))
             elif missing_key == "number_of_bets":
                 value = "10"
+            elif missing_key == "open_bets":
+                value = "betting_files/open_bets.csv"
+            elif missing_key == "closed_bets":
+                value = "betting_files/closed_bets.csv"
             else:
                 value = "100"
             if missing_key in ["name", "balance", "timezone", "number_of_bets"]:
@@ -89,12 +93,17 @@ class ConfigHandler(object):
             elif missing_key in ["open_bets", "closed_bets"]:
                 if "betting_files" in missing_sections:
                     config.add_section('betting_files')
+                self.update_config_file("betting_files", missing_key, value)
             missing_sections, missing_keys, missing_options = self.get_missing_data_config()
         for missing_option in missing_options:
             if missing_option[0] != "balance" or missing_option[0] != "number_of_bets":
                 value = str(input(f"Give the value for {missing_option[0]}: "))
             elif missing_option[0] == "number_of_bets":
                 value = "10"
+            elif missing_option[0] == "open_bets":
+                value = "betting_files/open_bets.csv"
+            elif missing_option[0] == "closed_bets":
+                value = "betting_files/closed_bets.csv"
             else:
                 value = "100"
             if missing_option[0] in ["name", "balance", "timezone", "number_of_bets"]:
