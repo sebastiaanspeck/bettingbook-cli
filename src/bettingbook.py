@@ -1,6 +1,7 @@
 import click
 from collections import namedtuple
 
+import graph_plotter
 from config_handler import ConfigHandler
 from request_handler import RequestHandler
 from json_handler import JsonHandler
@@ -93,8 +94,9 @@ ch = ConfigHandler()
               help="Show your closed bets")
 @click.option('--possible-leagues', '-PL', is_flag=True,
               help="Show all leagues that are in your Sportmonks API Plan.")
+@click.option('--balance-history', '-BH', is_flag=True)
 def main(api_token, timezone, live, today, matches, standings, league, days, history, details, odds, refresh, bet,
-         profile, all_bets, open_bets, closed_bets, possible_leagues):
+         profile, all_bets, open_bets, closed_bets, possible_leagues, balance_history):
     params = get_params(api_token, timezone)
 
     try:
@@ -152,6 +154,10 @@ def main(api_token, timezone, live, today, matches, standings, league, days, his
 
         if possible_leagues:
             rh.show_leagues()
+            return
+
+        if balance_history:
+            graph_plotter.show_full_graph()
             return
 
     except IncorrectParametersException as e:

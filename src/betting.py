@@ -87,7 +87,8 @@ class Betting(object):
         if winning_team == predicted_team:
             click.echo(f"Woohoo! You predicted {match_data['localTeam']['data']['name']} - "
                        f"{match_data['visitorTeam']['data']['name']} correct and won {potential_wins}")
-            self.update_balance(convert.float_to_currency(potential_wins), operation='win')
+            balance = self.update_balance(convert.float_to_currency(potential_wins), 'win')
+            self.update_graph_data(balance, convert.date(match_data['time']['starting_at']['date']))
             row.extend((winning_team, "yes"))
         else:
             click.echo(f"Ah noo! You predicted {match_data['localTeam']['data']['name']} - "
@@ -187,6 +188,7 @@ class Betting(object):
             balance = balance + stake
         self.config_handler.update_config_file('profile', 'balance', str(balance))
         click.secho(f"Updated balance: {balance}\n")
+        return balance
 
     def place_bet(self, matches):
         self.main()
@@ -208,7 +210,8 @@ class Betting(object):
 
     def place_bet_confirmation(self, data_in):
         if self.get_confirmation(data_in[0], data_in[1], data_in[2]):
-            self.update_balance(data_in[1], 'loss')
+            balance = self.update_balance(data_in[1], 'loss')
+            self.update_graph_data(balance, convert.date(data_in[4]["time"]["starting_at"]["date"]))
             data_out = [data_in[4]['id'], data_in[0], data_in[1], data_in[2], data_in[3],
                         data_in[4]['localTeam']['data']['name'], data_in[4]['visitorTeam']['data']['name'],
                         convert.datetime(data_in[4]["time"]["starting_at"]["date_time"]), data_in[5]]
@@ -245,6 +248,40 @@ class Betting(object):
                             f"{bet[2]:<10} {bet[3]:<20} {bet[7]:<20} {bet[9]:<10} {bet[10]:<10}"
                     click.secho(bet_str)
                 iteration += 1
+
+    def update_graph_data(self, balance, date):
+        updated = False
+        dates = []
+        start_balances = []
+        end_balances = []
+
+        with open(self.config_handler.get_data('betting_files')['balance_history'], 'r') as csv_reader_file:
+            plots = csv.reader(csv_reader_file, delimiter=',')
+            lines = list(plots)
+
+        for line in lines:
+            try:
+                if line[0] == date:
+                    line[2] = balance
+                    updated = True
+                dates.append(line[0])
+                start_balances.append(line[1])
+                end_balances.append(line[2])
+            except IndexError:
+                pass
+
+        if not updated:
+            try:
+                last_balance = lines[-1][2]
+            except IndexError:
+                last_balance = balance
+            lines.append([date, last_balance, balance])
+
+        with open(self.config_handler.get_data('betting_files')['balance_history'], 'w') as csv_writer_file:
+            writer = csv.writer(csv_writer_file)
+            writer.writerows(lines)
+
+        self.remove_empty_lines_csv_file(self.config_handler.get_data('betting_files')['balance_history'])
 
     def main(self):
         self.check_for_files(self.config_handler.get_data('betting_files').values())
