@@ -113,7 +113,7 @@ class ConfigHandler(object):
                 value = "betting_files/balance_history.csv"
             if missing_option[0] in ["name", "balance", "timezone", "number_of_bets"]:
                 self.update_config_file("profile", missing_option[0], value)
-            if missing_option[0] == "api_key":
+            elif missing_option[0] == "api_key":
                 self.update_config_file("auth", missing_option[0], value)
-            if missing_option[0] in ["open_bets", "closed_bets"]:
+            elif missing_option[0] in ["open_bets", "closed_bets", "balance_history"]:
                 self.update_config_file("betting_files", missing_option[0], value)
