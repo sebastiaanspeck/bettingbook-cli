@@ -146,7 +146,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
         self.score_id = 1
         self.bet_matches = []
         scores = sorted(total_data, key=lambda x: (x["league"]["data"]["country_id"], x['league_id']))
-        self.update_time()
+        self.show_update_time()
         for league, games in groupby(scores, key=lambda x: x['league_id']):
             league = convert.league_id_to_league_name(league)
             games = sorted(games, key=lambda x: x["time"]["starting_at"]["date_time"])
@@ -213,7 +213,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             self.print_details(match)
         click.echo()
 
-    def update_time(self):
+    def show_update_time(self):
         """Prints the time at which the data was updated"""
         click.secho(f"Last update: {datetime.now():%d-%m-%Y %H:%M:%S}", fg=self.colors.MISC)
 
