@@ -91,7 +91,7 @@ ch = ConfigHandler()
               help="Show your open bets")
 @click.option('--closed-bets', '-CB', is_flag=True,
               help="Show your closed bets")
-@click.option('--possible_leagues', '-PL', is_flag=True,
+@click.option('--possible-leagues', '-PL', is_flag=True,
               help="Show all leagues that are in your Sportmonks API Plan.")
 def main(api_token, timezone, live, today, matches, standings, league, days, history, details, odds, refresh, bet,
          profile, all_bets, open_bets, closed_bets, possible_leagues):
