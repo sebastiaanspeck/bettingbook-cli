@@ -4,6 +4,8 @@ import matplotlib.dates as mdates
 import mplcursors
 import csv
 
+import convert
+
 from config_handler import ConfigHandler
 
 
@@ -20,11 +22,12 @@ def show_full_graph():
             start.append(float(row[1]))
             end.append(float(row[2]))
 
-    dates = [dt.datetime.strptime(d, '%d-%m-%Y') for d in dates]
+    date_format = convert.format_date(ch.get('profile', 'date_format'))
+    dates = [dt.datetime.strptime(d, date_format) for d in dates]
 
     fig, ax = plt.subplots()
 
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%d-%m-%Y'))
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter(date_format))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
 
     ax.plot(dates, start, marker=".", color='red', label='Start balance')

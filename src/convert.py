@@ -4,6 +4,7 @@ from decimal import Decimal
 
 from json_handler import JsonHandler
 import writers
+import re
 
 jh = JsonHandler()
 LEAGUES_DATA = jh.load_leagues()
@@ -27,14 +28,22 @@ def league_id_to_league_abbreviation(league_id):
     return ''
 
 
-def datetime(datetime_str):
+def format_date(date_format):
+    if '-' in date_format:
+        splitter = '-'
+    else:
+        splitter = '/'
+    return splitter.join(["%" + char for char in re.split(splitter, date_format)])
+
+
+def datetime(datetime_str, date_format):
     """Converts the API UTC datetime string to the local user datetime."""
-    return dt.datetime.strftime(dt.datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S'), '%d-%m-%Y %H:%M')
+    return dt.datetime.strftime(dt.datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S'), date_format + ' %H:%M')
 
 
-def date(date_str):
+def date(date_str, date_format):
     """Converts the API UTC date string to the local user date."""
-    return dt.datetime.strftime(dt.datetime.strptime(date_str, '%Y-%m-%d'), '%d-%m-%Y')
+    return dt.datetime.strftime(dt.datetime.strptime(date_str, '%Y-%m-%d'), date_format)
 
 
 def time(time_str):

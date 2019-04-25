@@ -212,7 +212,9 @@ class Betting(object):
             self.update_balance(data_in[1], 'loss')
             data_out = [data_in[4]['id'], data_in[0], data_in[1], data_in[2], data_in[3],
                         data_in[4]['localTeam']['data']['name'], data_in[4]['visitorTeam']['data']['name'],
-                        convert.datetime(data_in[4]["time"]["starting_at"]["date_time"]), data_in[5]]
+                        convert.datetime(data_in[4]["time"]["starting_at"]["date_time"],
+                                         convert.format_date(self.config_handler.get('profile', 'date_format'))),
+                        data_in[5]]
             self.write_to_bets_file(data_out, 'open_bets')
         else:
             click.secho("Your bet is canceled\n")
