@@ -525,12 +525,12 @@ Your timezone: {profile_data['timezone']}""", fg="green")
 
     @staticmethod
     def get_match_statuses_to_skip(type_sort, place_bet):
-        if type_sort == "today" and place_bet is True:
-            return ["FT", "FT_PEN", "CANCL", "POSTP", "INT", "ABAN",
-                    "SUSP", "AWARDED", "DELAYED", "TBA", "WO", "AU",
-                    "LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK", "AU"]
+        if type_sort == "today" and place_bet or type_sort == "matches" and place_bet:
+            return ["LIVE", "HT", "FT", "ET", "PEN_LIVE", "AET", "BREAK",
+                    "FT_PEN", "CANCL", "POSTP", "INT", "ABAN",
+                    "SUSP", "AWARDED", "DELAYED", "WO"]
         elif type_sort == "today" or type_sort == "matches":
-            return ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK", "AU"]
+            return ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK"]
         elif type_sort == "live":
             return ["NS", "FT", "FT_PEN", "CANCL", "POSTP", "INT", "ABAN",
                     "SUSP", "AWARDED", "DELAYED", "TBA", "WO", "AU"]
@@ -546,6 +546,8 @@ Your timezone: {profile_data['timezone']}""", fg="green")
         elif type_sort == "today" and match_status == {"LIVE"}:
             return True
         elif type_sort == "today" and place_bet and match_status == {"FT"}:
+            return True
+        elif type_sort == "matches" and match_status == {"FT"}:
             return True
         elif type_sort == "matches" and not any(status in match_status for status in ["NS", "FT"]):
             return True
