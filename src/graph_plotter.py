@@ -33,7 +33,7 @@ def show_full_graph():
     ax.plot(dates, start, marker=".", color='red', label='Start balance')
     ax.plot(dates, end, marker=".", color='green', label='End balance')
 
-    mplcursors.cursor()
+    mplcursors.cursor(hover=True)
 
     ax.set(xlabel='Date', ylabel='Balance', title='Balance history')
     fig.canvas.set_window_title('Balance history graph')
