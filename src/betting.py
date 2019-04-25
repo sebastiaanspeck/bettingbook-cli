@@ -36,17 +36,17 @@ class Betting(object):
         return reader
 
     def write_to_bets_file(self, data, bet_type):
-        with open(self.config_handler.get_data('betting_files')[bet_type], 'a', newline='') as f:
+        with open(self.config_handler.get('betting_files', bet_type), 'a', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(data)
-        self.remove_empty_lines_csv_file(self.config_handler.get_data('betting_files')[bet_type])
+        self.remove_empty_lines_csv_file(self.config_handler.get('betting_files', bet_type))
 
     def update_open_bets_file(self, data):
-        with open(self.config_handler.get_data('betting_files')['open_bets'], 'w', newline='') as f:
+        with open(self.config_handler.get('betting_files', 'open_bets'), 'w', newline='') as f:
             writer = csv.writer(f)
             for line in data:
                 writer.writerow(line)
-        self.remove_empty_lines_csv_file(self.config_handler.get_data('betting_files')['open_bets'])
+        self.remove_empty_lines_csv_file(self.config_handler.get('betting_files', 'open_bets'))
 
     @staticmethod
     def remove_empty_lines_csv_file(file):
@@ -72,7 +72,7 @@ class Betting(object):
             click.secho(e)
 
     def check_open_bets(self):
-        reader = self.get_bets(self.config_handler.get_data('betting_files')['open_bets'])
+        reader = self.get_bets(self.config_handler.get('betting_files', 'open_bets'))
         for i, row in enumerate(reader):
             match_data = self.request_handler.get_match_bet(row[0])[0]
             if match_data['time']['status'] in ['FT', 'AET', 'FT_PEN']:
@@ -152,7 +152,7 @@ class Betting(object):
         return prediction
 
     def get_stake(self):
-        balance = convert.float_to_currency(self.config_handler.get_data('profile')['balance'])
+        balance = convert.float_to_currency(self.config_handler.get('profile', 'balance'))
         stake = convert.float_to_currency(click.prompt(f"What is your stake? (max. "
                                                        f"{balance})", type=float))
         while stake > balance or stake <= 0:
@@ -181,7 +181,7 @@ class Betting(object):
         return potential_wins, odd
 
     def update_balance(self, stake, operation):
-        balance = convert.float_to_currency(self.config_handler.get_data('profile')['balance'])
+        balance = convert.float_to_currency(self.config_handler.get('profile', 'balance'))
         if operation == 'loss':
             balance = balance - stake
         elif operation == 'win':
@@ -224,7 +224,7 @@ class Betting(object):
         sort_reverse = True
         if type_sort == "open":
             sort_reverse = False
-        bets = sorted(self.get_bets(self.config_handler.get_data('betting_files')[f'{type_sort}_bets']),
+        bets = sorted(self.get_bets(self.config_handler.get('betting_files', f'{type_sort}_bets')),
                       key=lambda x: (x[7]), reverse=sort_reverse)
         if len(bets) == 0:
             click.secho(f"\nNo {type_sort} bets found.", fg="red", bold=True)
@@ -277,11 +277,11 @@ class Betting(object):
                 last_balance = balance
             lines.append([date, last_balance, balance])
 
-        with open(self.config_handler.get_data('betting_files')['balance_history'], 'w') as csv_writer_file:
+        with open(self.config_handler.get('betting_files', 'balance_history'), 'w') as csv_writer_file:
             writer = csv.writer(csv_writer_file)
             writer.writerows(lines)
 
-        self.remove_empty_lines_csv_file(self.config_handler.get_data('betting_files')['balance_history'])
+        self.remove_empty_lines_csv_file(self.config_handler.get('betting_files', 'balance_history'))
 
     def main(self):
         self.check_for_files(self.config_handler.get_data('betting_files').values())
