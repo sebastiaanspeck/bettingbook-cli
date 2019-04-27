@@ -198,7 +198,8 @@ class Betting(object):
     def place_bet_match(self, match):
         odds = self.get_odds(match)
         league_name = self.get_league_name(match)
-        date = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S')
+        date_format = convert.format_date(self.config_handler.get('profile', 'date_format'))
+        date = datetime.datetime.strftime(datetime.datetime.now(), date_format + ' %H:%M:%S')
         click.echo(f"Betting on {match['localTeam']['data']['name']} - {match['visitorTeam']['data']['name']} in "
                    f"{league_name} with odds:\n1: {odds[0]}, X: {odds[1]}, 2: {odds[2]}")
         prediction, stake = self.get_input()
@@ -251,11 +252,10 @@ class Betting(object):
 
     def update_graph_data(self, balance):
         updated = False
-        today = convert.date(str(datetime.date.today()),
-                             convert.format_date(self.config_handler.get('profile', 'date_format')))
+        date_format = convert.format_date(self.config_handler.get('profile', 'date_format'))
+        now = datetime.datetime.strftime(datetime.datetime.now(), date_format + ' %H:%M:%S')
         dates = []
-        start_balances = []
-        end_balances = []
+        balances = []
 
         with open(self.config_handler.get('betting_files', 'balance_history'), 'r') as csv_reader_file:
             plots = csv.reader(csv_reader_file, delimiter=',')
@@ -263,21 +263,16 @@ class Betting(object):
 
         for line in lines:
             try:
-                if line[0] == today:
-                    line[2] = balance
+                if line[0] == now:
+                    line[1] = balance
                     updated = True
                 dates.append(line[0])
-                start_balances.append(line[1])
-                end_balances.append(line[2])
+                balances.append(line[1])
             except IndexError:
                 pass
 
         if not updated:
-            try:
-                last_balance = lines[-1][2]
-            except IndexError:
-                last_balance = balance
-            lines.append([today, last_balance, balance])
+            lines.append([now, balance])
 
         with open(self.config_handler.get('betting_files', 'balance_history'), 'w') as csv_writer_file:
             writer = csv.writer(csv_writer_file)
