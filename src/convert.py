@@ -27,18 +27,30 @@ def league_id_to_league_abbreviation(league_id):
     return ''
 
 
-def datetime(datetime_str):
-    """Converts the API UTC datetime string to the local user datetime."""
-    return dt.datetime.strftime(dt.datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S'), '%d-%m-%Y %H:%M')
+def format_date(date_format):
+    if '-' in date_format:
+        splitter = '-'
+    elif '/' in date_format:
+        splitter = '/'
+    elif '.' in date_format:
+        splitter = '.'
+    else:
+        splitter = ' '
+    return splitter.join(["%" + char for char in date_format.split(splitter)])
 
 
-def date(date_str):
-    """Converts the API UTC date string to the local user date."""
-    return dt.datetime.strftime(dt.datetime.strptime(date_str, '%Y-%m-%d'), '%d-%m-%Y')
+def datetime(datetime_str, date_format):
+    """Converts the API datetime string to the local user datetime."""
+    return dt.datetime.strftime(dt.datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S'), date_format + ' %H:%M')
+
+
+def date(date_str, date_format):
+    """Converts the API date string to the local user date."""
+    return dt.datetime.strftime(dt.datetime.strptime(date_str, '%Y-%m-%d'), date_format)
 
 
 def time(time_str):
-    """Converts the API UTC time string to the local user time."""
+    """Converts the API time string to the local user time."""
     return dt.datetime.strftime(dt.datetime.strptime(time_str, '%H:%M:%S'), '%H:%M')
 
 

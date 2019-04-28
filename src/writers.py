@@ -185,21 +185,17 @@ Your timezone: {profile_data['timezone']}""", fg="green")
         """Print the matches"""
         skip_match_statuses = self.get_match_statuses_to_skip(parameters.type_sort, parameters.place_bet)
         for matchday, matches in games:
-            print_matchday = ''
             if len(str(matchday)) < 3:
                 self.league_subheader(matchday, 'matchday', parameters.place_bet)
             else:
                 self.league_subheader(matchday, 'stage', parameters.place_bet)
             for match in matches:
-                self.print_match(match, parameters, print_matchday, matchday, skip_match_statuses)
+                self.print_match(match, parameters, skip_match_statuses)
 
-    def print_match(self, match, parameters, print_matchday, matchday, skip_match_statuses):
+    def print_match(self, match, parameters, skip_match_statuses):
         """Print match and all other match-details"""
         if match["time"]["status"] in skip_match_statuses:
             return
-        if matchday == "Regular Season" and print_matchday != match["round"]["data"]["name"]:
-            print_matchday = match["round"]["data"]["name"]
-            self.league_subheader(print_matchday, 'matchday', parameters.place_bet)
         if parameters.show_odds:
             self.print_odds(match, parameters.place_bet)
         if parameters.place_bet:
@@ -208,7 +204,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
         if parameters.type_sort != "matches":
             self.print_datetime_status(match, parameters)
         else:
-            self.print_datetime_status_matches(match)
+            self.print_datetime_status_matches(match, parameters)
         if parameters.show_details:
             self.print_details(match)
         click.echo()
@@ -305,7 +301,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
         elif match["time"]["status"] in ["FT", "FT_PEN", "TBA", "NS", "CANCL", "POSTP", "INT", "ABAN",
                                          "SUSP", "AWARDED", "DELAYED", "WO", "AU"]:
             if parameters.type_sort == "live":
-                click.secho(f'   {convert.datetime(match["time"]["starting_at"]["date_time"])} '
+                click.secho(f'   {convert.datetime(match["time"]["starting_at"]["date_time"], parameters.date_format)} '
                             f'{match["time"]["status"]}',
                             fg=self.colors.TIME)
             elif parameters.type_sort == "today":
@@ -313,15 +309,15 @@ Your timezone: {profile_data['timezone']}""", fg="green")
                             f'{match["time"]["status"]}',
                             fg=self.colors.TIME)
 
-    def print_datetime_status_matches(self, match):
+    def print_datetime_status_matches(self, match, parameters):
         """Prints the date/time in a pretty format based on the match status"""
         if match["time"]["status"] in ["FT", "FT_PEN", "AET", "TBA"]:
-            click.secho(f'   {convert.date(match["time"]["starting_at"]["date"])} '
+            click.secho(f'   {convert.date(match["time"]["starting_at"]["date"], parameters.date_format)} '
                         f'{match["time"]["status"]}',
                         fg=self.colors.TIME)
         elif match["time"]["status"] in ["NS", "CANCL", "POSTP", "INT", "ABAN", "SUSP", "AWARDED",
                                          "DELAYED", "WO", "AU"]:
-            click.secho(f'   {convert.datetime(match["time"]["starting_at"]["date_time"])} '
+            click.secho(f'   {convert.datetime(match["time"]["starting_at"]["date_time"], parameters.date_format)} '
                         f'{match["time"]["status"]}',
                         fg=self.colors.TIME)
 
@@ -550,6 +546,8 @@ Your timezone: {profile_data['timezone']}""", fg="green")
         elif type_sort == "today" and match_status == {"LIVE"}:
             return True
         elif type_sort == "today" and place_bet and match_status == {"FT"}:
+            return True
+        elif type_sort == "matches" and not any(status in match_status for status in ["NS", "FT"]):
             return True
         else:
             return False

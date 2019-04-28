@@ -7,6 +7,7 @@ from json_handler import JsonHandler
 from exceptions import IncorrectParametersException
 from writers import get_writer
 from betting import Betting
+import convert
 
 jh = JsonHandler()
 LEAGUES_DATA = jh.load_leagues()
@@ -91,7 +92,7 @@ ch = ConfigHandler()
               help="Show your open bets")
 @click.option('--closed-bets', '-CB', is_flag=True,
               help="Show your closed bets")
-@click.option('--possible_leagues', '-PL', is_flag=True,
+@click.option('--possible-leagues', '-PL', is_flag=True,
               help="Show all leagues that are in your Sportmonks API Plan.")
 def main(api_token, timezone, live, today, matches, standings, league, days, history, details, odds, refresh, bet,
          profile, all_bets, open_bets, closed_bets, possible_leagues):
@@ -104,27 +105,28 @@ def main(api_token, timezone, live, today, matches, standings, league, days, his
         betting.main()
 
         Parameters = namedtuple("parameters", "url, msg, league_name, days, "
-                                "show_history, show_details, show_odds, refresh, place_bet, type_sort")
+                                "show_history, show_details, show_odds, refresh, place_bet, date_format, type_sort")
 
         if live or today or matches:
             check_options(history, bet, live, today, refresh, matches)
+            date_format = convert.format_date(ch.get('profile', 'date_format'))
             if bet:
                 odds = True
             if live:
                 parameters = Parameters('livescores/now',
                                         ["No live action at this moment",
                                          "There was problem getting live scores, check your parameters"],
-                                        league, days, history, details, odds, refresh, bet, "live")
+                                        league, days, history, details, odds, refresh, bet, date_format, "live")
             elif today:
                 parameters = Parameters('livescores',
                                         ["No matches today",
                                          "There was problem getting today's scores, check your parameters"],
-                                        league, days, history, details, odds, refresh, bet, "today")
+                                        league, days, history, details, odds, refresh, bet, date_format, "today")
             else:
                 parameters = Parameters('fixtures/between/',
                                         [[f"No matches in the past {str(days)} days."],
                                          [f"No matches in the coming {str(days)} days."]],
-                                        league, days, history, details, odds, refresh, bet, "matches")
+                                        league, days, history, details, odds, refresh, bet, date_format, "matches")
             rh.get_matches(parameters)
             return
 
