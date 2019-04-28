@@ -138,7 +138,7 @@ class RequestHandler(object):
     def get_match_data(self, parameters, start, end):
         s = sched.scheduler(time.time, time.sleep)
         if parameters.type_sort == "matches":
-            fixtures_results = self._get(parameters.url + f'{start}/{end}')
+            fixtures_results = self._get(parameters.url + f"{start}/{end}")
         else:
             fixtures_results = self._get(parameters.url)
         # no fixtures in the timespan. display a help message and return
@@ -162,11 +162,11 @@ class RequestHandler(object):
         self.reset_params()
         for league in leagues:
             for league_id in self.get_league_abbreviation(league):
-                url = f'leagues/{league_id}'
+                url = f"leagues/{league_id}"
                 try:
                     league_data = self._get(url)
                     current_season_id = league_data['current_season_id']
-                    url = f'standings/season/{current_season_id}'
+                    url = f"standings/season/{current_season_id}"
                     standings_data = self._get(url)
                     if len(standings_data) == 0:
                         continue
@@ -195,7 +195,7 @@ class RequestHandler(object):
                 self.place_bet_betting(match_data)
 
     def get_match_bet(self, matches):
-        url = f'fixtures/multi/{matches}'
+        url = f"fixtures/multi/{matches}"
         self.params['include'] = 'localTeam,visitorTeam,league,round,events,stage,flatOdds'
         self.params['markets'] = '1'
         matches = self._get(url)

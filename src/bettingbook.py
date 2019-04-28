@@ -41,14 +41,14 @@ def check_options(history, bet, live, today, refresh, matches):
 
 def check_options_standings(leagues, history):
     if not leagues:
-        raise IncorrectParametersException('Please specify a league. '
-                                           'Example --standings --league=EN1')
+        raise IncorrectParametersException("Please specify a league. "
+                                           "Example --standings --league=EN1")
     if history:
-        raise IncorrectParametersException('--history and --days is not supported for --standings. '
-                                           'Use --matches to use these parameters')
+        raise IncorrectParametersException("--history and --days is not supported for --standings. "
+                                           "Use --matches to use these parameters")
     for league in leagues:
-        if league.endswith('C') and league not in ["WC", "EC"]:
-            raise IncorrectParametersException(f'Standings for {league} not supported')
+        if league.endswith("C") and league not in ["WC", "EC"]:
+            raise IncorrectParametersException(f"Standings for {league} not supported")
 
 
 ch = ConfigHandler()
@@ -105,7 +105,7 @@ def main(api_token, timezone, live, today, matches, standings, league, days, his
         betting.main()
 
         Parameters = namedtuple("parameters", "url, msg, league_name, days, "
-                                "show_history, show_details, show_odds, refresh, place_bet, date_format, type_sort")
+                                              "show_history, show_details, show_odds, refresh, place_bet, date_format, type_sort")
 
         if live or today or matches:
             check_options(history, bet, live, today, refresh, matches)
