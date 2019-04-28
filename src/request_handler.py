@@ -32,7 +32,6 @@ class RequestHandler(object):
     def _get(self, url):
         """Handles soccer.sportsmonks requests"""
         req = requests.get(RequestHandler.BASE_URL + url, params=self.params)
-        self.reset_params()
 
         if req.status_code == requests.codes.ok:
             data = self.get_data(req, url)
@@ -160,6 +159,7 @@ class RequestHandler(object):
             s.run()
 
     def get_standings(self, leagues, show_details):
+        self.reset_params()
         for league in leagues:
             for league_id in self.get_league_abbreviation(league):
                 url = f'leagues/{league_id}'
