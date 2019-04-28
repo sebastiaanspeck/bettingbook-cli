@@ -4,7 +4,6 @@ from decimal import Decimal
 
 from json_handler import JsonHandler
 import writers
-import re
 
 jh = JsonHandler()
 LEAGUES_DATA = jh.load_leagues()
@@ -31,9 +30,13 @@ def league_id_to_league_abbreviation(league_id):
 def format_date(date_format):
     if '-' in date_format:
         splitter = '-'
-    else:
+    elif '/' in date_format:
         splitter = '/'
-    return splitter.join(["%" + char for char in re.split(splitter, date_format)])
+    elif '.' in date_format:
+        splitter = '.'
+    else:
+        splitter = ' '
+    return splitter.join(["%" + char for char in date_format.split(splitter)])
 
 
 def datetime(datetime_str, date_format):
