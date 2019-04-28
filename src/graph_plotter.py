@@ -21,11 +21,11 @@ def show_full_graph():
             balances.append(float(row[1]))
 
     date_format = convert.format_date(ch.get('profile', 'date_format'))
-    dates = [dt.datetime.strptime(d, date_format + " %H:%M:%S") for d in dates]
+    dates = [dt.datetime.strptime(d, date_format) for d in dates]
 
     fig, ax = plt.subplots()
 
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter(date_format + " %H:%M"))
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter(date_format))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
 
     ax.plot(dates, balances, marker=".", color='red', label='Balance')

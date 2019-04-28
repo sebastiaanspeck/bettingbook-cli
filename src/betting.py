@@ -251,33 +251,12 @@ class Betting(object):
                 iteration += 1
 
     def update_graph_data(self, balance):
-        updated = False
         date_format = convert.format_date(self.config_handler.get('profile', 'date_format'))
-        now = datetime.datetime.strftime(datetime.datetime.now(), date_format + ' %H:%M:%S')
-        dates = []
-        balances = []
+        now = datetime.date.strftime(datetime.date.today(), date_format)
 
-        with open(self.config_handler.get('betting_files', 'balance_history'), 'r') as csv_reader_file:
-            plots = csv.reader(csv_reader_file, delimiter=',')
-            lines = list(plots)
-
-        for line in lines:
-            try:
-                if line[0] == now:
-                    line[1] = balance
-                    updated = True
-                dates.append(line[0])
-                balances.append(line[1])
-            except IndexError:
-                pass
-
-        if not updated:
-            lines.append([now, balance])
-
-        with open(self.config_handler.get('betting_files', 'balance_history'), 'w') as csv_writer_file:
-            writer = csv.writer(csv_writer_file)
-            writer.writerows(lines)
-
+        with open(self.config_handler.get('betting_files', 'balance_history'), 'a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([now, balance])
         self.remove_empty_lines_csv_file(self.config_handler.get('betting_files', 'balance_history'))
 
     def main(self):
