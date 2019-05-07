@@ -5,7 +5,7 @@ import json
 import sched
 import time
 
-import exceptions
+from exceptions import APIErrorException
 from betting import Betting
 
 
@@ -42,15 +42,15 @@ class RequestHandler(object):
                         fg="red", bold=True)
 
         if req.status_code in [requests.codes.bad, requests.codes.server_error, requests.codes.unauthorized]:
-            raise exceptions.APIErrorException("Invalid request. Check your parameters.")
+            raise APIErrorException("Invalid request. Check your parameters.")
         elif req.status_code == requests.codes.forbidden:
-            raise exceptions.APIErrorException("The data you requested is not accessible from your plan.")
+            raise APIErrorException("The data you requested is not accessible from your plan.")
         elif req.status_code == requests.codes.not_found:
-            raise exceptions.APIErrorException("This resource does not exist. Check parameters")
+            raise APIErrorException("This resource does not exist. Check parameters")
         elif req.status_code == requests.codes.too_many_requests:
-            raise exceptions.APIErrorException("You have exceeded your allowed requests per minute/day")
+            raise APIErrorException("You have exceeded your allowed requests per minute/day")
         else:
-            raise exceptions.APIErrorException("Whoops... Something went wrong!")
+            raise APIErrorException("Whoops... Something went wrong!")
 
     def reset_params(self):
         self.params = {'api_token': self.config_handler.get('auth', 'api_token'),
@@ -127,12 +127,12 @@ class RequestHandler(object):
                     league_id = self.get_league_abbreviation(league)
                     self.params['leagues'] = ','.join(str(val) for val in league_id)
                     self.get_match_data(parameters, start, end)
-                except exceptions.APIErrorException as e:
+                except APIErrorException as e:
                     click.secho(str(e), fg="red", bold=True)
         else:
             try:
                 self.get_match_data(parameters, start, end)
-            except exceptions.APIErrorException as e:
+            except APIErrorException as e:
                 click.secho(str(e), fg="red", bold=True)
 
     def get_match_data(self, parameters, start, end):
@@ -171,7 +171,7 @@ class RequestHandler(object):
                     if len(standings_data) == 0:
                         continue
                     self.writer.standings(standings_data, league_id, show_details)
-                except exceptions.APIErrorException as e:
+                except APIErrorException as e:
                     click.secho(str(e), fg="red", bold=True)
 
     def place_bet(self, bet_matches):

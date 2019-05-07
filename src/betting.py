@@ -4,6 +4,7 @@ import csv
 import datetime
 
 import convert
+from exceptions import APIErrorException
 
 try:
     from configparser import ConfigParser
@@ -72,11 +73,14 @@ class Betting(object):
             click.secho(e)
 
     def check_open_bets(self):
-        reader = self.get_bets(self.config_handler.get('betting_files', 'open_bets'))
-        for i, row in enumerate(reader):
-            match_data = self.request_handler.get_match_bet(row[0])[0]
-            if match_data['time']['status'] in ['FT', 'AET', 'FT_PEN']:
-                self.calculate_winning_odd(match_data, i, row, reader)
+        try:
+            reader = self.get_bets(self.config_handler.get('betting_files', 'open_bets'))
+            for i, row in enumerate(reader):
+                match_data = self.request_handler.get_match_bet(row[0])[0]
+                if match_data['time']['status'] in ['FT', 'AET', 'FT_PEN']:
+                    self.calculate_winning_odd(match_data, i, row, reader)
+        except APIErrorException as e:
+            click.secho(str(e), fg="red", bold=True)
 
     def calculate_winning_odd(self, match_data, i, row, reader):
         winning_team = self.writer.calculate_winning_team(match_data['scores']['localteam_score'],
@@ -158,7 +162,7 @@ class Betting(object):
             click.secho("Oops... You entered a stake higher than your balance or an invalid stake. Try again.",
                         fg="red", bold=True)
             stake = convert.float_to_currency(click.prompt(f"What is your stake? (max. "
-                                                           f"{balance})"), type=float)
+                                                           f"{balance})", type=float))
         return stake
 
     @staticmethod
@@ -190,7 +194,6 @@ class Betting(object):
         self.update_graph_data(balance)
 
     def place_bet(self, matches):
-        self.main()
         click.secho("\nMatches on which you want to bet:\n")
         for match in matches:
             self.place_bet_match(match)
