@@ -155,7 +155,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             games_copy = copy.deepcopy(games)
             league_prefix = list(set([x['league']['data']['name'] for x in games_copy]))
             match_status = set([x['time']['status'] for x in games_copy])
-            skip_league = self.get_skip_league(match_status, parameters.type_sort, parameters.place_bet)
+            skip_league = self.get_skip_league(match_status, parameters)
             if skip_league:
                 continue
             if league_prefix[0] == league:
@@ -538,18 +538,18 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             return []
 
     @staticmethod
-    def get_skip_league(match_status, type_sort, place_bet):
-        if type_sort == "live" and match_status == {"NS"}:
+    def get_skip_league(match_status, parameters):
+        if parameters.type_sort == "live" and match_status == {"NS"}:
             return True
-        elif type_sort == "live" and match_status == {"FT"}:
+        elif parameters.type_sort == "live" and match_status == {"FT"}:
             return True
-        elif type_sort == "today" and match_status == {"LIVE"}:
+        elif parameters.type_sort == "today" and match_status == {"LIVE"}:
             return True
-        elif type_sort == "today" and place_bet and match_status == {"FT"}:
+        elif parameters.type_sort == "today" and parameters.place_bet and match_status == {"FT"}:
             return True
-        elif type_sort == "matches" and match_status == {"FT"}:
+        elif parameters.type_sort == "matches" and not parameters.show_history and match_status == {"FT"}:
             return True
-        elif type_sort == "matches" and not any(status in match_status for status in ["NS", "FT"]):
+        elif parameters.type_sort == "matches" and not any(status in match_status for status in ["NS", "FT"]):
             return True
         else:
             return False
