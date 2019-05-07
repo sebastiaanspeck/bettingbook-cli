@@ -28,6 +28,10 @@ def get_params(api_token, timezone):
     return params
 
 
+def bettable_balance(balance):
+    return False if float(balance) <= 0.00 else True
+
+
 def check_options(history, bet, live, today, refresh, matches):
     if history and live or history and today:
         raise IncorrectParametersException('--history and --days is not supported for --live/--today. '
@@ -38,6 +42,8 @@ def check_options(history, bet, live, today, refresh, matches):
     if matches and refresh:
         raise IncorrectParametersException('--refresh is not supported for --matches. '
                                            'Use --live or --today to use this parameters')
+    if bet and not bettable_balance(ch.get('profile', 'balance')):
+        raise IncorrectParametersException('--betting can\'t be used because you have a too low balance')
 
 
 def check_options_standings(leagues, history):
