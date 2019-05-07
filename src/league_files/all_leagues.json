@@ -87,6 +87,12 @@
     }, {
       "WCEQ": [720],
       "name": "WC Qualification Europe"
+    }, {
+      "SC1": [525],
+      "name": "Championship Play-Offs"
+    }, {
+      "SC3": [528],
+      "name": "League One Play-Offs"
     }
   ]
 }
