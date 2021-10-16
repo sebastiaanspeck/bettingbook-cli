@@ -165,6 +165,11 @@ class RequestHandler(object):
         while True:
             self.writer.league_scores(self._get(f"fixtures/multi/{match_ids}"), parameters, True, predictions)
             time.sleep(60)
+        fixtures = self._get(f"fixtures/multi/{match_ids}")
+        if len(fixtures) == 0:
+            click.secho(parameters.msg[0], fg="red", bold=True)
+            return
+        self.writer.league_scores(self._get(f"fixtures/multi/{match_ids}"), parameters, True, predictions)   
 
     def get_match_data(self, parameters, start, end, first=False):
         if parameters.type_sort == "matches":
