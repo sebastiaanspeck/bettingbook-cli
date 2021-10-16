@@ -308,7 +308,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
                 click.secho(f"   {match['time']['minute']}\'",
                             fg=self.colors.TIME)
             elif match['time']['added_time'] not in [0, None]:
-                click.secho(f"   {match['time']['minute']}\'+{match['time']['added_time']}",
+                click.secho(f"   {match['time']['minute']}+{match['time']['added_time']}\'",
                             fg=self.colors.TIME)
         elif match['time']['status'] in ["FT", "FT_PEN", "TBA", "NS", "CANCL", "POSTP", "INT", "ABAN",
                                          "SUSP", "AWARDED", "DELAYED", "WO", "AU"]:
