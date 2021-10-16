@@ -131,10 +131,10 @@ class RequestHandler(object):
         if parameters.league_name:
             if parameters.refresh:
                 while True:
-                    self.try_to_get_match_data(parameters) 
+                    self.get_match_data_for_leagues(parameters) 
                     time.sleep(60)
             else:
-                self.try_to_get_match_data(parameters)    
+                self.get_match_data_for_leagues(parameters)    
         else:
             if parameters.refresh:
                 while True:
