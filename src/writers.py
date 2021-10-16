@@ -139,14 +139,14 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             except IndexError:
                 pass
 
-    def league_scores(self, total_data, parameters):
+    def league_scores(self, total_data, parameters, first=False, predictions=[]):
         """Prints the data in a pretty format"""
-        if parameters.refresh:
+        if parameters.refresh and first:
             os.system('cls' if os.name == 'nt' else 'clear')
+            self.show_update_time()
         self.score_id = 1
         self.bet_matches = []
         scores = sorted(total_data, key=lambda x: (x['league']['data']['country_id'], x['league_id']))
-        self.show_update_time()
         for league, games in groupby(scores, key=lambda x: x['league_id']):
             league = convert.league_id_to_league_name(league)
             games = sorted(games, key=lambda x: x['time']['starting_at']['date_time'])

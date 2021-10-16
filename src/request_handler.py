@@ -2,7 +2,6 @@ import requests
 import click
 import datetime
 import json
-import sched
 import time
 
 import exceptions
@@ -131,21 +130,23 @@ class RequestHandler(object):
         self.set_params()
         start, end = self.set_start_end(parameters.show_history, parameters.days)
         if parameters.league_name:
-            for league in parameters.league_name:
-                try:
-                    league_id = self.get_league_abbreviation(league)
-                    self.params['leagues'] = ','.join(str(val) for val in league_id)
-                    self.get_match_data(parameters, start, end)
-                except exceptions.APIErrorException as e:
-                    click.secho(str(e), fg="red", bold=True)
+            if parameters.refresh:
+                while True:
+                    for i, league in enumerate(parameters.league_name):
+                        try:
+                            league_id = self.get_league_abbreviation(league)
+                            self.params['leagues'] = ','.join(str(val) for val in league_id)
+                            self.get_match_data(parameters, start, end, i == 0)
+                        except exceptions.APIErrorException as e:
+                            click.secho(str(e), fg="red", bold=True)   
+                    time.sleep(60)
         else:
             try:
                 self.get_match_data(parameters, start, end)
             except exceptions.APIErrorException as e:
                 click.secho(str(e), fg="red", bold=True)
 
-    def get_match_data(self, parameters, start, end):
-        s = sched.scheduler(time.time, time.sleep)
+    def get_match_data(self, parameters, start, end, first=False):
         if parameters.type_sort == "matches":
             fixtures_results = self._get(parameters.url + f"{start}/{end}")
         else:
@@ -160,12 +161,9 @@ class RequestHandler(object):
             else:
                 click.secho(parameters.msg[0], fg="red", bold=True)
             return
-        bet_matches = self.writer.league_scores(fixtures_results, parameters)
+        bet_matches = self.writer.league_scores(fixtures_results, parameters, first)
         if parameters.place_bet:
             self.place_bet(bet_matches)
-        if parameters.refresh:
-            s.enter(60, 1, self.get_match_data, (parameters, start, end,))
-            s.run()
 
     def get_standings(self, leagues, show_details):
         self.reset_params()
