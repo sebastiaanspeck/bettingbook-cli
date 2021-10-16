@@ -357,11 +357,11 @@ Your timezone: {profile_data['timezone']}""", fg="green")
 
     def odds(self, odds, place_bet, prediction=False):
         """Prints the odds in a pretty format"""
-        if odds.winning_odd == 0:
+        if odds.winning_odd == '1':
             home_color, draw_color, away_color = (self.colors.WIN, self.colors.LOSE, self.colors.LOSE)
-        elif odds.winning_odd == 1:
+        elif odds.winning_odd == 'X':
             home_color, draw_color, away_color = (self.colors.LOSE, self.colors.WIN, self.colors.LOSE)
-        elif odds.winning_odd == 2:
+        elif odds.winning_odd == '2':
             home_color, draw_color, away_color = (self.colors.LOSE, self.colors.LOSE, self.colors.WIN)
         else:
             home_color, draw_color, away_color = (self.colors.ODDS, self.colors.ODDS, self.colors.ODDS)
