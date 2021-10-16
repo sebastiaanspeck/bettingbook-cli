@@ -162,9 +162,6 @@ class RequestHandler(object):
         based upon the match_ids
         """            
         self.set_params()
-        while True:
-            self.writer.league_scores(self._get(f"fixtures/multi/{match_ids}"), parameters, True, predictions)
-            time.sleep(60)
         fixtures = self._get(f"fixtures/multi/{match_ids}")
         if len(fixtures) == 0:
             click.secho(parameters.msg[0], fg="red", bold=True)

@@ -8,6 +8,7 @@ from exceptions import IncorrectParametersException
 from writers import get_writer
 from betting import Betting
 import convert
+import time
 
 jh = JsonHandler()
 LEAGUES_DATA = jh.load_leagues()
@@ -158,15 +159,17 @@ def main(api_token, timezone, live, today, matches, standings, league, days, his
             return
 
         if watch_bets:
-            bets = betting.get_bets(ch.get_data('betting_files')['open_bets'])
-            match_ids = ','.join([i[0] for i in bets])
-            predictions = [i[0] + ';' + i[1] for i in bets]
             date_format = convert.format_date(ch.get('profile', 'date_format'))
             parameters = Parameters('fixtures/multi',
                                     ["No open bets at the moment.",
                                     "There was problem getting live scores, check your parameters"],
                                     None, None, None, details, True, False, True, None, date_format, 'watch_bets')
-            rh.get_multi_matches(match_ids, predictions, parameters)
+            while True:
+                bets = betting.get_bets(ch.get_data('betting_files')['open_bets'])
+                match_ids = ','.join([i[0] for i in bets])
+                predictions = [i[0] + ';' + i[1] for i in bets]
+                rh.get_multi_matches(match_ids, predictions, parameters)
+                time.sleep(60)
 
         if possible_leagues:
             rh.show_leagues()
