@@ -33,11 +33,12 @@ class RequestHandler(object):
         """Handles soccer.sportsmonks requests"""
         req = requests.get(RequestHandler.BASE_URL + url, params=self.params)
 
-        if req.status_code == requests.codes.ok:
+        msg, code = self.get_error(req)
+
+        if code == requests.codes.ok:
             data = self.get_data(req, url)
             return data
         else:
-            msg, code = self.get_error(req)
             click.secho(f"The API returned the next error code: {code} with message: {msg}",
                         fg="red", bold=True)
 
@@ -60,7 +61,10 @@ class RequestHandler(object):
     def get_error(req):
         parts = json.loads(req.text)
         error = parts.get('error')
-        return error['message'], error['code']
+        if error is None:
+            return '', 200
+        else:
+            return error['message'], error['code']
 
     def get_data(self, req, url):
         parts = json.loads(req.text)
