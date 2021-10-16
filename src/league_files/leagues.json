@@ -54,10 +54,22 @@
       "name": "Europa League"
     },
     {
+      "ECL": [
+        2286
+      ],
+      "name": "Europa Conference League"
+    },
+    {
       "ENG1": [
         8
       ],
       "name": "Premier League"
+    },
+    {
+      "ENG2": [
+        9
+      ],
+      "name": "Championship"
     },
     {
       "ENGC": [
@@ -181,6 +193,60 @@
         513
       ],
       "name": "Premiership"
+    },
+    {
+      "UKR1": [
+        609
+      ],
+      "name": "Premier League"
+    },
+    {
+      "POL1": [
+        453
+      ],
+      "name": "Ekstraklasa"
+    },
+    {
+      "RUS1": [
+        486
+      ],
+      "name": "Premier League"
+    },
+    {
+      "AUT1": [
+        181
+      ],
+      "name": "Admiral Bundesliga"
+    },
+    {
+      "NOR1": [
+        444
+      ],
+      "name": "Eliteserien"
+    },
+    {
+      "CRO1": [
+        244
+      ],
+      "name": "1. HNL"
+    },
+    {
+      "SWE1": [
+        573
+      ],
+      "name": "Allsvenskan"
+    },
+    {
+      "CH1": [
+        591
+      ],
+      "name": "Super League"
+    },
+    {
+      "TUR1": [
+        600
+      ],
+      "name": "Super Lig"
     }
   ]
 }
