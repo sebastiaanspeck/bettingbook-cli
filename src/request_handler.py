@@ -128,23 +128,33 @@ class RequestHandler(object):
         based upon the league and time parameter
         """
         self.set_params()
-        start, end = self.set_start_end(parameters.show_history, parameters.days)
         if parameters.league_name:
             if parameters.refresh:
                 while True:
-                    for i, league in enumerate(parameters.league_name):
-                        try:
-                            league_id = self.get_league_abbreviation(league)
-                            self.params['leagues'] = ','.join(str(val) for val in league_id)
-                            self.get_match_data(parameters, start, end, i == 0)
-                        except exceptions.APIErrorException as e:
-                            click.secho(str(e), fg="red", bold=True)   
+                    self.try_to_get_match_data(parameters) 
                     time.sleep(60)
+            else:
+                self.try_to_get_match_data(parameters)    
         else:
-            try:
-                self.get_match_data(parameters, start, end)
-            except exceptions.APIErrorException as e:
-                click.secho(str(e), fg="red", bold=True)
+            if parameters.refresh:
+                while True:
+                    self.try_to_get_match_data(parameters)
+                    time.sleep(60)
+            else:
+                self.try_to_get_match_data(parameters)
+
+    def get_match_data_for_leagues(self, parameters):
+        for i, league in enumerate(parameters.league_name):
+            league_id = self.get_league_abbreviation(league)
+            self.params['leagues'] = ','.join(str(val) for val in league_id)
+            self.try_to_get_match_data(parameters, i == 0)
+
+    def try_to_get_match_data(self, parameters, first=False):
+        start, end = self.set_start_end(parameters.show_history, parameters.days)     
+        try:
+            self.get_match_data(parameters, start, end, first)
+        except exceptions.APIErrorException as e:
+            click.secho(str(e), fg="red", bold=True)                       
 
     def get_multi_matches(self, match_ids, predictions, parameters):
         """
