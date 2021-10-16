@@ -1,7 +1,7 @@
 {
   "leagues": [
     {
-      "BE1": [
+      "BEL1": [
         208,
         217,
         1129,
@@ -10,7 +10,7 @@
       "name": "Pro League"
     },
     {
-      "BEC": [
+      "BELC": [
         214
       ],
       "name": "Belgian Cup"
@@ -22,7 +22,7 @@
       "name": "Champions League"
     },
     {
-      "DE1": [
+      "GER1": [
         82,
         163,
         166
@@ -30,19 +30,19 @@
       "name": "Bundesliga"
     },
     {
-      "DE2": [
+      "GER2": [
         85
       ],
       "name": "2. Bundesliga"
     },
     {
-      "DEC": [
+      "GERC": [
         109
       ],
       "name": "DFB Pokal"
     },
     {
-      "EC": [
+      "EUC": [
         1326
       ],
       "name": "European Championship"
@@ -54,55 +54,55 @@
       "name": "Europa League"
     },
     {
-      "EN1": [
+      "ENG1": [
         8
       ],
       "name": "Premier League"
     },
     {
-      "ENC": [
+      "ENGC": [
         24
       ],
       "name": "FA Cup"
     },
     {
-      "EQ": [
+      "EUQ": [
         1325
       ],
       "name": "Euro Qualification"
     },
     {
-      "ES1": [
+      "ESP1": [
         564
       ],
       "name": "La Liga"
     },
     {
-      "ESC": [
+      "ESPC": [
         570
       ],
       "name": "Copa Del Rey"
     },
     {
-      "FR1": [
+      "FRA1": [
         301
       ],
       "name": "Ligue 1"
     },
     {
-      "FRC": [
+      "FRAC": [
         307
       ],
       "name": "Coupe de France"
     },
     {
-      "IT1": [
+      "ITA1": [
         384
       ],
       "name": "Serie A"
     },
     {
-      "ITC": [
+      "ITAC": [
         390
       ],
       "name": "Coppa Italia"
@@ -127,13 +127,13 @@
       "name": "KNVB Beker"
     },
     {
-      "PT1": [
+      "POR1": [
         462
       ],
       "name": "Primeira Liga"
     },
     {
-      "PTC": [
+      "PORC": [
         468
       ],
       "name": "Taça De Portugal"
@@ -169,7 +169,7 @@
       "name": "WC Qualification Europe"
     },
     {
-      "DEN1": [
+      "DK1": [
         271,
         1659
       ],
