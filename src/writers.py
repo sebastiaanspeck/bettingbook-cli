@@ -147,8 +147,9 @@ Your timezone: {profile_data['timezone']}""", fg="green")
         self.score_id = 1
         self.bet_matches = []
         scores = sorted(total_data, key=lambda x: (x['league']['data']['country_id'], x['league_id']))
-        for league, games in groupby(scores, key=lambda x: x['league_id']):
-            league = convert.league_id_to_league_name(league)
+        for league_id, games in groupby(scores, key=lambda x: x['league_id']):
+            league = convert.league_id_to_league_name(league_id)
+            league_abbrev = convert.league_id_to_league_abbreviation(league_id)
             games = sorted(games, key=lambda x: x['time']['starting_at']['date_time'])
             if league is '':
                 continue
@@ -159,9 +160,9 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             if skip_league or (parameters.not_started and 'NS' not in match_status):
                 continue
             if league_prefix[0] == league:
-                self.league_header(league, parameters.place_bet)
+                self.league_header(' - '.join([league, league_abbrev]), parameters.place_bet)
             else:
-                self.league_header(league + ' - ' + league_prefix[0], parameters.place_bet)
+                self.league_header(' - '.join([league, league_abbrev, league_prefix[0]]), parameters.place_bet)
             games = self.group_games(games, games_copy)
             self.print_matches(games, parameters, predictions)
         return self.bet_matches
