@@ -64,6 +64,8 @@ def prediction_to_msg(prediction):
 
 
 def player_name(name):
+    if name is None:
+        return ''
     try:
         name = name.split(' ', 1)
     except AttributeError:
