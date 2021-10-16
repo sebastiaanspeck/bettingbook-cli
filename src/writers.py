@@ -311,7 +311,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
                             fg=self.colors.TIME)
         elif match['time']['status'] in ["FT", "FT_PEN", "TBA", "NS", "CANCL", "POSTP", "INT", "ABAN",
                                          "SUSP", "AWARDED", "DELAYED", "WO", "AU"]:
-            if parameters.type_sort == "live":
+            if parameters.type_sort == "live" or parameters.type_sort == "watch_bets":
                 click.secho(f"   {convert.datetime(match['time']['starting_at']['date_time'], parameters.date_format)} "
                             f"{match['time']['status']}",
                             fg=self.colors.TIME)
