@@ -163,7 +163,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             else:
                 self.league_header(league + ' - ' + league_prefix[0], parameters.place_bet)
             games = self.group_games(games, games_copy)
-            self.print_matches(games, parameters)
+            self.print_matches(games, parameters, predictions)
         return self.bet_matches
 
     def group_games(self, games, games_copy):
@@ -181,7 +181,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             games = groupby(games, key=lambda x: x['stage']['data']['name'])
         return games
 
-    def print_matches(self, games, parameters):
+    def print_matches(self, games, parameters, predictions):
         """Print the matches"""
         skip_match_statuses = self.get_match_statuses_to_skip(parameters.type_sort, parameters.place_bet)
         for matchday, matches in games:
@@ -190,14 +190,23 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             else:
                 self.league_subheader(matchday, 'stage', parameters.place_bet)
             for match in matches:
-                self.print_match(match, parameters, skip_match_statuses)
+                if predictions:
+                    prediction = ''
+                    for pred in predictions:
+                        parts = pred.split(';')
+                        match_id = parts[0]
+                        if int(match_id) == match['id']:
+                            prediction = parts[1]
+                    self.print_match(match, parameters, skip_match_statuses, prediction)
+                else:
+                    self.print_match(match, parameters, skip_match_statuses)
 
-    def print_match(self, match, parameters, skip_match_statuses):
+    def print_match(self, match, parameters, skip_match_statuses, prediction=''):
         """Print match and all other match-details"""
         if match['time']['status'] in skip_match_statuses:
             return
         if parameters.show_odds:
-            self.print_odds(match, parameters.place_bet)
+            self.print_odds(match, parameters.place_bet, prediction)
         if parameters.place_bet:
             self.bet_matches.extend([match['id']])
         self.scores(self.parse_result(match), parameters.place_bet)
@@ -265,7 +274,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
         click.secho(f"{result.goals_away_team:>2} {result.away_team.rjust(26)}",
                     fg=away_color, nl=False)
 
-    def print_odds(self, match, place_bet):
+    def print_odds(self, match, place_bet, prediction):
         """Print the odds"""
         odds_dict = {"1": [], "X": [], "2": []}
 
@@ -273,7 +282,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             for odd in odds['odds']:
                 odds_dict = self.fill_odds(odd, odds_dict)
         self.odds(self.parse_odd(odds_dict, match['scores']['localteam_score'],
-                                 match['scores']['visitorteam_score'], match['time']['status']), place_bet)
+                                 match['scores']['visitorteam_score'], match['time']['status']), place_bet, prediction)
 
     @staticmethod
     def fill_odds(odd, odds):
@@ -344,7 +353,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
                                                match['scores']['visitorteam_score'])
         self.goals(goals)
 
-    def odds(self, odds, place_bet):
+    def odds(self, odds, place_bet, prediction=False):
         """Prints the odds in a pretty format"""
         if odds.winning_odd == 0:
             home_color, draw_color, away_color = (self.colors.WIN, self.colors.LOSE, self.colors.LOSE)
@@ -357,9 +366,9 @@ Your timezone: {profile_data['timezone']}""", fg="green")
         x = 28
         if place_bet:
             x = 32
-        click.secho("{}".format(odds.odd_home_team.rjust(x)), fg=home_color, nl=False)
-        click.secho(" {} ".format(odds.odd_draw), fg=draw_color, nl=False)
-        click.secho("{}".format(odds.odd_away_team), fg=away_color, nl=True)
+        click.secho("{}".format(odds.odd_home_team.rjust(x)), fg=home_color, nl=False, bold=prediction == '1')
+        click.secho(" {} ".format(odds.odd_draw), fg=draw_color, nl=False, bold=prediction == 'X')
+        click.secho("{}".format(odds.odd_away_team), fg=away_color, nl=True, bold=prediction == '2')
 
     @staticmethod
     def merge_duplicate_keys(dicts):

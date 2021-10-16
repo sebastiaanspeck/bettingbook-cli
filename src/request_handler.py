@@ -146,6 +146,16 @@ class RequestHandler(object):
             except exceptions.APIErrorException as e:
                 click.secho(str(e), fg="red", bold=True)
 
+    def get_multi_matches(self, match_ids, predictions, parameters):
+        """
+        Queries the API and fetches the scores for fixtures
+        based upon the match_ids
+        """            
+        self.set_params()
+        while True:
+            self.writer.league_scores(self._get(f"fixtures/multi/{match_ids}"), parameters, True, predictions)
+            time.sleep(60)
+
     def get_match_data(self, parameters, start, end, first=False):
         if parameters.type_sort == "matches":
             fixtures_results = self._get(parameters.url + f"{start}/{end}")

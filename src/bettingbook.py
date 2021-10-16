@@ -92,10 +92,12 @@ ch = ConfigHandler()
               help="Show your open bets")
 @click.option('--closed-bets', '-CB', is_flag=True,
               help="Show your closed bets")
+@click.option('--watch-bets', '-WB', is_flag=True,
+              help="Watch all matches you've placed a bet on")              
 @click.option('--possible-leagues', '-PL', is_flag=True,
               help="Show all leagues that are in your Sportmonks API Plan.")
 def main(api_token, timezone, live, today, matches, standings, league, days, history, details, odds, refresh, bet,
-         profile, all_bets, open_bets, closed_bets, possible_leagues):
+         profile, all_bets, open_bets, closed_bets, watch_bets, possible_leagues):
     params = get_params(api_token, timezone)
 
     try:
@@ -151,6 +153,17 @@ def main(api_token, timezone, live, today, matches, standings, league, days, his
         if closed_bets:
             betting.view_bets('closed')
             return
+
+        if watch_bets:
+            bets = betting.get_bets(ch.get_data('betting_files')['open_bets'])
+            match_ids = ','.join([i[0] for i in bets])
+            predictions = [i[0] + ';' + i[1] for i in bets]
+            date_format = convert.format_date(ch.get('profile', 'date_format'))
+            parameters = Parameters('fixtures/multi',
+                                    ["No open bets at the moment.",
+                                    "There was problem getting live scores, check your parameters"],
+                                    None, None, None, details, True, False, True, None, date_format, 'watch_bets')
+            rh.get_multi_matches(match_ids, predictions, parameters)
 
         if possible_leagues:
             rh.show_leagues()
