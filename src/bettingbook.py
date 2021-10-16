@@ -80,6 +80,8 @@ ch = ConfigHandler()
               help="Displays goal-scorers under the score and a more detailed standing.")
 @click.option('--odds', '-O', is_flag=True, default=False,
               help="Displays the odds above the score.")
+@click.option('--not-started', '-NS', is_flag=True, default=False,
+              help="Only show matches that haven't started yet")              
 @click.option('--refresh', '-R', is_flag=True, default=False,
               help="Refresh the data every minute.")
 @click.option('--bet', '-B', is_flag=True, default=False,
@@ -96,7 +98,7 @@ ch = ConfigHandler()
               help="Watch all matches you've placed a bet on")              
 @click.option('--possible-leagues', '-PL', is_flag=True,
               help="Show all leagues that are in your Sportmonks API Plan.")
-def main(api_token, timezone, live, today, matches, standings, league, days, history, details, odds, refresh, bet,
+def main(api_token, timezone, live, today, matches, standings, league, days, history, details, odds, not_started, refresh, bet,
          profile, all_bets, open_bets, closed_bets, watch_bets, possible_leagues):
     params = get_params(api_token, timezone)
 
@@ -107,7 +109,7 @@ def main(api_token, timezone, live, today, matches, standings, league, days, his
         betting.main()
 
         Parameters = namedtuple("parameters", "url, msg, league_name, days, "
-                                              "show_history, show_details, show_odds, refresh, place_bet, date_format, type_sort")
+                                              "show_history, show_details, show_odds, not_started, refresh, place_bet, date_format, type_sort")
 
         if live or today or matches:
             check_options(history, bet, live, today, refresh, matches)
@@ -115,20 +117,21 @@ def main(api_token, timezone, live, today, matches, standings, league, days, his
             if bet:
                 odds = True
             if live:
+                not_started = False
                 parameters = Parameters('livescores/now',
                                         ["No live action at this moment",
                                          "There was problem getting live scores, check your parameters"],
-                                        league, days, history, details, odds, refresh, bet, date_format, "live")
+                                        league, days, history, details, odds, not_started, refresh, bet, date_format, "live")
             elif today:
                 parameters = Parameters('livescores',
                                         ["No matches today",
                                          "There was problem getting today's scores, check your parameters"],
-                                        league, days, history, details, odds, refresh, bet, date_format, "today")
+                                        league, days, history, details, odds, not_started, refresh, bet, date_format, "today")
             else:
                 parameters = Parameters('fixtures/between/',
                                         [[f"No matches in the past {str(days)} days."],
                                          [f"No matches in the coming {str(days)} days."]],
-                                        league, days, history, details, odds, refresh, bet, date_format, "matches")
+                                        league, days, history, details, odds, not_started, refresh, bet, date_format, "matches")
             rh.get_matches(parameters)
             return
 

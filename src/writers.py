@@ -156,7 +156,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             league_prefix = list(set([x['league']['data']['name'] for x in games_copy]))
             match_status = set([x['time']['status'] for x in games_copy])
             skip_league = self.get_skip_league(match_status, parameters.type_sort, parameters.place_bet)
-            if skip_league:
+            if skip_league or (parameters.not_started and 'NS' not in match_status):
                 continue
             if league_prefix[0] == league:
                 self.league_header(league, parameters.place_bet)
@@ -190,6 +190,8 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             else:
                 self.league_subheader(matchday, 'stage', parameters.place_bet)
             for match in matches:
+                if parameters.not_started and match['time']['status'] != 'NS':
+                    continue
                 if predictions:
                     prediction = ''
                     for pred in predictions:
