@@ -33,6 +33,9 @@ class RequestHandler(object):
         """Handles soccer.sportsmonks requests"""
         req = requests.get(RequestHandler.BASE_URL + url, params=self.params)
 
+        if req.status_code != requests.codes.ok:
+            self.show_request_error(req)
+
         msg, code = self.get_error(req)
 
         if code == requests.codes.ok:
@@ -42,6 +45,12 @@ class RequestHandler(object):
             click.secho(f"The API returned the next error code: {code} with message: {msg}",
                         fg="red", bold=True)
 
+    def reset_params(self):
+        self.params = {'api_token': self.config_handler.get('auth', 'api_token'),
+                       'tz': self.config_handler.get('profile', 'timezone')}
+
+    @staticmethod
+    def show_request_error(req):
         if req.status_code in [requests.codes.bad, requests.codes.server_error, requests.codes.unauthorized]:
             raise exceptions.APIErrorException("Invalid request. Check your parameters.")
         elif req.status_code == requests.codes.forbidden:
@@ -52,10 +61,6 @@ class RequestHandler(object):
             raise exceptions.APIErrorException("You have exceeded your allowed requests per minute/day")
         else:
             raise exceptions.APIErrorException("Whoops... Something went wrong!")
-
-    def reset_params(self):
-        self.params = {'api_token': self.config_handler.get('auth', 'api_token'),
-                       'tz': self.config_handler.get('profile', 'timezone')}
 
     @staticmethod
     def get_error(req):
