@@ -6,7 +6,7 @@ A CLI to keep track of your soccer bets.
 Install
 =====
 
-An API key from [Sportsmonks](https://sportmonks.com/) will be required and you can register for one [here](http://sportsmonks.com/register).
+An API key from [Sportsmonks](https://sportmonks.com/) will be required and you can register for one [here](http://sportmonks.com/register).
 
 ### Build from source
 
