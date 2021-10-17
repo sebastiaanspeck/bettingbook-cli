@@ -120,20 +120,20 @@
       "name": "Coppa Italia"
     },
     {
-      "NL1": [
+      "NED1": [
         72,
         1353
       ],
       "name": "Eredivisie"
     },
     {
-      "NL2": [
+      "NED2": [
         74
       ],
       "name": "Eerste Divisie"
     },
     {
-      "NLC": [
+      "NEDC": [
         78
       ],
       "name": "KNVB Beker"
@@ -157,7 +157,7 @@
       "name": "UEFA Nations League"
     },
     {
-      "US1": [
+      "USA1": [
         779
       ],
       "name": "Major League Soccer"
@@ -181,7 +181,7 @@
       "name": "WC Qualification Europe"
     },
     {
-      "DK1": [
+      "DNK1": [
         271,
         1659
       ],
@@ -237,7 +237,7 @@
       "name": "Allsvenskan"
     },
     {
-      "CH1": [
+      "SWI1": [
         591
       ],
       "name": "Super League"
