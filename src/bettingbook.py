@@ -119,7 +119,7 @@ def main(api_token, timezone, live, today, matches, standings, league, days, his
             predictions = [i[0] + ';' + i[1] for i in bets]
             return rh.get_multi_matches(match_ids, predictions, parameters)
 
-        def watch_bets(type):    
+        def bet_matches(type):    
             date_format = convert.format_date(ch.get('profile', 'date_format'))
             parameters = Parameters('fixtures/multi',
                                     ["No open bets at the moment.",
@@ -178,20 +178,20 @@ def main(api_token, timezone, live, today, matches, standings, league, days, his
 
         if open_bets:
             if details:
-                watch_bets('open')
+                bet_matches('open')
             else:  
                 betting.view_bets('open')
             return
 
         if closed_bets:
             if details:
-                watch_bets('closed')
+                bet_matches('closed')
             else:    
                 betting.view_bets('closed')
             return
 
         if watch_bets:
-            watch_bets('open')
+            bet_matches('open')
 
         if possible_leagues:
             rh.show_leagues()
