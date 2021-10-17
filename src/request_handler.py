@@ -161,6 +161,9 @@ class RequestHandler(object):
         Queries the API and fetches the scores for fixtures
         based upon the match_ids
         """            
+        if len(match_ids) == 0:
+            click.secho(parameters.msg[0], fg="red", bold=True)
+            return True
         self.set_params()
         fixtures = self._get(f"fixtures/multi/{match_ids}")
         if len(fixtures) == 0:
