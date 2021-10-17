@@ -112,6 +112,32 @@ def main(api_token, timezone, live, today, matches, standings, league, days, his
         Parameters = namedtuple("parameters", "url, msg, league_name, days, "
                                               "show_history, show_details, show_odds, not_started, refresh, place_bet, date_format, type_sort")
 
+
+        def get_multi_matches(filename, parameters):
+            bets = betting.get_bets(ch.get_data('betting_files')[filename])
+            match_ids = ','.join([i[0] for i in bets])
+            predictions = [i[0] + ';' + i[1] for i in bets]
+            return rh.get_multi_matches(match_ids, predictions, parameters)
+
+        def watch_bets(type):    
+            date_format = convert.format_date(ch.get('profile', 'date_format'))
+            parameters = Parameters('fixtures/multi',
+                                    ["No open bets at the moment.",
+                                    "There was problem getting live scores, check your parameters"],
+                                    None, None, None, details, True, False, True, None, date_format, 'watch_bets')
+            if type == 'open':
+                filename = 'open_bets'
+                while True:
+                    quit = get_multi_matches(filename, parameters)
+                    if quit:
+                        return
+                    else:    
+                        time.sleep(60)
+            else:
+                filename = 'closed_bets'
+                get_multi_matches(filename, parameters)
+                return
+
         if live or today or matches:
             check_options(history, bet, live, today, refresh, matches)
             date_format = convert.format_date(ch.get('profile', 'date_format'))
@@ -151,25 +177,21 @@ def main(api_token, timezone, live, today, matches, standings, league, days, his
             return
 
         if open_bets:
-            betting.view_bets('open')
+            if details:
+                watch_bets('open')
+            else:  
+                betting.view_bets('open')
             return
 
         if closed_bets:
-            betting.view_bets('closed')
+            if details:
+                watch_bets('closed')
+            else:    
+                betting.view_bets('closed')
             return
 
         if watch_bets:
-            date_format = convert.format_date(ch.get('profile', 'date_format'))
-            parameters = Parameters('fixtures/multi',
-                                    ["No open bets at the moment.",
-                                    "There was problem getting live scores, check your parameters"],
-                                    None, None, None, details, True, False, True, None, date_format, 'watch_bets')
-            while True:
-                bets = betting.get_bets(ch.get_data('betting_files')['open_bets'])
-                match_ids = ','.join([i[0] for i in bets])
-                predictions = [i[0] + ';' + i[1] for i in bets]
-                rh.get_multi_matches(match_ids, predictions, parameters)
-                time.sleep(60)
+            watch_bets('open')
 
         if possible_leagues:
             rh.show_leagues()
