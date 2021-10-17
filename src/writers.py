@@ -146,7 +146,10 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             self.show_update_time()
         self.score_id = 1
         self.bet_matches = []
-        scores = sorted(total_data, key=lambda x: (x['league']['data']['country_id'], x['league_id']))
+        if parameters.sort_by == 'date':
+            scores = sorted(total_data, key=lambda x: (x['time']['starting_at']['date_time'], x['league_id']))
+        else:
+            scores = sorted(total_data, key=lambda x: (x['league']['data']['country_id'], x['league_id']))    
         for league_id, games in groupby(scores, key=lambda x: x['league_id']):
             league = convert.league_id_to_league_name(league_id)
             league_abbrev = convert.league_id_to_league_abbreviation(league_id)
