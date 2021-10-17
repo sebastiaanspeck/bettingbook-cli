@@ -54,6 +54,11 @@ def check_options_standings(leagues, history):
 
 ch = ConfigHandler()
 
+def get_possible_leagues():
+    params = get_params(ch.get('auth', 'api_token'), ch.get('profile', 'timezone'))
+    rh = RequestHandler(params, LEAGUES_DATA, None, ch)
+    leagues = rh.get_leagues()
+    return [convert.league_id_to_league_abbreviation(x['id']) for x in leagues]   
 
 @click.command()
 @click.option('--api_token', default=ch.load_config_file,
@@ -69,7 +74,7 @@ ch = ConfigHandler()
               help="Shows matches from various leagues for a longer period.")
 @click.option('--standings', '-S', is_flag=True,
               help="Standings for a particular league.")
-@click.option('--league', '-l', type=click.Choice(LEAGUES), multiple=True,
+@click.option('--league', '-l', type=click.Choice(get_possible_leagues()), multiple=True,
               help="Show fixtures from a particular league.")
 @click.option('--days', '-d', default=7, show_default=True,
               help=("The number of days in the future for which you "
