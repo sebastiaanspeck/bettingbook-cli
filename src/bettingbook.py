@@ -125,7 +125,7 @@ def main(api_token, timezone, live, today, matches, standings, league, days, his
                                     ["No open bets at the moment.",
                                     "There was problem getting live scores, check your parameters"],
                                     None, None, None, details, True, False, True, None, date_format, 'watch_bets')
-            if type == 'open':
+            if type == 'open' and watch_bets:
                 filename = 'open_bets'
                 while True:
                     quit = get_multi_matches(filename, parameters)
@@ -133,10 +133,13 @@ def main(api_token, timezone, live, today, matches, standings, league, days, his
                         return
                     else:    
                         time.sleep(60)
-            else:
+            elif type == 'open':
+                filename = 'open_bets'
+            else:    
                 filename = 'closed_bets'
-                get_multi_matches(filename, parameters)
-                return
+
+            get_multi_matches(filename, parameters)
+            return
 
         if live or today or matches:
             check_options(history, bet, live, today, refresh, matches)
