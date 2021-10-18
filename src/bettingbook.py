@@ -75,7 +75,7 @@ def get_possible_leagues():
               help="Standings for a particular league.")
 @click.option('--league', '-l', type=click.Choice(get_possible_leagues()), multiple=True,
               help="Show fixtures from a particular league.")
-@click.option('--sort-by', '-sb', default='league', show_default=True, type=click.Choice(['date', 'league']),
+@click.option('--sort-by', '-sb', type=click.Choice(['date', 'league']),
               help="Sort fixtures by type.")              
 @click.option('--days', '-d', default=7, show_default=True,
               help=("The number of days in the future for which you "
@@ -125,12 +125,14 @@ def main(api_token, timezone, live, today, matches, standings, league, sort_by, 
             predictions = [i[0] + ';' + i[1] for i in bets]
             return rh.get_multi_matches(match_ids, predictions, parameters)
 
-        def bet_matches(type):    
+        def bet_matches(type, sort_by):
             date_format = convert.format_date(ch.get('profile', 'date_format'))
+            if sort_by is None:
+                sort_by = 'date'
             parameters = Parameters('fixtures/multi',
                                     ["No open bets at the moment.",
                                     "There was problem getting live scores, check your parameters"],
-                                    None, 'date', None, None, details, True, False, True, None, date_format, 'watch_bets')
+                                    None, sort_by, None, None, details, True, False, True, None, date_format, 'watch_bets')
             if type == 'open' and watch_bets:
                 filename = 'open_bets'
                 while True:
@@ -150,6 +152,8 @@ def main(api_token, timezone, live, today, matches, standings, league, sort_by, 
         if live or today or matches:
             check_options(history, bet, live, today, refresh, matches)
             date_format = convert.format_date(ch.get('profile', 'date_format'))
+            if sort_by is None:
+                sort_by = 'league'
             if bet:
                 odds = True
             if live:
@@ -187,20 +191,20 @@ def main(api_token, timezone, live, today, matches, standings, league, sort_by, 
 
         if open_bets:
             if details:
-                bet_matches('open')
+                bet_matches('open', sort_by)
             else:  
                 betting.view_bets('open')
             return
 
         if closed_bets:
             if details:
-                bet_matches('closed')
+                bet_matches('closed', sort_by)
             else:    
                 betting.view_bets('closed')
             return
 
         if watch_bets:
-            bet_matches('open')
+            bet_matches('open', sort_by)
 
         if possible_leagues:
             rh.show_leagues()
