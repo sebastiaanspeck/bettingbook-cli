@@ -136,6 +136,7 @@ def main(api_token, timezone, live, today, matches, standings, league, sort_by, 
             if type == 'open' and watch_bets:
                 filename = 'open_bets'
                 while True:
+                    betting.check_open_bets()
                     quit = get_multi_matches(filename, parameters)
                     if quit:
                         return
