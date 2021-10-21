@@ -188,7 +188,10 @@ class RequestHandler(object):
             return
         bet_matches = self.writer.league_scores(fixtures_results, parameters, first)
         if parameters.place_bet:
-            self.place_bet(bet_matches)
+            if len(bet_matches) != 0:
+                self.place_bet(bet_matches)
+            else:
+                click.secho("There are no matches in the selected timespan to bet on.", fg="red", bold=True)
 
     def get_standings(self, leagues, show_details):
         self.reset_params()
