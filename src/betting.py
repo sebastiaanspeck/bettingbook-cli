@@ -72,7 +72,6 @@ class Betting(object):
             click.secho(e)
 
     def check_open_bets(self):
-        print("Checking open bets...")
         reader = self.get_bets(self.config_handler.get_data('betting_files')['open_bets'])
         for i, row in enumerate(reader):
             match_data = self.request_handler.get_match_bet(row[0])[0]

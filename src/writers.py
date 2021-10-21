@@ -421,7 +421,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
                 minutes = []
                 for key, val in enumerate(events[team][goal][0]['minute']):
                     minutes.extend([''.join([str(val), str(events[team][goal][0]['type'][key])])])
-                str_scorer = ''.join([goal, ' (', ','.join(minutes), ')'])
+                str_scorer = ''.join([goal, ' (', ', '.join(minutes), ')'])
             if team == "home":
                 goals.extend(["{}".format(str_scorer)])
             else:
@@ -441,7 +441,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
                 minutes = []
                 for key, val in enumerate(events['home'][goal][0]['minute']):
                     minutes.extend([''.join([str(val), str(events['home'][goal][0]['type'][key])])])
-                str_scorer = ''.join([goal, ' (', ','.join(minutes), ')'])
+                str_scorer = ''.join([goal, ' (', ', '.join(minutes), ')'])
             goals.extend(["{}".format(str_scorer)])
         for i, goal in enumerate(events['away']):
             number_of_goals = len(events['away'][goal][0]['minute'])
@@ -452,7 +452,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
                 minutes = []
                 for key, val in enumerate(events['away'][goal][0]['minute']):
                     minutes.extend([''.join([str(val), str(events['away'][goal][0]['type'][key])])])
-                str_scorer = ''.join([goal, ' (', ','.join(minutes), ')'])
+                str_scorer = ''.join([goal, ' (', ', '.join(minutes), ')'])
             try:
                 goals[i] += "{}".format(str_scorer.rjust(62 - len(goals[i])))
             except IndexError:
