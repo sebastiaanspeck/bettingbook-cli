@@ -154,7 +154,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             league = convert.league_id_to_league_name(league_id)
             league_abbrev = convert.league_id_to_league_abbreviation(league_id)
             games = sorted(games, key=lambda x: x['time']['starting_at']['date_time'])
-            if league is '':
+            if league == '':
                 continue
             games_copy = copy.deepcopy(games)
             league_prefix = list(set([x['league']['data']['name'] for x in games_copy]))
@@ -560,7 +560,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             return True
         elif type_sort == "today" and match_status == {"LIVE"}:
             return True
-        elif type_sort == "today" and place_bet and match_status == {"FT"}:
+        elif (type_sort == "today" or type_sort == "matches") and place_bet and match_status == {"FT"}:
             return True
         elif type_sort == "matches" and not any(status in match_status for status in ["NS", "FT"]):
             return True
