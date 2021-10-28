@@ -293,7 +293,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
     @staticmethod
     def fill_odds(odd, odds):
         """Fills the odds with all odds"""
-        odds[odd['label']].append(float(odd['value']))
+        odds[odd['label']].append(float(odd['value'].replace(',', '')))
         return odds
 
     def print_datetime_status(self, match, parameters):
