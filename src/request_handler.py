@@ -9,7 +9,7 @@ from betting import Betting
 
 
 class RequestHandler(object):
-    BASE_URL = "https://soccer.sportmonks.com/api/v2.0/"
+    BASE_URL = "https://api.sportmonks.com/v3/football/"
 
     def __init__(self, params, league_data, writer, config_handler):
         self.params = params
@@ -90,10 +90,9 @@ class RequestHandler(object):
     def get_data(self, req, url):
         parts = json.loads(req.text)
         data = parts.get("data")
-        meta = parts.get("meta")
-        pagination = meta.get("pagination")
+        pagination = parts.get("pagination")
         if pagination:
-            pages = int(pagination["total_pages"])
+            pages = int(pagination["count"])
         else:
             pages = 1
         if pages > 1:
@@ -126,7 +125,7 @@ class RequestHandler(object):
         league_ids = self.get_league_ids()
         self.params["leagues"] = ",".join(str(val) for val in league_ids)
         self.params["include"] = (
-            "localTeam,visitorTeam,league,round,events,stage,flatOdds"
+            "league;round;events;stage;odds"
         )
         self.params["markets"] = "1"
 
@@ -265,7 +264,7 @@ class RequestHandler(object):
     def get_match_bet(self, matches):
         url = f"fixtures/multi/{matches}"
         self.params["include"] = (
-            "localTeam,visitorTeam,league,round,events,stage,flatOdds"
+            "league;round;events;stage;odds"
         )
         self.params["markets"] = "1"
         matches = self._get(url)
