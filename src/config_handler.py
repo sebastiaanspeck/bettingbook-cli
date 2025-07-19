@@ -105,7 +105,7 @@ class ConfigHandler(object):
                 if "profile" in missing_sections:
                     config.add_section("profile")
                 self.update_config_file("profile", missing_key, value)
-            elif missing_key == "api_key":
+            elif missing_key == "api_token":
                 if "auth" in missing_sections:
                     config.add_section("auth")
                 self.update_config_file("auth", missing_key, value)
@@ -134,7 +134,7 @@ class ConfigHandler(object):
                 value = "betting_files/closed_bets.csv"
             if missing_option[0] in ["name", "balance", "timezone", "date_format"]:
                 self.update_config_file("profile", missing_option[0], value)
-            elif missing_option[0] == "api_key":
+            elif missing_option[0] == "api_token":
                 self.update_config_file("auth", missing_option[0], value)
             elif missing_option[0] in ["open_bets", "closed_bets"]:
                 self.update_config_file("betting_files", missing_option[0], value)
