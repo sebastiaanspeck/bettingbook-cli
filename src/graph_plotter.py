@@ -14,13 +14,13 @@ def show_full_graph():
     balances = []
     ch = ConfigHandler()
 
-    with open(ch.get_data('betting_files')['balance_history'], 'r') as csv_file:
-        plots = csv.reader(csv_file, delimiter=',')
+    with open(ch.get_data("betting_files")["balance_history"], "r") as csv_file:
+        plots = csv.reader(csv_file, delimiter=",")
         for row in plots:
             dates.append(row[0])
             balances.append(float(row[1]))
 
-    date_format = convert.format_date(ch.get('profile', 'date_format'))
+    date_format = convert.format_date(ch.get("profile", "date_format"))
     dates = [dt.datetime.strptime(d, date_format) for d in dates]
 
     fig, ax = plt.subplots()
@@ -28,12 +28,12 @@ def show_full_graph():
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter(date_format))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
 
-    ax.plot(dates, balances, marker=".", color='red', label='Balance')
+    ax.plot(dates, balances, marker=".", color="red", label="Balance")
 
     mplcursors.cursor(hover=True)
 
-    ax.set(title='Balance history')
-    fig.canvas.set_window_title('Balance history graph')
+    ax.set(title="Balance history")
+    fig.canvas.set_window_title("Balance history graph")
 
     plt.gcf().autofmt_xdate()
     plt.legend()

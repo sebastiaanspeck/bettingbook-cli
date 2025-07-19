@@ -9,7 +9,7 @@ from betting import Betting
 
 
 class RequestHandler(object):
-    BASE_URL = 'https://soccer.sportmonks.com/api/v2.0/'
+    BASE_URL = "https://soccer.sportmonks.com/api/v2.0/"
 
     def __init__(self, params, league_data, writer, config_handler):
         self.params = params
@@ -18,11 +18,11 @@ class RequestHandler(object):
         self.config_handler = config_handler
 
     def show_profile(self):
-        self.writer.show_profile(self.config_handler.get_data('profile'))
+        self.writer.show_profile(self.config_handler.get_data("profile"))
 
     def get_leagues(self):
-        self.params['include'] = 'country'
-        return self._get('leagues')
+        self.params["include"] = "country"
+        return self._get("leagues")
 
     def show_leagues(self):
         leagues = self.get_leagues()
@@ -41,50 +41,63 @@ class RequestHandler(object):
             data = self.get_data(req, url)
             return data
         else:
-            click.secho(f"The API returned the next error code: {code} with message: {msg}",
-                        fg="red", bold=True)
+            click.secho(
+                f"The API returned the next error code: {code} with message: {msg}",
+                fg="red",
+                bold=True,
+            )
 
     def reset_params(self):
-        self.params = {'api_token': self.config_handler.get('auth', 'api_token'),
-                       'tz': self.config_handler.get('profile', 'timezone')}
+        self.params = {
+            "api_token": self.config_handler.get("auth", "api_token"),
+            "tz": self.config_handler.get("profile", "timezone"),
+        }
 
     @staticmethod
     def show_request_error(req):
-        if req.status_code in [requests.codes.bad, requests.codes.server_error, requests.codes.unauthorized]:
+        if req.status_code in [
+            requests.codes.bad,
+            requests.codes.server_error,
+            requests.codes.unauthorized,
+        ]:
             raise APIErrorException("Invalid request. Check your parameters.")
         elif req.status_code == requests.codes.forbidden:
-            raise APIErrorException("The data you requested is not accessible from your plan.")
+            raise APIErrorException(
+                "The data you requested is not accessible from your plan."
+            )
         elif req.status_code == requests.codes.not_found:
             raise APIErrorException("This resource does not exist. Check parameters")
         elif req.status_code == requests.codes.too_many_requests:
-            raise APIErrorException("You have exceeded your allowed requests per minute/day")
+            raise APIErrorException(
+                "You have exceeded your allowed requests per minute/day"
+            )
         else:
             raise APIErrorException("Whoops... Something went wrong!")
 
     @staticmethod
     def get_error(req):
         parts = json.loads(req.text)
-        error = parts.get('error')
+        error = parts.get("error")
         if error is None:
-            return '', 200
+            return "", 200
         else:
-            return error['message'], error['code']
+            return error["message"], error["code"]
 
     def get_data(self, req, url):
         parts = json.loads(req.text)
-        data = parts.get('data')
-        meta = parts.get('meta')
-        pagination = meta.get('pagination')
+        data = parts.get("data")
+        meta = parts.get("meta")
+        pagination = meta.get("pagination")
         if pagination:
-            pages = int(pagination['total_pages'])
+            pages = int(pagination["total_pages"])
         else:
             pages = 1
         if pages > 1:
             for i in range(2, pages + 1):
-                self.params['page'] = i
+                self.params["page"] = i
                 req = requests.get(RequestHandler.BASE_URL + url, params=self.params)
                 next_parts = json.loads(req.text)
-                next_data = next_parts.get('data')
+                next_data = next_parts.get("data")
                 if next_data:
                     data.extend(next_data)
         return data
@@ -107,19 +120,27 @@ class RequestHandler(object):
 
     def set_params(self):
         league_ids = self.get_league_ids()
-        self.params['leagues'] = ','.join(str(val) for val in league_ids)
-        self.params['include'] = 'localTeam,visitorTeam,league,round,events,stage,flatOdds'
-        self.params['markets'] = '1'
+        self.params["leagues"] = ",".join(str(val) for val in league_ids)
+        self.params["include"] = (
+            "localTeam,visitorTeam,league,round,events,stage,flatOdds"
+        )
+        self.params["markets"] = "1"
 
     @staticmethod
     def set_start_end(show_history, days):
         now = datetime.datetime.now()
         if show_history:
-            start = datetime.datetime.strftime(now - datetime.timedelta(days=days), '%Y-%m-%d')
-            end = datetime.datetime.strftime(now - datetime.timedelta(days=1), '%Y-%m-%d')
+            start = datetime.datetime.strftime(
+                now - datetime.timedelta(days=days), "%Y-%m-%d"
+            )
+            end = datetime.datetime.strftime(
+                now - datetime.timedelta(days=1), "%Y-%m-%d"
+            )
         else:
-            start = datetime.datetime.strftime(now, '%Y-%m-%d')
-            end = datetime.datetime.strftime(now + datetime.timedelta(days=days), '%Y-%m-%d')
+            start = datetime.datetime.strftime(now, "%Y-%m-%d")
+            end = datetime.datetime.strftime(
+                now + datetime.timedelta(days=days), "%Y-%m-%d"
+            )
         return start, end
 
     def get_matches(self, parameters):
@@ -131,10 +152,10 @@ class RequestHandler(object):
         if parameters.league_name:
             if parameters.refresh:
                 while True:
-                    self.get_match_data_for_leagues(parameters) 
+                    self.get_match_data_for_leagues(parameters)
                     time.sleep(60)
             else:
-                self.get_match_data_for_leagues(parameters)    
+                self.get_match_data_for_leagues(parameters)
         else:
             if parameters.refresh:
                 while True:
@@ -146,21 +167,21 @@ class RequestHandler(object):
     def get_match_data_for_leagues(self, parameters):
         for i, league in enumerate(parameters.league_name):
             league_id = self.get_league_abbreviation(league)
-            self.params['leagues'] = ','.join(str(val) for val in league_id)
+            self.params["leagues"] = ",".join(str(val) for val in league_id)
             self.try_to_get_match_data(parameters, i == 0)
 
     def try_to_get_match_data(self, parameters, first=False):
-        start, end = self.set_start_end(parameters.show_history, parameters.days)     
+        start, end = self.set_start_end(parameters.show_history, parameters.days)
         try:
             self.get_match_data(parameters, start, end, first)
         except exceptions.APIErrorException as e:
-            click.secho(str(e), fg="red", bold=True)                       
+            click.secho(str(e), fg="red", bold=True)
 
     def get_multi_matches(self, match_ids, predictions, parameters):
         """
         Queries the API and fetches the scores for fixtures
         based upon the match_ids
-        """            
+        """
         if len(match_ids) == 0:
             click.secho(parameters.msg[0], fg="red", bold=True)
             return True
@@ -169,7 +190,9 @@ class RequestHandler(object):
         if len(fixtures) == 0:
             click.secho(parameters.msg[0], fg="red", bold=True)
             return
-        self.writer.league_scores(self._get(f"fixtures/multi/{match_ids}"), parameters, True, predictions)   
+        self.writer.league_scores(
+            self._get(f"fixtures/multi/{match_ids}"), parameters, True, predictions
+        )
 
     def get_match_data(self, parameters, start, end, first=False):
         if parameters.type_sort == "matches":
@@ -180,9 +203,9 @@ class RequestHandler(object):
         if len(fixtures_results) == 0:
             if parameters.type_sort == "matches":
                 if parameters.show_history:
-                    click.secho(''.join(parameters.msg[0]), fg="red", bold=True)
+                    click.secho("".join(parameters.msg[0]), fg="red", bold=True)
                 else:
-                    click.secho(''.join(parameters.msg[1]), fg="red", bold=True)
+                    click.secho("".join(parameters.msg[1]), fg="red", bold=True)
             else:
                 click.secho(parameters.msg[0], fg="red", bold=True)
             return
@@ -191,7 +214,11 @@ class RequestHandler(object):
             if len(bet_matches) != 0:
                 self.place_bet(bet_matches)
             else:
-                click.secho("There are no matches in the selected timespan to bet on.", fg="red", bold=True)
+                click.secho(
+                    "There are no matches in the selected timespan to bet on.",
+                    fg="red",
+                    bold=True,
+                )
 
     def get_standings(self, leagues, show_details):
         self.reset_params()
@@ -200,7 +227,7 @@ class RequestHandler(object):
                 url = f"leagues/{league_id}"
                 try:
                     league_data = self._get(url)
-                    current_season_id = league_data['current_season_id']
+                    current_season_id = league_data["current_season_id"]
                     url = f"standings/season/{current_season_id}"
                     standings_data = self._get(url)
                     if len(standings_data) == 0:
@@ -210,9 +237,11 @@ class RequestHandler(object):
                     click.secho(str(e), fg="red", bold=True)
 
     def place_bet(self, bet_matches):
-        match_bet = click.prompt("Give the numbers of the matches you want to bet on (comma-separated)").split(',')
+        match_bet = click.prompt(
+            "Give the numbers of the matches you want to bet on (comma-separated)"
+        ).split(",")
         match_bet = sorted(self.check_match_bet(match_bet, len(bet_matches)))
-        if match_bet == 'no_matches':
+        if match_bet == "no_matches":
             click.secho("There are no valid matches selected.", fg="red", bold=True)
         else:
             matches = []
@@ -221,18 +250,20 @@ class RequestHandler(object):
                     matches.extend([str(bet_matches[int(match_id) - 1])])
                 except (IndexError, ValueError):
                     pass
-            matches = ','.join(val for val in matches)
+            matches = ",".join(val for val in matches)
             match_data = self.get_match_bet(matches)
             match_data = self.check_match_data(match_data)
-            if match_data == 'no_matches':
+            if match_data == "no_matches":
                 click.secho("There are no valid matches selected.", fg="red", bold=True)
             else:
                 self.place_bet_betting(match_data)
 
     def get_match_bet(self, matches):
         url = f"fixtures/multi/{matches}"
-        self.params['include'] = 'localTeam,visitorTeam,league,round,events,stage,flatOdds'
-        self.params['markets'] = '1'
+        self.params["include"] = (
+            "localTeam,visitorTeam,league,round,events,stage,flatOdds"
+        )
+        self.params["markets"] = "1"
         matches = self._get(url)
         return matches
 
@@ -242,32 +273,50 @@ class RequestHandler(object):
         for match_id in match_bet:
             try:
                 if 0 <= int(match_id) > max_match_id:
-                    click.secho(f"The match with id {match_id} is an invalid match.", fg="red", bold=True)
+                    click.secho(
+                        f"The match with id {match_id} is an invalid match.",
+                        fg="red",
+                        bold=True,
+                    )
                 else:
                     matches.add(match_id)
             except ValueError:
-                click.secho(f"The match with id {match_id} is an invalid match.", fg="red", bold=True)
+                click.secho(
+                    f"The match with id {match_id} is an invalid match.",
+                    fg="red",
+                    bold=True,
+                )
                 continue
         if len(matches) == 0:
-            return 'no_matches'
+            return "no_matches"
         return matches
 
     @staticmethod
     def check_match_data(match_data):
         matches = []
         for match in match_data:
-            if len(match['flatOdds']['data']) == 0:
-                click.secho(f"The match {match['localTeam']['data']['name']} - {match['visitorTeam']['data']['name']} "
-                            f"doesn't have any odds available (yet).", fg="red", bold=True)
-            elif match['time']['status'] != 'NS':
-                click.secho(f"The match {match['localTeam']['data']['name']} - {match['visitorTeam']['data']['name']} "
-                            f"has already started.", fg="red", bold=True)
+            if len(match["flatOdds"]["data"]) == 0:
+                click.secho(
+                    f"The match {match['localTeam']['data']['name']} - {match['visitorTeam']['data']['name']} "
+                    f"doesn't have any odds available (yet).",
+                    fg="red",
+                    bold=True,
+                )
+            elif match["time"]["status"] != "NS":
+                click.secho(
+                    f"The match {match['localTeam']['data']['name']} - {match['visitorTeam']['data']['name']} "
+                    f"has already started.",
+                    fg="red",
+                    bold=True,
+                )
             else:
                 matches.extend([match])
         if len(matches) == 0:
-            return 'no_matches'
+            return "no_matches"
         return matches
 
     def place_bet_betting(self, matches):
-        bet = Betting(self.params, self.league_data, self.writer, self, self.config_handler)
+        bet = Betting(
+            self.params, self.league_data, self.writer, self, self.config_handler
+        )
         bet.place_bet(matches)
