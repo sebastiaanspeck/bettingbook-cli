@@ -105,7 +105,7 @@ class ConfigHandler(object):
                 if "profile" in missing_sections:
                     config.add_section("profile")
                 self.update_config_file("profile", missing_key, value)
-            elif missing_key == "api_key":
+            elif missing_key == "api_token":
                 if "auth" in missing_sections:
                     config.add_section("auth")
                 self.update_config_file("auth", missing_key, value)
