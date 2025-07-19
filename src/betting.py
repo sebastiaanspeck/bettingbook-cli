@@ -27,7 +27,7 @@ class Betting(object):
             filename = os.path.join(os.getcwd(), file)
             os.makedirs(os.path.dirname(filename), exist_ok=True)
             if not os.path.exists(filename):
-                open(filename, "w+")
+                with open(filename, "w+"):
 
     @staticmethod
     def get_bets(filename):
