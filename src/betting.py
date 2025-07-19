@@ -28,7 +28,7 @@ class Betting(object):
             filename = os.path.join(os.getcwd(), file)
             os.makedirs(os.path.dirname(filename), exist_ok=True)
             if not os.path.exists(filename):
-                open(filename, "w+")
+                open(filename, 'w+')
 
     @staticmethod
     def get_bets(filename):
@@ -67,7 +67,7 @@ class Betting(object):
                 file_object = open(file, 'w')
                 for line in data:
                     str1 = ','.join(line)
-                    file_object.write(str1 + "\n")
+                    file_object.write(str1 + '\n')
                 file_object.close()
         except Exception as e:
             click.secho(e)
@@ -91,13 +91,17 @@ class Betting(object):
         if winning_team == predicted_team:
             click.echo(f"Woohoo! You predicted {match_data['localTeam']['data']['name']} - "
                        f"{match_data['visitorTeam']['data']['name']} correct and won {potential_wins}")
+<<<<<<< HEAD
             self.update_balance(convert.float_to_currency(potential_wins), 'win')
+=======
+            self.update_balance(convert.float_to_currency(potential_wins), operation="win")
+>>>>>>> main
             row.extend((winning_team, "yes"))
         else:
             click.echo(f"Ah noo! You predicted {match_data['localTeam']['data']['name']} - "
                        f"{match_data['visitorTeam']['data']['name']} incorrect")
             row.extend((winning_team, "no"))
-        self.write_to_bets_file(row, 'closed_bets')
+        self.write_to_bets_file(row, "closed_bets")
         del reader[i][0:]
         self.update_open_bets_file(reader)
 
@@ -108,11 +112,11 @@ class Betting(object):
             except (ValueError, ZeroDivisionError):
                 return 0.00
         odds_dict = {"1": [], "X": [], "2": []}
-        for odds in match["flatOdds"]["data"]:
-            for odd in odds["odds"]:
+        for odds in match['flatOdds']['data']:
+            for odd in odds['odds']:
                 odds_dict = self.fill_odds(odd, odds_dict)
 
-        home_odd, draw_odd, away_odd = '', '', ''
+        home_odd, draw_odd, away_odd = "", "", ""
         for label, values in odds_dict.items():
             odd = average_odd(values)
             odd = "{0:.2f}".format(odd)
@@ -128,7 +132,7 @@ class Betting(object):
 
     @staticmethod
     def fill_odds(odd, odds):
-        odds[odd["label"]].append(float(odd["value"]))
+        odds[odd['label']].append(float(odd['value']))
         return odds
 
     @staticmethod
@@ -216,7 +220,11 @@ class Betting(object):
             self.update_balance(data_in[1], 'loss')
             data_out = [data_in[4]['id'], data_in[0], data_in[1], data_in[2], data_in[3],
                         data_in[4]['localTeam']['data']['name'], data_in[4]['visitorTeam']['data']['name'],
+<<<<<<< HEAD
                         convert.datetime(data_in[4]["time"]["starting_at"]["date_time"],
+=======
+                        convert.datetime(data_in[4]['time']['starting_at']['date_time'],
+>>>>>>> main
                                          convert.format_date(self.config_handler.get('profile', 'date_format'))),
                         data_in[5]]
             self.write_to_bets_file(data_out, 'open_bets')
@@ -228,7 +236,11 @@ class Betting(object):
         sort_reverse = True
         if type_sort == "open":
             sort_reverse = False
+<<<<<<< HEAD
         bets = sorted(self.get_bets(self.config_handler.get('betting_files', f'{type_sort}_bets')),
+=======
+        bets = sorted(self.get_bets(self.config_handler.get_data('betting_files')[f"{type_sort}_bets"]),
+>>>>>>> main
                       key=lambda x: (x[7]), reverse=sort_reverse)
         if len(bets) == 0:
             click.secho(f"\nNo {type_sort} bets found.", fg="red", bold=True)
@@ -240,18 +252,14 @@ class Betting(object):
             else:
                 click.secho(f"{'MATCH':50} {'PREDICTION':15} {'ODD':10} {'STAKE':10} {'POTENTIAL WINS':20} "
                             f"{'DATE AND TIME':20} {'RESULT':10} {'CORRECT':10}", bold=True)
-            iteration = 0
-            max_iterations = int(self.config_handler.get('profile', 'number_of_bets'))
             for bet in bets:
-                if iteration <= max_iterations:
-                    if type_sort == 'open':
-                        bet_str = f"{bet[5] + ' - ' + bet[6]:<50} {bet[1]:<15} {bet[4]:<10} " \
-                            f"{bet[2]:<10} {bet[3]:<20} {bet[7]:<20}"
-                    else:
-                        bet_str = f"{bet[5] + ' - ' + bet[6]:<50} {bet[1]:<15} {bet[4]:<10} " \
-                            f"{bet[2]:<10} {bet[3]:<20} {bet[7]:<20} {bet[9]:<10} {bet[10]:<10}"
-                    click.secho(bet_str)
-                iteration += 1
+                if type_sort == 'open':
+                    bet_str = f"{bet[5] + ' - ' + bet[6]:<50} {bet[1]:<15} {bet[4]:<10} " \
+                        f"{bet[2]:<10} {bet[3]:<20} {bet[7]:<20}"
+                else:
+                    bet_str = f"{bet[5] + ' - ' + bet[6]:<50} {bet[1]:<15} {bet[4]:<10} " \
+                        f"{bet[2]:<10} {bet[3]:<20} {bet[7]:<20} {bet[9]:<10} {bet[10]:<10}"
+                click.secho(bet_str)
 
     def update_graph_data(self, balance):
         date_format = convert.format_date(self.config_handler.get('profile', 'date_format'))

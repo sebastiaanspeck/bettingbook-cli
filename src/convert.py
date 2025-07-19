@@ -1,4 +1,4 @@
-import datetime as dt
+from datetime import datetime
 from re import sub
 from decimal import Decimal
 
@@ -7,6 +7,8 @@ import writers
 
 jh = JsonHandler()
 LEAGUES_DATA = jh.load_leagues()
+
+dt = datetime
 
 
 def league_id_to_league_name(league_id):
@@ -40,18 +42,24 @@ def format_date(date_format):
 
 
 def datetime(datetime_str, date_format):
-    """Converts the API UTC datetime string to the local user datetime."""
-    return dt.datetime.strftime(dt.datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S'), date_format + ' %H:%M')
+    """Converts the API datetime string to the local user datetime."""
+    datetime = dt.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
+    if datetime.year == dt.now().year:
+        date_format = date_format.replace("%Y", '').replace("%y", '').rstrip("-")
+    return dt.strftime(datetime, date_format + ' %H:%M')
 
 
 def date(date_str, date_format):
-    """Converts the API UTC date string to the local user date."""
-    return dt.datetime.strftime(dt.datetime.strptime(date_str, '%Y-%m-%d'), date_format)
+    """Converts the API date string to the local user date."""
+    date = dt.strptime(date_str, '%Y-%m-%d')
+    if date.year  == dt.now().year:
+        date_format = date_format.replace("%Y", '').replace("%y", '').rstrip("-")
+    return dt.strftime(date, date_format)
 
 
 def time(time_str):
-    """Converts the API UTC time string to the local user time."""
-    return dt.datetime.strftime(dt.datetime.strptime(time_str, '%H:%M:%S'), '%H:%M')
+    """Converts the API time string to the local user time."""
+    return dt.strftime(dt.strptime(time_str, '%H:%M:%S'), '%H:%M')
 
 
 def prediction_to_msg(prediction):
@@ -64,6 +72,8 @@ def prediction_to_msg(prediction):
 
 
 def player_name(name):
+    if name is None:
+        return ''
     try:
         name = name.split(' ', 1)
     except AttributeError:

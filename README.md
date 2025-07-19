@@ -6,7 +6,7 @@ A CLI to keep track of your soccer bets.
 Install
 =====
 
-An API key from [Sportsmonks](https://sportmonks.com/) will be required and you can register for one [here](http://sportsmonks.com/register).
+An API key from [Sportsmonks](https://sportmonks.com/) will be required and you can register for one [here](http://sportmonks.com/register).
 
 ### Build from source
 
@@ -16,7 +16,7 @@ $ cd bettingbook-cli/src
 ```
 
 #### Notes:
-- Currently only tested on Windows and MacOS. Might work on other platforms, but this is not yet tested.
+- Currently only tested on Windows and MacOS with Python 3. Might work on other platforms, but this is not yet tested.
 
 - To get colorized terminal output on Windows, make sure to install [ansicon](https://github.com/adoxa/ansicon/releases/latest) and [colorama](https://pypi.python.org/pypi/colorama).
 

@@ -139,31 +139,35 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             except IndexError:
                 pass
 
-    def league_scores(self, total_data, parameters):
+    def league_scores(self, total_data, parameters, first=False, predictions=[]):
         """Prints the data in a pretty format"""
-        if parameters.refresh:
+        if parameters.refresh and first:
             os.system('cls' if os.name == 'nt' else 'clear')
+            self.show_update_time()
         self.score_id = 1
         self.bet_matches = []
-        scores = sorted(total_data, key=lambda x: (x["league"]["data"]["country_id"], x['league_id']))
-        self.show_update_time()
-        for league, games in groupby(scores, key=lambda x: x['league_id']):
-            league = convert.league_id_to_league_name(league)
-            games = sorted(games, key=lambda x: x["time"]["starting_at"]["date_time"])
-            if league is '':
+        if parameters.sort_by == 'date':
+            scores = sorted(total_data, key=lambda x: (x['time']['starting_at']['date_time'], x['league_id']))
+        else:
+            scores = sorted(total_data, key=lambda x: (x['league']['data']['country_id'], x['league_id']))    
+        for league_id, games in groupby(scores, key=lambda x: x['league_id']):
+            league = convert.league_id_to_league_name(league_id)
+            league_abbrev = convert.league_id_to_league_abbreviation(league_id)
+            games = sorted(games, key=lambda x: x['time']['starting_at']['date_time'])
+            if league == '':
                 continue
             games_copy = copy.deepcopy(games)
             league_prefix = list(set([x['league']['data']['name'] for x in games_copy]))
             match_status = set([x['time']['status'] for x in games_copy])
-            skip_league = self.get_skip_league(match_status, parameters)
-            if skip_league:
+            skip_league = self.get_skip_league(match_status, parameters.type_sort, parameters.place_bet)
+            if skip_league or (parameters.not_started and 'NS' not in match_status):
                 continue
             if league_prefix[0] == league:
-                self.league_header(league, parameters.place_bet)
+                self.league_header(' - '.join([league, league_abbrev]), parameters.place_bet)
             else:
-                self.league_header(league + ' - ' + league_prefix[0], parameters.place_bet)
+                self.league_header(' - '.join([league, league_abbrev, league_prefix[0]]), parameters.place_bet)
             games = self.group_games(games, games_copy)
-            self.print_matches(games, parameters)
+            self.print_matches(games, parameters, predictions)
         return self.bet_matches
 
     def group_games(self, games, games_copy):
@@ -174,14 +178,14 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             uniq_keys.update(key)
         if "round" in uniq_keys:
             if self.groupby_round(games_copy):
-                games = groupby(games, key=lambda x: x["round"]["data"]["name"])
+                games = groupby(games, key=lambda x: x['round']['data']['name'])
             else:
-                games = groupby(games, key=lambda x: x["stage"]["data"]["name"])
+                games = groupby(games, key=lambda x: x['stage']['data']['name'])
         else:
-            games = groupby(games, key=lambda x: x["stage"]["data"]["name"])
+            games = groupby(games, key=lambda x: x['stage']['data']['name'])
         return games
 
-    def print_matches(self, games, parameters):
+    def print_matches(self, games, parameters, predictions):
         """Print the matches"""
         skip_match_statuses = self.get_match_statuses_to_skip(parameters.type_sort, parameters.place_bet)
         for matchday, matches in games:
@@ -190,16 +194,27 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             else:
                 self.league_subheader(matchday, 'stage', parameters.place_bet)
             for match in matches:
-                self.print_match(match, parameters, skip_match_statuses)
+                if parameters.not_started and match['time']['status'] != 'NS':
+                    continue
+                if predictions:
+                    prediction = ''
+                    for pred in predictions:
+                        parts = pred.split(';')
+                        match_id = parts[0]
+                        if int(match_id) == match['id']:
+                            prediction = parts[1]
+                    self.print_match(match, parameters, skip_match_statuses, prediction)
+                else:
+                    self.print_match(match, parameters, skip_match_statuses)
 
-    def print_match(self, match, parameters, skip_match_statuses):
+    def print_match(self, match, parameters, skip_match_statuses, prediction=''):
         """Print match and all other match-details"""
-        if match["time"]["status"] in skip_match_statuses:
+        if match['time']['status'] in skip_match_statuses:
             return
         if parameters.show_odds:
-            self.print_odds(match, parameters.place_bet)
+            self.print_odds(match, parameters.place_bet, prediction)
         if parameters.place_bet:
-            self.bet_matches.extend([match["id"]])
+            self.bet_matches.extend([match['id']])
         self.scores(self.parse_result(match), parameters.place_bet)
         if parameters.type_sort != "matches":
             self.print_datetime_status(match, parameters)
@@ -265,101 +280,101 @@ Your timezone: {profile_data['timezone']}""", fg="green")
         click.secho(f"{result.goals_away_team:>2} {result.away_team.rjust(26)}",
                     fg=away_color, nl=False)
 
-    def print_odds(self, match, place_bet):
+    def print_odds(self, match, place_bet, prediction):
         """Print the odds"""
         odds_dict = {"1": [], "X": [], "2": []}
 
-        for odds in match["flatOdds"]["data"]:
-            for odd in odds["odds"]:
+        for odds in match['flatOdds']['data']:
+            for odd in odds['odds']:
                 odds_dict = self.fill_odds(odd, odds_dict)
-        self.odds(self.parse_odd(odds_dict, match["scores"]["localteam_score"],
-                                 match["scores"]["visitorteam_score"], match["time"]["status"]), place_bet)
+        self.odds(self.parse_odd(odds_dict, match['scores']['localteam_score'],
+                                 match['scores']['visitorteam_score'], match['time']['status']), place_bet, prediction)
 
     @staticmethod
     def fill_odds(odd, odds):
         """Fills the odds with all odds"""
-        odds[odd["label"]].append(float(odd["value"]))
+        odds[odd['label']].append(float(odd['value'].replace(',', '')))
         return odds
 
     def print_datetime_status(self, match, parameters):
         """Prints the date/time in a pretty format based on the match status"""
-        if match["time"]["status"] in ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK"]:
-            if match["time"]["status"] == "HT":
-                click.secho(f'   HT',
+        if match['time']['status'] in ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK"]:
+            if match['time']['status'] == "HT":
+                click.secho(f"   HT",
                             fg=self.colors.TIME)
             # print 0' instead of None'
-            elif match["time"]["minute"] is None and match["time"]["added_time"] == 0:
-                click.secho(f'   0\'',
+            elif match['time']['minute'] is None and match['time']['added_time'] == 0:
+                click.secho(f"   0\'",
                             fg=self.colors.TIME)
             # print minute
-            elif match["time"]["added_time"] in [0, None]:
-                click.secho(f'   {match["time"]["minute"]}\'',
+            elif match['time']['added_time'] in [0, None]:
+                click.secho(f"   {match['time']['minute']}\'",
                             fg=self.colors.TIME)
-            elif match["time"]["added_time"] not in [0, None]:
-                click.secho(f'   {match["time"]["minute"]}\'+{match["time"]["added_time"]}',
+            elif match['time']['added_time'] not in [0, None]:
+                click.secho(f"   {match['time']['minute']}+{match['time']['added_time']}\'",
                             fg=self.colors.TIME)
-        elif match["time"]["status"] in ["FT", "FT_PEN", "TBA", "NS", "CANCL", "POSTP", "INT", "ABAN",
+        elif match['time']['status'] in ["FT", "FT_PEN", "TBA", "NS", "CANCL", "POSTP", "INT", "ABAN",
                                          "SUSP", "AWARDED", "DELAYED", "WO", "AU"]:
-            if parameters.type_sort == "live":
-                click.secho(f'   {convert.datetime(match["time"]["starting_at"]["date_time"], parameters.date_format)} '
-                            f'{match["time"]["status"]}',
+            if parameters.type_sort == "live" or parameters.type_sort == "watch_bets":
+                click.secho(f"   {convert.datetime(match['time']['starting_at']['date_time'], parameters.date_format)} "
+                            f"{match['time']['status']}",
                             fg=self.colors.TIME)
             elif parameters.type_sort == "today":
-                click.secho(f'   {convert.time(match["time"]["starting_at"]["time"])} '
-                            f'{match["time"]["status"]}',
+                click.secho(f"   {convert.time(match['time']['starting_at']['time'])} "
+                            f"{match['time']['status']}",
                             fg=self.colors.TIME)
 
     def print_datetime_status_matches(self, match, parameters):
         """Prints the date/time in a pretty format based on the match status"""
-        if match["time"]["status"] in ["FT", "FT_PEN", "AET", "TBA"]:
-            click.secho(f'   {convert.date(match["time"]["starting_at"]["date"], parameters.date_format)} '
-                        f'{match["time"]["status"]}',
+        if match['time']['status'] in ["FT", "FT_PEN", "AET", "TBA"]:
+            click.secho(f"   {convert.date(match['time']['starting_at']['date'], parameters.date_format)} "
+                        f"{match['time']['status']}",
                         fg=self.colors.TIME)
-        elif match["time"]["status"] in ["NS", "CANCL", "POSTP", "INT", "ABAN", "SUSP", "AWARDED",
+        elif match['time']['status'] in ["NS", "CANCL", "POSTP", "INT", "ABAN", "SUSP", "AWARDED",
                                          "DELAYED", "WO", "AU"]:
-            click.secho(f'   {convert.datetime(match["time"]["starting_at"]["date_time"], parameters.date_format)} '
-                        f'{match["time"]["status"]}',
+            click.secho(f"   {convert.datetime(match['time']['starting_at']['date_time'], parameters.date_format)} "
+                        f"{match['time']['status']}",
                         fg=self.colors.TIME)
 
     def print_details(self, match):
         """Prints the match details in a pretty format"""
         goals = []
-        events = sorted(match["events"]["data"], key=lambda x: x["id"])
+        events = sorted(match['events']['data'], key=lambda x: x['id'])
         for event in events:
-            if event["type"] in ["goal", "penalty", "own-goal"] and event["minute"] is not None:
-                player_name = convert.player_name(event["player_name"])
-                home_team = convert.team_id_to_team_name(event["team_id"], match["localTeam"]["data"]["id"])
-                goal_type = convert.goal_type_to_prefix(event["type"])
-                goals.extend([[home_team, player_name, event["minute"], goal_type]])
+            if event['type'] in ["goal", "penalty", "own-goal"] and event['minute'] is not None:
+                player_name = convert.player_name(event['player_name'])
+                home_team = convert.team_id_to_team_name(event['team_id'], match['localTeam']['data']['id'])
+                goal_type = convert.goal_type_to_prefix(event['type'])
+                goals.extend([[home_team, player_name, event['minute'], goal_type]])
         goals = sorted(goals, key=lambda x: x[0])
         events = {"home": [], "away": []}
         for goal in goals:
             if goal[0]:
-                events["home"].extend([{goal[1]: [{"minute": [goal[2]], "type": [goal[3]]}]}])
+                events['home'].extend([{goal[1]: [{"minute": [goal[2]], "type": [goal[3]]}]}])
             else:
-                events["away"].extend([{goal[1]: [{"minute": [goal[2]], "type": [goal[3]]}]}])
-        events["home"] = self.merge_duplicate_keys(events["home"])
-        events["away"] = self.merge_duplicate_keys(events["away"])
-        goals = convert.events_to_pretty_goals(events, match["scores"]["localteam_score"],
-                                               match["scores"]["visitorteam_score"])
+                events['away'].extend([{goal[1]: [{"minute": [goal[2]], "type": [goal[3]]}]}])
+        events['home'] = self.merge_duplicate_keys(events['home'])
+        events['away'] = self.merge_duplicate_keys(events['away'])
+        goals = convert.events_to_pretty_goals(events, match['scores']['localteam_score'],
+                                               match['scores']['visitorteam_score'])
         self.goals(goals)
 
-    def odds(self, odds, place_bet):
+    def odds(self, odds, place_bet, prediction=False):
         """Prints the odds in a pretty format"""
-        if odds.winning_odd == 0:
+        if odds.winning_odd == '1':
             home_color, draw_color, away_color = (self.colors.WIN, self.colors.LOSE, self.colors.LOSE)
-        elif odds.winning_odd == 1:
+        elif odds.winning_odd == 'X':
             home_color, draw_color, away_color = (self.colors.LOSE, self.colors.WIN, self.colors.LOSE)
-        elif odds.winning_odd == 2:
+        elif odds.winning_odd == '2':
             home_color, draw_color, away_color = (self.colors.LOSE, self.colors.LOSE, self.colors.WIN)
         else:
             home_color, draw_color, away_color = (self.colors.ODDS, self.colors.ODDS, self.colors.ODDS)
         x = 28
         if place_bet:
             x = 32
-        click.secho("{}".format(odds.odd_home_team.rjust(x)), fg=home_color, nl=False)
-        click.secho(" {} ".format(odds.odd_draw), fg=draw_color, nl=False)
-        click.secho("{}".format(odds.odd_away_team), fg=away_color, nl=True)
+        click.secho("{}".format(odds.odd_home_team.rjust(x)), fg=home_color, nl=False, bold=prediction == '1')
+        click.secho(" {} ".format(odds.odd_draw), fg=draw_color, nl=False, bold=prediction == 'X')
+        click.secho("{}".format(odds.odd_away_team), fg=away_color, nl=True, bold=prediction == '2')
 
     @staticmethod
     def merge_duplicate_keys(dicts):
@@ -368,8 +383,8 @@ Your timezone: {profile_data['timezone']}""", fg="green")
         for i_dict in dicts:
             for key in i_dict:
                 try:
-                    d[key][0]["minute"] += i_dict[key][0]["minute"]
-                    d[key][0]["type"] += i_dict[key][0]["type"]
+                    d[key][0]['minute'] += i_dict[key][0]['minute']
+                    d[key][0]['type'] += i_dict[key][0]['type']
                 except KeyError:
                     d[key] = i_dict[key]
         return d
@@ -395,7 +410,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
         """Get the goals in a pretty-format"""
         goals = []
         for goal in events[team]:
-            number_of_goals = len(events[team][goal][0]["minute"])
+            number_of_goals = len(events[team][goal][0]['minute'])
             if number_of_goals == 1:
                 try:
                     str_scorer = ''.join([goal, ' (', str(events[team][goal][0]['minute'][0]),
@@ -404,9 +419,9 @@ Your timezone: {profile_data['timezone']}""", fg="green")
                     continue
             else:
                 minutes = []
-                for key, val in enumerate(events[team][goal][0]["minute"]):
-                    minutes.extend([''.join([str(val), str(events[team][goal][0]["type"][key])])])
-                str_scorer = ''.join([goal, ' (', ','.join(minutes), ')'])
+                for key, val in enumerate(events[team][goal][0]['minute']):
+                    minutes.extend([''.join([str(val), str(events[team][goal][0]['type'][key])])])
+                str_scorer = ''.join([goal, ' (', ', '.join(minutes), ')'])
             if team == "home":
                 goals.extend(["{}".format(str_scorer)])
             else:
@@ -417,27 +432,27 @@ Your timezone: {profile_data['timezone']}""", fg="green")
     def get_pretty_goals(events):
         """Get the goals in a pretty-format"""
         goals = []
-        for goal in events["home"]:
-            number_of_goals = len(events["home"][goal][0]["minute"])
+        for goal in events['home']:
+            number_of_goals = len(events['home'][goal][0]['minute'])
             if number_of_goals == 1:
                 str_scorer = ''.join([goal, ' (', str(events['home'][goal][0]['minute'][0]),
                                       str(events['home'][goal][0]['type'][0]), ')'])
             else:
                 minutes = []
-                for key, val in enumerate(events["home"][goal][0]["minute"]):
-                    minutes.extend([''.join([str(val), str(events["home"][goal][0]["type"][key])])])
-                str_scorer = ''.join([goal, ' (', ','.join(minutes), ')'])
+                for key, val in enumerate(events['home'][goal][0]['minute']):
+                    minutes.extend([''.join([str(val), str(events['home'][goal][0]['type'][key])])])
+                str_scorer = ''.join([goal, ' (', ', '.join(minutes), ')'])
             goals.extend(["{}".format(str_scorer)])
-        for i, goal in enumerate(events["away"]):
-            number_of_goals = len(events["away"][goal][0]["minute"])
+        for i, goal in enumerate(events['away']):
+            number_of_goals = len(events['away'][goal][0]['minute'])
             if number_of_goals == 1:
                 str_scorer = ''.join([goal, ' (', str(events['away'][goal][0]['minute'][0]),
                                       str(events['away'][goal][0]['type'][0]), ')'])
             else:
                 minutes = []
-                for key, val in enumerate(events["away"][goal][0]["minute"]):
-                    minutes.extend([''.join([str(val), str(events["away"][goal][0]["type"][key])])])
-                str_scorer = ''.join([goal, ' (', ','.join(minutes), ')'])
+                for key, val in enumerate(events['away'][goal][0]['minute']):
+                    minutes.extend([''.join([str(val), str(events['away'][goal][0]['type'][key])])])
+                str_scorer = ''.join([goal, ' (', ', '.join(minutes), ')'])
             try:
                 goals[i] += "{}".format(str_scorer.rjust(62 - len(goals[i])))
             except IndexError:
@@ -461,10 +476,10 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             return "-" if status in ["NS", "TBA"] else score
 
         result = self.Result(
-            data["localTeam"]["data"]["name"],
-            match_status(data["time"]["status"], data["scores"]["localteam_score"]),
-            data["visitorTeam"]["data"]["name"],
-            match_status(data["time"]["status"], data["scores"]["visitorteam_score"]))
+            data['localTeam']['data']['name'],
+            match_status(data['time']['status'], data['scores']['localteam_score']),
+            data['visitorTeam']['data']['name'],
+            match_status(data['time']['status'], data['scores']['visitorteam_score']))
 
         return result
 
@@ -545,9 +560,7 @@ Your timezone: {profile_data['timezone']}""", fg="green")
             return True
         elif parameters.type_sort == "today" and match_status == {"LIVE"}:
             return True
-        elif parameters.type_sort == "today" and parameters.place_bet and match_status == {"FT"}:
-            return True
-        elif parameters.type_sort == "matches" and not parameters.show_history and match_status == {"FT"}:
+        elif (parameters.type_sort == "today" or parameters.type_sort == "matches") and parameters.place_bet and match_status == {"FT"}:
             return True
         elif parameters.type_sort == "matches" and not any(status in match_status for status in ["NS", "FT"]):
             return True

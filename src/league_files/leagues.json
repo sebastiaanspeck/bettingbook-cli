@@ -1,83 +1,179 @@
 {
   "leagues": [
     {
-      "BE1": [208, 217, 1129, 1371],
+      "BEL1": [
+        208,
+        217,
+        1129,
+        1371
+      ],
       "name": "Pro League"
-    }, {
-      "BEC": [214],
+    },
+    {
+      "BELC": [
+        214
+      ],
       "name": "Belgian Cup"
-    }, {
-      "CL": [2],
+    },
+    {
+      "CL": [
+        2
+      ],
       "name": "Champions League"
-    }, {
-      "DE1": [82, 163, 166],
+    },
+    {
+      "GER1": [
+        82,
+        163,
+        166
+      ],
       "name": "Bundesliga"
-    }, {
-      "DE2": [85],
+    },
+    {
+      "GER2": [
+        85
+      ],
       "name": "2. Bundesliga"
-    }, {
-      "DEC": [109],
+    },
+    {
+      "GERC": [
+        109
+      ],
       "name": "DFB Pokal"
-    }, {
-      "EC": [1326],
+    },
+    {
+      "EUC": [
+        1326
+      ],
       "name": "European Championship"
-    }, {
-      "EL": [5],
+    },
+    {
+      "EL": [
+        5
+      ],
       "name": "Europa League"
-    }, {
-      "EN1": [8],
+    },
+    {
+      "ECL": [
+        2286
+      ],
+      "name": "Europa Conference League"
+    },
+    {
+      "ENG1": [
+        8
+      ],
       "name": "Premier League"
-    }, {
-      "ENC": [24],
+    },
+    {
+      "ENG2": [
+        9
+      ],
+      "name": "Championship"
+    },
+    {
+      "ENGC": [
+        24
+      ],
       "name": "FA Cup"
-    }, {
-      "EQ": [1325],
+    },
+    {
+      "EUQ": [
+        1325
+      ],
       "name": "Euro Qualification"
-    }, {
-      "ES1": [564],
+    },
+    {
+      "ESP1": [
+        564
+      ],
       "name": "La Liga"
-    }, {
-      "ESC": [570],
+    },
+    {
+      "ESPC": [
+        570
+      ],
       "name": "Copa Del Rey"
-    }, {
-      "FR1": [301],
+    },
+    {
+      "FRA1": [
+        301
+      ],
       "name": "Ligue 1"
-    }, {
-      "FRC": [307],
+    },
+    {
+      "FRAC": [
+        307
+      ],
       "name": "Coupe de France"
-    }, {
-      "IT1": [384],
+    },
+    {
+      "ITA1": [
+        384
+      ],
       "name": "Serie A"
-    }, {
-      "ITC": [390],
+    },
+    {
+      "ITAC": [
+        390
+      ],
       "name": "Coppa Italia"
-    }, {
-      "NL1": [72, 1353],
+    },
+    {
+      "NED1": [
+        72,
+        1353
+      ],
       "name": "Eredivisie"
-    }, {
-      "NL2": [74],
+    },
+    {
+      "NED2": [
+        74
+      ],
       "name": "Eerste Divisie"
-    }, {
-      "NLC": [78],
+    },
+    {
+      "NEDC": [
+        78
+      ],
       "name": "KNVB Beker"
-    }, {
-      "PT1": [462],
+    },
+    {
+      "POR1": [
+        462
+      ],
       "name": "Primeira Liga"
-    }, {
-      "PTC": [468],
+    },
+    {
+      "PORC": [
+        468
+      ],
       "name": "Taça De Portugal"
-    }, {
-      "UNL": [1538],
+    },
+    {
+      "UNL": [
+        1538
+      ],
       "name": "UEFA Nations League"
-    }, {
-      "US1": [779],
+    },
+    {
+      "USA1": [
+        779
+      ],
       "name": "Major League Soccer"
-    }, {
-      "WC": [732],
+    },
+    {
+      "WC": [
+        732
+      ],
       "name": "World Cup"
-    }, {
-      "WCW": [1369],
+    },
+    {
+      "WCW": [
+        1369
+      ],
       "name": "World Cup Women"
+<<<<<<< HEAD
     }, {
       "IF": [1082],
       "name": "International Friendlies"
@@ -93,6 +189,82 @@
     }, {
       "SC3": [528],
       "name": "League One Play-Offs"
+=======
+    },
+    {
+      "WCEQ": [
+        720
+      ],
+      "name": "WC Qualification Europe"
+    },
+    {
+      "DNK1": [
+        271,
+        1659
+      ],
+      "name": "Superliga"
+    },
+    {
+      "SCO1": [
+        501,
+        513
+      ],
+      "name": "Premiership"
+    },
+    {
+      "UKR1": [
+        609
+      ],
+      "name": "Premier League"
+    },
+    {
+      "POL1": [
+        453
+      ],
+      "name": "Ekstraklasa"
+    },
+    {
+      "RUS1": [
+        486
+      ],
+      "name": "Premier League"
+    },
+    {
+      "AUT1": [
+        181
+      ],
+      "name": "Admiral Bundesliga"
+    },
+    {
+      "NOR1": [
+        444
+      ],
+      "name": "Eliteserien"
+    },
+    {
+      "CRO1": [
+        244
+      ],
+      "name": "1. HNL"
+    },
+    {
+      "SWE1": [
+        573
+      ],
+      "name": "Allsvenskan"
+    },
+    {
+      "SWI1": [
+        591
+      ],
+      "name": "Super League"
+    },
+    {
+      "TUR1": [
+        600
+      ],
+      "name": "Super Lig"
+>>>>>>> main
     }
   ]
 }
