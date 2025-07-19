@@ -133,7 +133,7 @@ def get_possible_leagues():
     "-H",
     is_flag=True,
     default=False,
-    help="Displays past games when used with --time command.",
+    help="Displays past games when used with --days command.",
 )
 @click.option(
     "--details",

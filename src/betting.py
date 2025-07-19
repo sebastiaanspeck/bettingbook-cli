@@ -4,7 +4,7 @@ import csv
 import datetime
 
 import convert
-import exceptions
+from exceptions import APIErrorException
 
 from configparser import ConfigParser
 
