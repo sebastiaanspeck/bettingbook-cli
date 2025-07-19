@@ -166,7 +166,7 @@ class Betting(object):
         prediction = click.prompt("On which team do you want to bet? (1, X, 2)")
         while prediction.upper() not in ["1", "X", "2"]:
             click.secho(
-                "Oops... You didn't entered 1, X or 2. Try again.", fg="red", bold=True
+                "Oops... You didn't enter 1, X or 2. Try again.", fg="red", bold=True
             )
             prediction = click.prompt("On which team do you want to bet? (1, X, 2)")
         return prediction
