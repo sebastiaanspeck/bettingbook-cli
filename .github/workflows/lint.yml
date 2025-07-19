@@ -1,14 +1,10 @@
-name: Codespell
+name: Lint
 permissions:
   contents: read
 
 on:
   pull_request:
-    # Ignore all other languages except English
-    paths-ignore:
-      - 'pages.*/*/*'
-      - 'contributing-guides/style-guide.*.md'
-      - 'package-lock.json'
+  push:
 
 jobs:
   codespell:
