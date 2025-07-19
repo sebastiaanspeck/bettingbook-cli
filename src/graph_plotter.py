@@ -23,7 +23,7 @@ def show_full_graph():
     date_format = convert.format_date(ch.get("profile", "date_format"))
     dates = [dt.datetime.strptime(d, date_format) for d in dates]
 
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
 
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter(date_format))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())
@@ -33,9 +33,8 @@ def show_full_graph():
     mplcursors.cursor(hover=True)
 
     ax.set(title="Balance history")
-    fig.canvas.set_window_title("Balance history graph")
 
     plt.gcf().autofmt_xdate()
     plt.legend()
 
-    plt.show()
+    plt.savefig("balance_history.png")

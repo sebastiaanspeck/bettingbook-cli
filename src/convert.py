@@ -113,7 +113,7 @@ def events_to_pretty_goals(events, home_goals, away_goals):
         return writers.Stdout.get_pretty_goals(events)
 
 
-def float_to_currency(f):
-    f = "{:,.2f}".format(float(f))
-    f = Decimal(sub(r"[^\d.]", "", f))
-    return f
+def float_to_currency(float_value):
+    currency_value = "{:,.2f}".format(float(float_value))
+    currency_value = Decimal(sub(r"[^\d.]", "", currency_value))
+    return currency_value

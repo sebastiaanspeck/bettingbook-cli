@@ -4,7 +4,7 @@ import csv
 import datetime
 
 import convert
-from exceptions import APIErrorException
+import exceptions
 
 from configparser import ConfigParser
 
@@ -108,7 +108,7 @@ class Betting(object):
             row.extend((winning_team, "yes"))
         else:
             click.echo(
-                f"Ah noo! You predicted {match_data['localTeam']['data']['name']} - "
+                f"Ah, no! You predicted {match_data['localTeam']['data']['name']} - "
                 f"{match_data['visitorTeam']['data']['name']} incorrect"
             )
             row.extend((winning_team, "no"))
@@ -167,7 +167,7 @@ class Betting(object):
         prediction = click.prompt("On which team do you want to bet? (1, X, 2)")
         while prediction.upper() not in ["1", "X", "2"]:
             click.secho(
-                "Oops... You didn't entered 1, X or 2. Try again.", fg="red", bold=True
+                "Oops... You didn't enter 1, X, or 2. Try again.", fg="red", bold=True
             )
             prediction = click.prompt("On which team do you want to bet? (1, X, 2)")
         return prediction

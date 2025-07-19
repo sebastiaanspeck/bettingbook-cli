@@ -101,6 +101,8 @@ ENV/
 # config file and csv files
 *.csv
 *.ini
+# Ignore graph images
+*.png
 
 .DS_STORE
 .idea/

@@ -174,7 +174,7 @@ class RequestHandler(object):
         start, end = self.set_start_end(parameters.show_history, parameters.days)
         try:
             self.get_match_data(parameters, start, end, first)
-        except exceptions.APIErrorException as e:
+        except APIErrorException as e:
             click.secho(str(e), fg="red", bold=True)
 
     def get_multi_matches(self, match_ids, predictions, parameters):

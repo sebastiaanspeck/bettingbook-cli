@@ -173,23 +173,6 @@
         1369
       ],
       "name": "World Cup Women"
-<<<<<<< HEAD
-    }, {
-      "IF": [1082],
-      "name": "International Friendlies"
-    }, {
-      "CF": [1101],
-      "name": "Club Friendlies"
-    }, {
-      "WCEQ": [720],
-      "name": "WC Qualification Europe"
-    }, {
-      "SC1": [525],
-      "name": "Championship Play-Offs"
-    }, {
-      "SC3": [528],
-      "name": "League One Play-Offs"
-=======
     },
     {
       "WCEQ": [
@@ -264,7 +247,6 @@
         600
       ],
       "name": "Super Lig"
->>>>>>> main
     }
   ]
 }

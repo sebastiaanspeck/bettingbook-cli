@@ -194,9 +194,7 @@ Your timezone: {profile_data['timezone']}""",
             games_copy = copy.deepcopy(games)
             league_prefix = list(set([x["league"]["data"]["name"] for x in games_copy]))
             match_status = set([x["time"]["status"] for x in games_copy])
-            skip_league = self.get_skip_league(
-                match_status, parameters.type_sort, parameters.place_bet
-            )
+            skip_league = self.get_skip_league(match_status, parameters)
             if skip_league or (parameters.not_started and "NS" not in match_status):
                 continue
             if league_prefix[0] == league:
@@ -362,10 +360,10 @@ Your timezone: {profile_data['timezone']}""",
         """Prints the date/time in a pretty format based on the match status"""
         if match["time"]["status"] in ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK"]:
             if match["time"]["status"] == "HT":
-                click.secho(f"   HT", fg=self.colors.TIME)
+                click.secho("   HT", fg=self.colors.TIME)
             # print 0' instead of None'
             elif match["time"]["minute"] is None and match["time"]["added_time"] == 0:
-                click.secho(f"   0'", fg=self.colors.TIME)
+                click.secho("   0'", fg=self.colors.TIME)
             # print minute
             elif match["time"]["added_time"] in [0, None]:
                 click.secho(f"   {match['time']['minute']}'", fg=self.colors.TIME)
@@ -701,7 +699,7 @@ Your timezone: {profile_data['timezone']}""",
 
     @staticmethod
     def get_match_statuses_to_skip(type_sort, place_bet):
-        if type_sort == "today" and place_bet or type_sort == "matches" and place_bet:
+        if type_sort == "today" and place_bet is True or type_sort == "matches" and place_bet is True:
             return [
                 "LIVE",
                 "HT",
@@ -710,6 +708,7 @@ Your timezone: {profile_data['timezone']}""",
                 "PEN_LIVE",
                 "AET",
                 "BREAK",
+                "AU",
                 "FT_PEN",
                 "CANCL",
                 "POSTP",
@@ -718,10 +717,11 @@ Your timezone: {profile_data['timezone']}""",
                 "SUSP",
                 "AWARDED",
                 "DELAYED",
+                "TBA",
                 "WO",
             ]
         elif type_sort == "today" or type_sort == "matches":
-            return ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK"]
+            return ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK", "AU"]
         elif type_sort == "live":
             return [
                 "NS",
