@@ -699,7 +699,12 @@ Your timezone: {profile_data['timezone']}""",
 
     @staticmethod
     def get_match_statuses_to_skip(type_sort, place_bet):
-        if type_sort == "today" and place_bet is True or type_sort == "matches" and place_bet is True:
+        if (
+            type_sort == "today"
+            and place_bet is True
+            or type_sort == "matches"
+            and place_bet is True
+        ):
             return [
                 "LIVE",
                 "HT",
