@@ -107,7 +107,7 @@ class Betting(object):
             row.extend((winning_team, "yes"))
         else:
             click.echo(
-                f"Ah no! You predicted {match_data['localTeam']['data']['name']} - "
+                f"Ah, no! You predicted {match_data['localTeam']['data']['name']} - "
                 f"{match_data['visitorTeam']['data']['name']} incorrect"
             )
             row.extend((winning_team, "no"))
