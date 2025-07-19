@@ -17,7 +17,7 @@ def league_id_to_league_name(league_id):
         league_ids = list(leagues.values())[0]
         if int(league_id) in league_ids:
             return league_name
-    return ''
+    return ""
 
 
 def league_id_to_league_abbreviation(league_id):
@@ -26,56 +26,56 @@ def league_id_to_league_abbreviation(league_id):
         league_ids = list(leagues.values())[0]
         if int(league_id) in league_ids:
             return league_abbr
-    return ''
+    return ""
 
 
 def format_date(date_format):
-    if '-' in date_format:
-        splitter = '-'
-    elif '/' in date_format:
-        splitter = '/'
-    elif '.' in date_format:
-        splitter = '.'
+    if "-" in date_format:
+        splitter = "-"
+    elif "/" in date_format:
+        splitter = "/"
+    elif "." in date_format:
+        splitter = "."
     else:
-        splitter = ' '
+        splitter = " "
     return splitter.join(["%" + char for char in date_format.split(splitter)])
 
 
 def datetime(datetime_str, date_format):
     """Converts the API datetime string to the local user datetime."""
-    datetime = dt.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
+    datetime = dt.strptime(datetime_str, "%Y-%m-%d %H:%M:%S")
     if datetime.year == dt.now().year:
-        date_format = date_format.replace("%Y", '').replace("%y", '').rstrip("-")
-    return dt.strftime(datetime, date_format + ' %H:%M')
+        date_format = date_format.replace("%Y", "").replace("%y", "").rstrip("-")
+    return dt.strftime(datetime, date_format + " %H:%M")
 
 
 def date(date_str, date_format):
     """Converts the API date string to the local user date."""
-    date = dt.strptime(date_str, '%Y-%m-%d')
-    if date.year  == dt.now().year:
-        date_format = date_format.replace("%Y", '').replace("%y", '').rstrip("-")
+    date = dt.strptime(date_str, "%Y-%m-%d")
+    if date.year == dt.now().year:
+        date_format = date_format.replace("%Y", "").replace("%y", "").rstrip("-")
     return dt.strftime(date, date_format)
 
 
 def time(time_str):
     """Converts the API time string to the local user time."""
-    return dt.strftime(dt.strptime(time_str, '%H:%M:%S'), '%H:%M')
+    return dt.strftime(dt.strptime(time_str, "%H:%M:%S"), "%H:%M")
 
 
 def prediction_to_msg(prediction):
-    if prediction == '1':
-        return 'win for the home-team'
-    elif prediction.upper() == 'X':
-        return 'draw'
+    if prediction == "1":
+        return "win for the home-team"
+    elif prediction.upper() == "X":
+        return "draw"
     else:
-        return 'win for the away-team'
+        return "win for the away-team"
 
 
 def player_name(name):
     if name is None:
-        return ''
+        return ""
     try:
-        name = name.split(' ', 1)
+        name = name.split(" ", 1)
     except AttributeError:
         return name
     if len(name) == 1:
@@ -91,11 +91,11 @@ def team_id_to_team_name(team_id, home_team):
 
 def goal_type_to_prefix(goal_type):
     if goal_type == "goal":
-        return ''
+        return ""
     elif goal_type == "penalty":
-        return ' P'
+        return " P"
     elif goal_type == "own-goal":
-        return ' OG'
+        return " OG"
 
 
 def events_to_pretty_goals(events, home_goals, away_goals):
@@ -114,6 +114,6 @@ def events_to_pretty_goals(events, home_goals, away_goals):
 
 
 def float_to_currency(f):
-    f = '{:,.2f}'.format(float(f))
-    f = Decimal(sub(r'[^\d.]', '', f))
+    f = "{:,.2f}".format(float(f))
+    f = Decimal(sub(r"[^\d.]", "", f))
     return f
