@@ -4,7 +4,7 @@ A CLI to keep track of your soccer bets.
 
 ## Install
 
-An API key from [Sportsmonks](https://sportmonks.com/) will be required and you can register for one [here](http://sportmonks.com/register).
+An API key from [Sportsmonks](https://sportmonks.com/) will be required and you should [register](http://sportmonks.com/register) yourself to get an API Key.
 
 ## Build from source
 
@@ -90,7 +90,7 @@ bettingbook.py --help
   - EN1: Premier League
   - ENC: FA Cup
 - Portugal:
-  - PT1: Primeira Liga  
+  - PT1: Primeira Liga
 - Netherlands:
   - NL1: Eredivisie
   - NL2: Eerste Divisie/Keuken Kampioen Divisie
@@ -132,16 +132,16 @@ For a full list of supported leagues & cups [see this](src/league_files/all_leag
   - --history (-H)
   - --details (-D)
   - --odds (-O)
-  - --bet (-B)  
+  - --bet (-B)
 - --standings (-S):
   - --league (-l)
 - --all_bets (-AB)
 - --open_bets (-OB)
-- --closed_bets (-CB)  
-- --profile (-P)  
+- --closed_bets (-CB)
+- --profile (-P)
 - --possible_leagues (-PL)
 
-Commands (live, today, matches, standings) and flags (details, odds, history, bet and refresh) can be used as -UPPERCASE.  
+Commands (live, today, matches, standings) and flags (details, odds, history, bet and refresh) can be used as -UPPERCASE.
 Parameters (league, days) can also be used as -lowercase
 
 ## Abbreviations
