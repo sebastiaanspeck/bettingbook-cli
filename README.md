@@ -165,7 +165,7 @@ INT | Interrupted | The game has been interrupted. Can be due to bad weather
 ABAN | Abandoned | The game has abandoned and will continue at a later time or day
 SUSP | Suspended | The game has suspended and will continue at a later time or day
 AWARDED | Awarded | Winner is being decided externally
-DELAYED | Delayed | The game is delayed so it wil start later
+DELAYED | Delayed | The game is delayed so it will start later
 TBA | To Be Announced | Fixture will be updated with exact time later
 WO | Walkover | Awarding of a victory to a contestant because there are no other contestants
 AU | Awaiting Updates | Can occur when there is a connectivity issue or something
