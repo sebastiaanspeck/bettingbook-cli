@@ -1,9 +1,6 @@
 import os
 
-try:
-    from configparser import ConfigParser
-except ImportError:
-    from ConfigParser import ConfigParser
+from configparser import ConfigParser
 
 config = ConfigParser()
 
