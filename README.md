@@ -137,6 +137,7 @@ AU | Awaiting Updates | Can occur when there is a connectivity issue or somethin
 
 ## TODO
 
+- [ ] Upgrade the API to V3
 - [ ] Add more competitions (divisions under the first divisions)
 - [ ] Add option to get matches for a specific team
 - [ ] Add support to show cards
