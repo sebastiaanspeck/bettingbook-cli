@@ -435,6 +435,7 @@ Your timezone: {profile_data['timezone']}""",
     def print_details(self, match):
         """Prints the match details in a pretty format"""
         goals = []
+        cards = []
         events = sorted(match["events"]["data"], key=lambda x: x["id"])
         for event in events:
             if (
@@ -447,8 +448,16 @@ Your timezone: {profile_data['timezone']}""",
                 )
                 goal_type = convert.goal_type_to_prefix(event["type"])
                 goals.extend([[home_team, player_name, event["minute"], goal_type]])
+            elif event["type"] in ["yellowcard", "redcard", "yellowredcard"]:
+                player_name = convert.player_name(event["player_name"])
+                home_team = convert.team_id_to_team_name(
+                    event["team_id"], match["localTeam"]["data"]["id"]
+                )
+                card_type = convert.card_type_to_prefix(event["type"])
+                cards.extend([[home_team, player_name, event["minute"], card_type]])
         goals = sorted(goals, key=lambda x: x[0])
         events = {"home": [], "away": []}
+        card_events = {"home": [], "away": []}
         for goal in goals:
             if goal[0]:
                 events["home"].extend(
@@ -458,6 +467,15 @@ Your timezone: {profile_data['timezone']}""",
                 events["away"].extend(
                     [{goal[1]: [{"minute": [goal[2]], "type": [goal[3]]}]}]
                 )
+        for card in cards:
+            if card[0]:
+                card_events["home"].extend(
+                    [{card[1]: [{"minute": [card[2]], "type": [card[3]]}]}]
+                )
+            else:
+                card_events["away"].extend(
+                    [{card[1]: [{"minute": [card[2]], "type": [card[3]]}]}]
+                )
         events["home"] = self.merge_duplicate_keys(events["home"])
         events["away"] = self.merge_duplicate_keys(events["away"])
         goals = convert.events_to_pretty_goals(
@@ -466,6 +484,10 @@ Your timezone: {profile_data['timezone']}""",
             match["scores"]["visitorteam_score"],
         )
         self.goals(goals)
+
+        card_events["home"] = self.merge_duplicate_keys(card_events["home"])
+        card_events["away"] = self.merge_duplicate_keys(card_events["away"])
+        self.cards(card_events)
 
     def odds(self, odds, place_bet, prediction=False):
         """Prints the odds in a pretty format"""
@@ -633,6 +655,29 @@ Your timezone: {profile_data['timezone']}""",
                 click.secho(goal)
         except TypeError:
             pass
+
+    def cards(self, cards):
+        """Prints the cards in a pretty format"""
+        if not cards["home"] and not cards["away"]:
+            return
+        click.secho("\nCards:", fg="bright_yellow", bold=True)
+        for team, card_list in cards.items():
+            if not card_list:
+                continue
+            for card, details in card_list.items():
+                string = "".join(
+                    [
+                        card,
+                        " (",
+                        str(details[0]["minute"][0]),
+                        str(details[0]["type"][0]),
+                        ")",
+                    ]
+                )
+                if team == "home":
+                    click.secho(f"{string}")
+                else:
+                    click.secho(f"{string}".rjust(62))
 
     def parse_result(self, data):
         """Parses the results and returns a Result namedtuple"""

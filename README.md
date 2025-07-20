@@ -139,7 +139,7 @@ AU | Awaiting Updates | Can occur when there is a connectivity issue or somethin
 
 - [ ] Add more competitions (divisions under the first divisions)
 - [ ] Add option to get matches for a specific team
-- [ ] Add support to show cards
+- [x] Add support to show cards
 - [ ] Add support for live betting
 - [x] Update balance at runtime
 - [x] Add built-in watch feature so you can run once with --live and just leave the program running.

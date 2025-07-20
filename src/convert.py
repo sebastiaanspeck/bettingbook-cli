@@ -98,6 +98,15 @@ def goal_type_to_prefix(goal_type):
         return " OG"
 
 
+def card_type_to_prefix(card_type):
+    if card_type == "yellowcard":
+        return " YC"
+    elif card_type == "redcard":
+        return " RC"
+    elif card_type == "yellowredcard":
+        return " 2YC"
+
+
 def events_to_pretty_goals(events, home_goals, away_goals):
     # no home or away-goals scored (0-0)
     if home_goals == 0 and away_goals == 0:
