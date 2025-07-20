@@ -3,6 +3,7 @@
 import click
 from collections import namedtuple
 
+import graph_plotter
 from config_handler import ConfigHandler
 from request_handler import RequestHandler
 from json_handler import JsonHandler
@@ -29,6 +30,10 @@ def get_params(api_token, timezone):
     return params
 
 
+def bettable_balance(balance):
+    return False if float(balance) <= 0.00 else True
+
+
 def check_options(history, bet, live, today, refresh, matches):
     if history and live or history and today:
         raise IncorrectParametersException(
@@ -44,6 +49,10 @@ def check_options(history, bet, live, today, refresh, matches):
         raise IncorrectParametersException(
             "--refresh is not supported for --matches. "
             "Use --live or --today to use this parameters"
+        )
+    if bet and not bettable_balance(ch.get("profile", "balance")):
+        raise IncorrectParametersException(
+            "--betting can't be used because you have a too low balance"
         )
 
 
@@ -124,7 +133,7 @@ def get_possible_leagues():
     "-H",
     is_flag=True,
     default=False,
-    help="Displays past games when used with --time command.",
+    help="Displays past games when used with --days command.",
 )
 @click.option(
     "--details",
@@ -170,6 +179,7 @@ def get_possible_leagues():
     is_flag=True,
     help="Show all leagues that are in your Sportmonks API Plan.",
 )
+@click.option("--balance-history", "-BH", is_flag=True)
 def main(
     api_token,
     timezone,
@@ -192,7 +202,9 @@ def main(
     closed_bets,
     watch_bets,
     possible_leagues,
+    balance_history,
 ):
+
     params = get_params(api_token, timezone)
 
     try:
@@ -259,6 +271,7 @@ def main(
                 sort_by = "league"
             if bet:
                 odds = True
+            date_format = convert.format_date(ch.get("profile", "date_format"))
             if live:
                 not_started = False
                 parameters = Parameters(
@@ -353,6 +366,10 @@ def main(
 
         if possible_leagues:
             rh.show_leagues()
+            return
+
+        if balance_history:
+            graph_plotter.show_full_graph()
             return
 
     except IncorrectParametersException as e:

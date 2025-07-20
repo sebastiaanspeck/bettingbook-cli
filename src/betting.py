@@ -4,11 +4,9 @@ import csv
 import datetime
 
 import convert
+from exceptions import APIErrorException
 
-try:
-    from configparser import ConfigParser
-except ImportError:
-    from ConfigParser import ConfigParser
+from configparser import ConfigParser
 
 config = ConfigParser()
 
@@ -37,23 +35,23 @@ class Betting(object):
 
     def write_to_bets_file(self, data, bet_type):
         with open(
-            self.config_handler.get_data("betting_files")[bet_type], "a", newline=""
+            self.config_handler.get("betting_files", bet_type), "a", newline=""
         ) as f:
             writer = csv.writer(f)
             writer.writerow(data)
         self.remove_empty_lines_csv_file(
-            self.config_handler.get_data("betting_files")[bet_type]
+            self.config_handler.get("betting_files", bet_type)
         )
 
     def update_open_bets_file(self, data):
         with open(
-            self.config_handler.get_data("betting_files")["open_bets"], "w", newline=""
+            self.config_handler.get("betting_files", "open_bets"), "w", newline=""
         ) as f:
             writer = csv.writer(f)
             for line in data:
                 writer.writerow(line)
         self.remove_empty_lines_csv_file(
-            self.config_handler.get_data("betting_files")["open_bets"]
+            self.config_handler.get("betting_files", "open_bets")
         )
 
     @staticmethod
@@ -80,13 +78,16 @@ class Betting(object):
             click.secho(e)
 
     def check_open_bets(self):
-        reader = self.get_bets(
-            self.config_handler.get_data("betting_files")["open_bets"]
-        )
-        for i, row in enumerate(reader):
-            match_data = self.request_handler.get_match_bet(row[0])[0]
-            if match_data["time"]["status"] in ["FT", "AET", "FT_PEN"]:
-                self.calculate_winning_odd(match_data, i, row, reader)
+        try:
+            reader = self.get_bets(
+                self.config_handler.get("betting_files", "open_bets")
+            )
+            for i, row in enumerate(reader):
+                match_data = self.request_handler.get_match_bet(row[0])[0]
+                if match_data["time"]["status"] in ["FT", "AET", "FT_PEN"]:
+                    self.calculate_winning_odd(match_data, i, row, reader)
+        except APIErrorException as e:
+            click.secho(str(e), fg="red", bold=True)
 
     def calculate_winning_odd(self, match_data, i, row, reader):
         winning_team = self.writer.calculate_winning_team(
@@ -173,7 +174,7 @@ class Betting(object):
 
     def get_stake(self):
         balance = convert.float_to_currency(
-            self.config_handler.get_data("profile")["balance"]
+            self.config_handler.get("profile", "balance")
         )
         stake = convert.float_to_currency(
             click.prompt(f"What is your stake? (max. " f"{balance})", type=float)
@@ -185,7 +186,7 @@ class Betting(object):
                 bold=True,
             )
             stake = convert.float_to_currency(
-                click.prompt(f"What is your stake? (max. " f"{balance})"), type=float
+                click.prompt(f"What is your stake? (max. " f"{balance})", type=float)
             )
         return stake
 
@@ -211,7 +212,7 @@ class Betting(object):
 
     def update_balance(self, stake, operation):
         balance = convert.float_to_currency(
-            self.config_handler.get_data("profile")["balance"]
+            self.config_handler.get("profile", "balance")
         )
         if operation == "loss":
             balance = balance - stake
@@ -219,9 +220,9 @@ class Betting(object):
             balance = balance + stake
         self.config_handler.update_config_file("profile", "balance", str(balance))
         click.secho(f"Updated balance: {balance}\n")
+        self.update_graph_data(balance)
 
     def place_bet(self, matches):
-        self.main()
         click.secho("\nMatches on which you want to bet:\n")
         for match in matches:
             self.place_bet_match(match)
@@ -229,7 +230,12 @@ class Betting(object):
     def place_bet_match(self, match):
         odds = self.get_odds(match)
         league_name = self.get_league_name(match)
-        date = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S")
+        date_format = convert.format_date(
+            self.config_handler.get("profile", "date_format")
+        )
+        date = datetime.datetime.strftime(
+            datetime.datetime.now(), date_format + " %H:%M:%S"
+        )
         click.echo(
             f"Betting on {match['localTeam']['data']['name']} - {match['visitorTeam']['data']['name']} in "
             f"{league_name} with odds:\n1: {odds[0]}, X: {odds[1]}, 2: {odds[2]}"
@@ -303,6 +309,21 @@ class Betting(object):
                         f"{bet[2]:<10} {bet[3]:<20} {bet[7]:<20} {bet[9]:<10} {bet[10]:<10}"
                     )
                 click.secho(bet_str)
+
+    def update_graph_data(self, balance):
+        date_format = convert.format_date(
+            self.config_handler.get("profile", "date_format")
+        )
+        now = datetime.date.strftime(datetime.date.today(), date_format)
+
+        with open(
+            self.config_handler.get("betting_files", "balance_history"), "a", newline=""
+        ) as f:
+            writer = csv.writer(f)
+            writer.writerow([now, balance])
+        self.remove_empty_lines_csv_file(
+            self.config_handler.get("betting_files", "balance_history")
+        )
 
     def main(self):
         self.check_for_files(self.config_handler.get_data("betting_files").values())
