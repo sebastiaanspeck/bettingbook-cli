@@ -124,9 +124,7 @@ class RequestHandler(object):
     def set_params(self):
         league_ids = self.get_league_ids()
         self.params["leagues"] = ",".join(str(val) for val in league_ids)
-        self.params["include"] = (
-            "league;round;events;stage;odds"
-        )
+        self.params["include"] = "participants;league;round;events;stage;odds"
         self.params["markets"] = "1"
 
     @staticmethod
@@ -263,9 +261,7 @@ class RequestHandler(object):
 
     def get_match_bet(self, matches):
         url = f"fixtures/multi/{matches}"
-        self.params["include"] = (
-            "league;round;events;stage;odds"
-        )
+        self.params["include"] = "participants;league;round;events;stage;odds"
         self.params["markets"] = "1"
         matches = self._get(url)
         return matches
