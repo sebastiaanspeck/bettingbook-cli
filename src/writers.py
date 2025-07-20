@@ -108,7 +108,7 @@ Your timezone: {profile_data['timezone']}""",
                 goal_difference = team["total"]["goal_difference"]
                 position = team["position"]
                 result = team["result"]
-                recent_form = " ".join(team["recent_form"] or [])
+                recent_form = " ".join(str(item) for item in (team["recent_form"] or []))
                 goals = (
                     str(team["overall"]["goals_scored"])
                     + ":"
