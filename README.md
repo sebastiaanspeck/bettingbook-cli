@@ -60,10 +60,10 @@ bettingbook.py --matches --league=NL1 --history --odds # get odds for all the Er
 bettingbook.py --all-bets
 ```
 
-### View account details
+### View profile details
 
 ```bash
-bettingbook.py --account
+bettingbook.py --profile
 ```
 
 ### Help
@@ -72,45 +72,13 @@ bettingbook.py --account
 bettingbook.py --help
 ```
 
-## List of supported leagues & cups and their league codes
-
-- Germany:
-  - DE1: Bundesliga
-  - DEC: DFB Pokal
-- France:
-  - FR1: Ligue 1
-  - FRC: Coupe de France
-- Spain:
-  - ES1: La Liga
-  - ESC: Copa Del Rey
-- Italy:
-  - IT1: Serie A
-  - ITC: Coppa Italia
-- England:
-  - EN1: Premier League
-  - ENC: FA Cup
-- Portugal:
-  - PT1: Primeira Liga
-- Netherlands:
-  - NL1: Eredivisie
-  - NL2: Eerste Divisie/Keuken Kampioen Divisie
-  - NLC: KNVB Beker
-- Belgium:
-  - BE1: Pro League
-  - BEC: Belgian Cup
-- Europe:
-  - CL: Champions League
-  - EL: Europa League
-  - WCEQ: WC Qualification Europe
-  - EQ: Euro Qualification
-  - EC: European Chamionship
-  - UNL: UEFA Nations League
-- World:
-  - WC: World Cup
-
 ## Supported leagues & cups
 
-For a full list of supported leagues & cups [see this](src/league_files/all_leagues.json).
+For a full list of supported leagues & cups [see this](src/league_files/all_leagues.json) or run:
+
+```bash
+bettingbook.py --all-leagues
+```
 
 ## Commands and possible arguments
 
@@ -135,14 +103,11 @@ For a full list of supported leagues & cups [see this](src/league_files/all_leag
   - --bet (-B)
 - --standings (-S):
   - --league (-l)
-- --all_bets (-AB)
-- --open_bets (-OB)
-- --closed_bets (-CB)
+- --all-bets (-AB)
+- --open-bets (-OB)
+- --closed-bets (-CB)
 - --profile (-P)
-- --possible_leagues (-PL)
-
-Commands (live, today, matches, standings) and flags (details, odds, history, bet and refresh) can be used as -UPPERCASE.
-Parameters (league, days) can also be used as -lowercase
+- --possible-leagues (-PL)
 
 ## Abbreviations
 
