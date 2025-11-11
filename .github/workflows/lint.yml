@@ -31,7 +31,7 @@ jobs:
         with:
           python-version: '3.12'
           cache: 'pip'
-      - uses: psf/black@bbc36ea205292e213b0c9a448f630d19726605e4 # v25.1.0
+      - uses: psf/black@f209c53a0882c6a0e6a7cdcd452d44ba8b9ac364 # v25.1.0
         with:
           src: "./src"
       - uses: py-actions/flake8@777f3c125938bc6e01d737c6306ecee8728cff24 # v2.3.0
