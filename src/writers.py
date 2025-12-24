@@ -180,22 +180,22 @@ Your timezone: {profile_data['timezone']}""",
         if parameters.sort_by == "date":
             scores = sorted(
                 total_data,
-                key=lambda x: (x["time"]["starting_at"]["date_time"], x["league_id"]),
+                key=lambda x: (x["starting_at_timestamp"], x["league_id"]),
             )
         else:
             scores = sorted(
                 total_data,
-                key=lambda x: (x["league"]["data"]["country_id"], x["league_id"]),
+                key=lambda x: (x["league"]["country_id"], x["league_id"]),
             )
         for league_id, games in groupby(scores, key=lambda x: x["league_id"]):
             league = convert.league_id_to_league_name(league_id)
             league_abbrev = convert.league_id_to_league_abbreviation(league_id)
-            games = sorted(games, key=lambda x: x["time"]["starting_at"]["date_time"])
+            games = sorted(games, key=lambda x: x["starting_at_timestamp"])
             if league == "":
                 continue
             games_copy = copy.deepcopy(games)
-            league_prefix = list(set([x["league"]["data"]["name"] for x in games_copy]))
-            match_status = set([x["time"]["status"] for x in games_copy])
+            league_prefix = list(set([x["league"]["name"] for x in games_copy]))
+            match_status = set([x["state_id"] for x in games_copy])
             skip_league = self.get_skip_league(
                 match_status, parameters.type_sort, parameters.place_bet
             )
