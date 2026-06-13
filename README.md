@@ -4,13 +4,14 @@ A CLI to keep track of your soccer bets.
 
 ## Install
 
-An API key from [Sportsmonks](https://sportmonks.com/) will be required and you should [register](http://sportmonks.com/register) yourself to get an API Key.
+An API key from [Sportmonks](https://sportmonks.com/) will be required and you should [register](http://sportmonks.com/register) yourself to get an API Key.
 
 ## Build from source
 
 ```bash
 git clone https://github.com/sebastiaanspeck/bettingbook-cli.git
 cd bettingbook-cli/src
+pip install -r ../requirements.txt
 ```
 
 ### Notes
@@ -19,20 +20,18 @@ cd bettingbook-cli/src
 
 - To get colorized terminal output on Windows, make sure to install [ansicon](https://github.com/adoxa/ansicon/releases/latest) and [colorama](https://pypi.python.org/pypi/colorama).
 
-- You need the packages click and requests. You can install these using pip (pip install \<package\>).
-
 ## Usage
 
 ### View live scores from various leagues
 
 ```bash
-bettingbook.py --live
+python3 bettingbook.py --live
 ```
 
 ### View matches from various leagues for today
 
 ```bash
-bettingbook.py --today
+python3 bettingbook.py --today
 ```
 
 #### Note
@@ -42,34 +41,34 @@ bettingbook.py --today
 ### Get scores for all leagues with a set time period
 
 ```bash
-bettingbook.py --matches --days=10 # get scores for all leagues over the coming 10 days
+python3 bettingbook.py --matches --days=10 # get scores for all leagues over the coming 10 days
 ```
 
 ### Get scores for a particular league
 
 ```bash
-bettingbook.py --matches --league=DE1 # DE1 is the league code for Bundesliga
-bettingbook.py --matches --league=FR1 --history --days=15 # get scores for all the French Ligue 1 games over the past 15 days
-bettingbook.py --matches --league=EN1 --history --details # get scores for all the Premier League games over the past 6 days and showing the goalscorers.
-bettingbook.py --matches --league=NL1 --history --odds # get odds for all the Eredivisie games over the past 6 days and showing the odds (in corresponding colors).
+python3 bettingbook.py --matches --league=DE1 # DE1 is the league code for Bundesliga
+python3 bettingbook.py --matches --league=FR1 --history --days=15 # get scores for all the French Ligue 1 games over the past 15 days
+python3 bettingbook.py --matches --league=EN1 --history --details # get scores for all the Premier League games over the past 6 days and showing the goalscorers.
+python3 bettingbook.py --matches --league=NL1 --history --odds # get odds for all the Eredivisie games over the past 6 days and showing the odds (in corresponding colors).
 ```
 
 ### View all your bets
 
 ```bash
-bettingbook.py --all-bets
+python3 bettingbook.py --all-bets
 ```
 
 ### View profile details
 
 ```bash
-bettingbook.py --profile
+python3 bettingbook.py --profile
 ```
 
 ### Help
 
 ```bash
-bettingbook.py --help
+python3 bettingbook.py --help
 ```
 
 ## Supported leagues & cups
@@ -77,25 +76,30 @@ bettingbook.py --help
 For a full list of supported leagues & cups [see this](src/league_files/all_leagues.json) or run:
 
 ```bash
-bettingbook.py --all-leagues
+python3 bettingbook.py --possible-leagues
 ```
 
 ## Commands and possible arguments
 
 - --live (-L):
   - --league (-l)
+  - --sort-by (-sb)
   - --details (-D)
   - --odds (-O)
+  - --not-started (-NS)
   - --bet (-B)
   - --refresh (-R)
 - --today (-T):
   - --league (-l)
+  - --sort-by (-sb)
   - --details (-D)
   - --odds (-O)
+  - --not-started (-NS)
   - --bet (-B)
   - --refresh (-R)
 - --matches (-M):
   - --league (-l)
+  - --sort-by (-sb)
   - --days (-d)
   - --history (-H)
   - --details (-D)
@@ -103,9 +107,15 @@ bettingbook.py --all-leagues
   - --bet (-B)
 - --standings (-S):
   - --league (-l)
+  - --details (-D)
 - --all-bets (-AB)
-- --open-bets (-OB)
-- --closed-bets (-CB)
+- --open-bets (-OB):
+  - --details (-D)
+- --closed-bets (-CB):
+  - --details (-D)
+- --watch-bets (-WB):
+  - --sort-by (-sb)
+  - --details (-D)
 - --profile (-P)
 - --possible-leagues (-PL)
 
@@ -137,11 +147,11 @@ AU | Awaiting Updates | Can occur when there is a connectivity issue or somethin
 
 ## TODO
 
-- [ ] Upgrade the API to V3
 - [ ] Add more competitions (divisions under the first divisions)
 - [ ] Add option to get matches for a specific team
 - [ ] Add support to show cards
 - [ ] Add support for live betting
+- [x] Upgrade the API to V3
 - [x] Update balance at runtime
 - [x] Add built-in watch feature so you can run once with --live and just leave the program running.
 - [x] Add option to view active/finished bets.
