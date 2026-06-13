@@ -4,12 +4,13 @@ import datetime
 import json
 import time
 
+import convert
 import exceptions
 from betting import Betting
 
 
 class RequestHandler(object):
-    BASE_URL = "https://soccer.sportmonks.com/api/v2.0/"
+    BASE_URL = "https://api.sportmonks.com/v3/football/"
 
     def __init__(self, params, league_data, writer, config_handler):
         self.params = params
@@ -90,10 +91,9 @@ class RequestHandler(object):
     def get_data(self, req, url):
         parts = json.loads(req.text)
         data = parts.get("data")
-        meta = parts.get("meta")
-        pagination = meta.get("pagination")
+        pagination = parts.get("pagination")
         if pagination:
-            pages = int(pagination["total_pages"])
+            pages = int(pagination["count"])
         else:
             pages = 1
         if pages > 1:
@@ -125,9 +125,7 @@ class RequestHandler(object):
     def set_params(self):
         league_ids = self.get_league_ids()
         self.params["leagues"] = ",".join(str(val) for val in league_ids)
-        self.params["include"] = (
-            "localTeam,visitorTeam,league,round,events,stage,flatOdds"
-        )
+        self.params["include"] = "participants;league;round;events;stage;odds"
         self.params["markets"] = "1"
 
     @staticmethod
@@ -228,12 +226,12 @@ class RequestHandler(object):
         self.reset_params()
         for league in leagues:
             for league_id in self.get_league_abbreviation(league):
-                url = f"leagues/{league_id}"
                 try:
-                    league_data = self._get(url)
-                    current_season_id = league_data["current_season_id"]
-                    url = f"standings/season/{current_season_id}"
-                    standings_data = self._get(url)
+                    self.params["include"] = "currentSeason"
+                    league_data = self._get(f"leagues/{league_id}")
+                    current_season_id = league_data["current_season"]["id"]
+                    self.reset_params()
+                    standings_data = self._get(f"standings/seasons/{current_season_id}")
                     if len(standings_data) == 0:
                         continue
                     self.writer.standings(standings_data, league_id, show_details)
@@ -264,9 +262,7 @@ class RequestHandler(object):
 
     def get_match_bet(self, matches):
         url = f"fixtures/multi/{matches}"
-        self.params["include"] = (
-            "localTeam,visitorTeam,league,round,events,stage,flatOdds"
-        )
+        self.params["include"] = "participants;league;round;events;stage;odds"
         self.params["markets"] = "1"
         matches = self._get(url)
         return matches
@@ -299,17 +295,18 @@ class RequestHandler(object):
     def check_match_data(match_data):
         matches = []
         for match in match_data:
-            if len(match["flatOdds"]["data"]) == 0:
+            home = convert.get_home_team(match).get("name", "")
+            away = convert.get_away_team(match).get("name", "")
+            status = convert.state_id_to_status(match.get("state_id"))
+            if not match.get("odds"):
                 click.secho(
-                    f"The match {match['localTeam']['data']['name']} - {match['visitorTeam']['data']['name']} "
-                    f"doesn't have any odds available (yet).",
+                    f"The match {home} - {away} doesn't have any odds available (yet).",
                     fg="red",
                     bold=True,
                 )
-            elif match["time"]["status"] != "NS":
+            elif status != "NS":
                 click.secho(
-                    f"The match {match['localTeam']['data']['name']} - {match['visitorTeam']['data']['name']} "
-                    f"has already started.",
+                    f"The match {home} - {away} has already started.",
                     fg="red",
                     bold=True,
                 )

@@ -10,6 +10,31 @@ LEAGUES_DATA = jh.load_leagues()
 
 dt = datetime
 
+STATE_ID_MAP = {
+    1: "NS",
+    2: "LIVE",
+    3: "HT",
+    4: "LIVE",
+    5: "ET",
+    6: "PEN_LIVE",
+    7: "BREAK",
+    8: "FT",
+    9: "FT_PEN",
+    10: "POSTP",
+    11: "SUSP",
+    12: "CANCL",
+    13: "TBA",
+    14: "WO",
+    15: "AWARDED",
+    17: "DELAYED",
+    18: "AET",
+    21: "AU",
+    31: "INT",
+    32: "ABAN",
+}
+
+GOAL_TYPE_IDS = {14: "goal", 15: "own-goal", 16: "penalty"}
+
 
 def league_id_to_league_name(league_id):
     for leagues in LEAGUES_DATA:
@@ -85,8 +110,36 @@ def player_name(name):
     return name
 
 
+def state_id_to_status(state_id):
+    return STATE_ID_MAP.get(state_id, "NS")
+
+
+def get_home_team(match):
+    for p in match.get("participants", []):
+        if p.get("meta", {}).get("location") == "home":
+            return p
+    return {}
+
+
+def get_away_team(match):
+    for p in match.get("participants", []):
+        if p.get("meta", {}).get("location") == "away":
+            return p
+    return {}
+
+
+def get_current_score(match, location):
+    for score in match.get("scores", []):
+        if (
+            score.get("description") == "CURRENT"
+            and score.get("score", {}).get("participant") == location
+        ):
+            return score["score"]["goals"]
+    return 0
+
+
 def team_id_to_team_name(team_id, home_team):
-    return team_id == str(home_team)
+    return str(team_id) == str(home_team)
 
 
 def goal_type_to_prefix(goal_type):
