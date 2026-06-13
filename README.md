@@ -10,8 +10,10 @@ An API key from [Sportmonks](https://sportmonks.com/) will be required and you s
 
 ```bash
 git clone https://github.com/sebastiaanspeck/bettingbook-cli.git
-cd bettingbook-cli/src
-pip install -r ../requirements.txt
+cd bettingbook-cli
+python3 -m venv venv
+source venv/bin/activate        # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
 ### Notes
@@ -19,6 +21,8 @@ pip install -r ../requirements.txt
 - Currently only tested on Windows and MacOS with Python 3. Might work on other platforms, but this is not yet tested.
 
 - To get colorized terminal output on Windows, make sure to install [ansicon](https://github.com/adoxa/ansicon/releases/latest) and [colorama](https://pypi.python.org/pypi/colorama).
+
+- Activate the venv before running the CLI (`source venv/bin/activate` on macOS/Linux, `venv\Scripts\activate` on Windows).
 
 ## Usage
 
