@@ -5,10 +5,7 @@ import datetime
 
 import convert
 
-try:
-    from configparser import ConfigParser
-except ImportError:
-    from ConfigParser import ConfigParser
+from configparser import ConfigParser
 
 config = ConfigParser()
 
@@ -84,7 +81,10 @@ class Betting(object):
             self.config_handler.get_data("betting_files")["open_bets"]
         )
         for i, row in enumerate(reader):
-            match_data = self.request_handler.get_match_bet(row[0])[0]
+            match_bets = self.request_handler.get_match_bet(row[0])
+            if not match_bets:
+                continue
+            match_data = match_bets[0]
             if match_data["time"]["status"] in ["FT", "AET", "FT_PEN"]:
                 self.calculate_winning_odd(match_data, i, row, reader)
 

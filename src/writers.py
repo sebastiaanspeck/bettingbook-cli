@@ -327,12 +327,14 @@ Your timezone: {profile_data['timezone']}""",
         click.secho(
             f"{result.home_team:{25}} {result.goals_home_team:>2}",
             fg=home_color,
+            bold=home_color == self.colors.WIN,
             nl=False,
         )
         click.secho("  vs ", nl=False)
         click.secho(
             f"{result.goals_away_team:>2} {result.away_team.rjust(26)}",
             fg=away_color,
+            bold=away_color == self.colors.WIN,
             nl=False,
         )
 
