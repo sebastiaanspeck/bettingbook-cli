@@ -85,31 +85,34 @@ class Betting(object):
             if not match_bets:
                 continue
             match_data = match_bets[0]
-            if match_data["time"]["status"] in ["FT", "AET", "FT_PEN"]:
+            if convert.state_id_to_status(match_data.get("state_id")) in [
+                "FT",
+                "AET",
+                "FT_PEN",
+            ]:
                 self.calculate_winning_odd(match_data, i, row, reader)
 
     def calculate_winning_odd(self, match_data, i, row, reader):
+        home_score = convert.get_current_score(match_data, "home")
+        away_score = convert.get_current_score(match_data, "away")
+        status = convert.state_id_to_status(match_data.get("state_id"))
         winning_team = self.writer.calculate_winning_team(
-            match_data["scores"]["localteam_score"],
-            match_data["scores"]["visitorteam_score"],
-            match_data["time"]["status"],
+            home_score, away_score, status
         )
+        home_name = convert.get_home_team(match_data).get("name", "")
+        away_name = convert.get_away_team(match_data).get("name", "")
         predicted_team = row[1]
         potential_wins = row[3]
         if winning_team == predicted_team:
             click.echo(
-                f"Woohoo! You predicted {match_data['localTeam']['data']['name']} - "
-                f"{match_data['visitorTeam']['data']['name']} correct and won {potential_wins}"
+                f"Woohoo! You predicted {home_name} - {away_name} correct and won {potential_wins}"
             )
             self.update_balance(
                 convert.float_to_currency(potential_wins), operation="win"
             )
             row.extend((winning_team, "yes"))
         else:
-            click.echo(
-                f"Ah, no! You predicted {match_data['localTeam']['data']['name']} - "
-                f"{match_data['visitorTeam']['data']['name']} incorrect"
-            )
+            click.echo(f"Ah, no! You predicted {home_name} - {away_name} incorrect")
             row.extend((winning_team, "no"))
         self.write_to_bets_file(row, "closed_bets")
         del reader[i][0:]
@@ -123,9 +126,8 @@ class Betting(object):
                 return 0.00
 
         odds_dict = {"1": [], "X": [], "2": []}
-        for odds in match["flatOdds"]["data"]:
-            for odd in odds["odds"]:
-                odds_dict = self.fill_odds(odd, odds_dict)
+        for odd in match.get("odds", []):
+            odds_dict = self.fill_odds(odd, odds_dict)
 
         home_odd, draw_odd, away_odd = "", "", ""
         for label, values in odds_dict.items():
@@ -143,13 +145,16 @@ class Betting(object):
 
     @staticmethod
     def fill_odds(odd, odds):
-        odds[odd["label"]].append(float(odd["value"]))
+        try:
+            odds[odd["label"]].append(float(str(odd["value"]).replace(",", "")))
+        except (KeyError, ValueError):
+            pass
         return odds
 
     @staticmethod
     def get_league_name(match):
         league_name = convert.league_id_to_league_name(match["league_id"])
-        league_prefix = match["league"]["data"]["name"]
+        league_prefix = match["league"]["name"]
         if league_prefix == league_name:
             league_name = league_name
         else:
@@ -230,8 +235,10 @@ class Betting(object):
         odds = self.get_odds(match)
         league_name = self.get_league_name(match)
         date = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S")
+        home_name = convert.get_home_team(match).get("name", "")
+        away_name = convert.get_away_team(match).get("name", "")
         click.echo(
-            f"Betting on {match['localTeam']['data']['name']} - {match['visitorTeam']['data']['name']} in "
+            f"Betting on {home_name} - {away_name} in "
             f"{league_name} with odds:\n1: {odds[0]}, X: {odds[1]}, 2: {odds[2]}"
         )
         prediction, stake = self.get_input()
@@ -243,16 +250,17 @@ class Betting(object):
     def place_bet_confirmation(self, data_in):
         if self.get_confirmation(data_in[0], data_in[1], data_in[2]):
             self.update_balance(data_in[1], "loss")
+            match = data_in[4]
             data_out = [
-                data_in[4]["id"],
+                match["id"],
                 data_in[0],
                 data_in[1],
                 data_in[2],
                 data_in[3],
-                data_in[4]["localTeam"]["data"]["name"],
-                data_in[4]["visitorTeam"]["data"]["name"],
+                convert.get_home_team(match).get("name", ""),
+                convert.get_away_team(match).get("name", ""),
                 convert.datetime(
-                    data_in[4]["time"]["starting_at"]["date_time"],
+                    match.get("starting_at", ""),
                     convert.format_date(
                         self.config_handler.get("profile", "date_format")
                     ),
