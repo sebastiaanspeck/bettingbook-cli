@@ -14,7 +14,7 @@ def show_full_graph():
     balances = []
     ch = ConfigHandler()
 
-    with open(ch.get_data("betting_files")["balance_history"], "r") as csv_file:
+    with open(ch.get("betting_files", "balance_history"), "r") as csv_file:
         plots = csv.reader(csv_file, delimiter=",")
         for row in plots:
             dates.append(row[0])
