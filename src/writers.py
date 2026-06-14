@@ -100,7 +100,11 @@ Your timezone: {profile_data['timezone']}""",
         stages = {}
         for entry in sorted(
             standings_data,
-            key=lambda x: (x.get("stage_id", 0), x.get("group_id") or 0, x.get("position", 0)),
+            key=lambda x: (
+                x.get("stage_id", 0),
+                x.get("group_id") or 0,
+                x.get("position", 0),
+            ),
         ):
             stages.setdefault(entry.get("stage_id", 0), []).append(entry)
         for stage_teams in stages.values():
@@ -115,7 +119,9 @@ Your timezone: {profile_data['timezone']}""",
                 for group_teams in groups.values():
                     if not group_teams:
                         continue
-                    group_name = (group_teams[0].get("group") or {}).get("name") or stage_name
+                    group_name = (group_teams[0].get("group") or {}).get(
+                        "name"
+                    ) or stage_name
                     self.standings_header(league_name, show_details, group_name)
                     self._print_standings_table(group_teams, show_details)
             else:
@@ -229,9 +235,7 @@ Your timezone: {profile_data['timezone']}""",
             match_status = set(
                 [convert.state_id_to_status(x["state_id"]) for x in games_copy]
             )
-            skip_league = self.get_skip_league(
-                match_status, parameters.type_sort, parameters.place_bet
-            )
+            skip_league = self.get_skip_league(match_status, parameters)
             if skip_league or (parameters.not_started and "NS" not in match_status):
                 continue
             if league_prefix[0] == league:
@@ -753,9 +757,21 @@ Your timezone: {profile_data['timezone']}""",
 
     @staticmethod
     def get_match_statuses_to_skip(type_sort, place_bet):
-        if type_sort == "today" and place_bet is True:
+        if (
+            type_sort == "today"
+            and place_bet is True
+            or type_sort == "matches"
+            and place_bet is True
+        ):
             return [
+                "LIVE",
+                "HT",
                 "FT",
+                "ET",
+                "PEN_LIVE",
+                "AET",
+                "BREAK",
+                "AU",
                 "FT_PEN",
                 "CANCL",
                 "POSTP",
@@ -766,14 +782,6 @@ Your timezone: {profile_data['timezone']}""",
                 "DELAYED",
                 "TBA",
                 "WO",
-                "AU",
-                "LIVE",
-                "HT",
-                "ET",
-                "PEN_LIVE",
-                "AET",
-                "BREAK",
-                "AU",
             ]
         elif type_sort == "today":
             return ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK", "AU"]
@@ -799,20 +807,20 @@ Your timezone: {profile_data['timezone']}""",
             return []
 
     @staticmethod
-    def get_skip_league(match_status, type_sort, place_bet):
-        if type_sort == "live" and match_status == {"NS"}:
+    def get_skip_league(match_status, parameters):
+        if parameters.type_sort == "live" and match_status == {"NS"}:
             return True
-        elif type_sort == "live" and match_status == {"FT"}:
+        elif parameters.type_sort == "live" and match_status == {"FT"}:
             return True
-        elif type_sort == "today" and match_status == {"LIVE"}:
+        elif parameters.type_sort == "today" and match_status == {"LIVE"}:
             return True
         elif (
-            (type_sort == "today" or type_sort == "matches")
-            and place_bet
+            (parameters.type_sort == "today" or parameters.type_sort == "matches")
+            and parameters.place_bet
             and match_status == {"FT"}
         ):
             return True
-        elif type_sort == "matches" and all(
+        elif parameters.type_sort == "matches" and all(
             status in {"LIVE", "HT", "PEN_LIVE", "BREAK"} for status in match_status
         ):
             return True

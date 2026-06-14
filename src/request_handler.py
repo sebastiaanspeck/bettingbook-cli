@@ -5,7 +5,7 @@ import json
 import time
 
 import convert
-import exceptions
+from exceptions import APIErrorException
 from betting import Betting
 
 
@@ -61,27 +61,21 @@ class RequestHandler(object):
             requests.codes.server_error,
             requests.codes.unauthorized,
         ]:
-            raise exceptions.APIErrorException(
-                "Invalid request. Check your parameters."
-            )
+            raise APIErrorException("Invalid request. Check your parameters.")
         elif req.status_code == requests.codes.forbidden:
-            raise exceptions.APIErrorException(
+            raise APIErrorException(
                 "The data you requested is not accessible from your plan."
             )
         elif req.status_code == requests.codes.not_found:
-            raise exceptions.APIErrorException(
-                "This resource does not exist. Check parameters"
-            )
+            raise APIErrorException("This resource does not exist. Check parameters")
         elif req.status_code == requests.codes.too_many_requests:
-            raise exceptions.APIErrorException(
+            raise APIErrorException(
                 "You have exceeded your allowed requests per minute/day"
             )
         elif req.status_code == requests.codes.unprocessable_entity:
-            raise exceptions.APIErrorException(
-                "Unprocessable request. Check your parameters."
-            )
+            raise APIErrorException("Unprocessable request. Check your parameters.")
         else:
-            raise exceptions.APIErrorException("Whoops... Something went wrong!")
+            raise APIErrorException("Whoops... Something went wrong!")
 
     @staticmethod
     def get_error(req):
@@ -186,7 +180,7 @@ class RequestHandler(object):
         start, end = self.set_start_end(parameters.show_history, parameters.days)
         try:
             self.get_match_data(parameters, start, end, first)
-        except exceptions.APIErrorException as e:
+        except APIErrorException as e:
             click.secho(str(e), fg="red", bold=True)
 
     def get_multi_matches(self, match_ids, predictions, parameters):
@@ -246,7 +240,7 @@ class RequestHandler(object):
                     if not standings_data:
                         continue
                     self.writer.standings(standings_data, league_id, show_details)
-                except exceptions.APIErrorException as e:
+                except APIErrorException as e:
                     click.secho(str(e), fg="red", bold=True)
                 except (KeyError, TypeError):
                     pass
