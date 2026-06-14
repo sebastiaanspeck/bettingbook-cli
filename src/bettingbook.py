@@ -276,7 +276,7 @@ def main(
             get_multi_matches(filename, parameters)
             return
 
-        if live or today or matches:
+        if live or today or matches or history:
             check_options(history, bet, live, today, refresh, matches)
             date_format = convert.format_date(ch.get("profile", "date_format"))
             if sort_by is None:
