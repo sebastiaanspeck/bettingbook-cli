@@ -134,11 +134,11 @@ class RequestHandler(object):
             self.params.pop("markets", None)
 
     @staticmethod
-    def set_start_end(show_history, days):
+    def set_start_end(days):
         now = datetime.datetime.now()
-        if show_history:
+        if days < 0:
             start = datetime.datetime.strftime(
-                now - datetime.timedelta(days=days), "%Y-%m-%d"
+                now + datetime.timedelta(days=days), "%Y-%m-%d"
             )
             end = datetime.datetime.strftime(
                 now - datetime.timedelta(days=1), "%Y-%m-%d"
@@ -178,7 +178,7 @@ class RequestHandler(object):
             self.try_to_get_match_data(parameters, i == 0)
 
     def try_to_get_match_data(self, parameters, first=False):
-        start, end = self.set_start_end(parameters.show_history, parameters.days)
+        start, end = self.set_start_end(parameters.days)
         try:
             self.get_match_data(parameters, start, end, first)
         except APIErrorException as e:
@@ -207,10 +207,18 @@ class RequestHandler(object):
         # no fixtures in the timespan. display a help message and return
         if len(fixtures_results) == 0:
             if parameters.type_sort == "matches":
-                if parameters.show_history:
-                    click.secho("".join(parameters.msg[0]), fg="red", bold=True)
+                if parameters.days < 0:
+                    click.secho(
+                        f"No matches in the past {abs(parameters.days)} days.",
+                        fg="red",
+                        bold=True,
+                    )
                 else:
-                    click.secho("".join(parameters.msg[1]), fg="red", bold=True)
+                    click.secho(
+                        f"No matches in the coming {parameters.days} days.",
+                        fg="red",
+                        bold=True,
+                    )
             else:
                 click.secho(parameters.msg[0], fg="red", bold=True)
             return
