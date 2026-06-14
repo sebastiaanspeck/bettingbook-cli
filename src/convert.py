@@ -2,11 +2,9 @@ from datetime import datetime
 from re import sub
 from decimal import Decimal
 
-from json_handler import JsonHandler
 import writers
 
-jh = JsonHandler()
-LEAGUES_DATA = jh.load_leagues()
+LEAGUES_DATA = []
 
 dt = datetime
 

@@ -9,11 +9,6 @@ from itertools import groupby
 from collections import namedtuple
 from datetime import datetime
 
-from json_handler import JsonHandler
-
-jh = JsonHandler()
-LEAGUES_DATA = jh.load_leagues()
-
 
 def get_writer(output_format="stdout", output_file=None):
     return globals()[output_format.capitalize()](output_file)

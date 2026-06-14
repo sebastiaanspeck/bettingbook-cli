@@ -6,15 +6,13 @@ from collections import namedtuple
 import graph_plotter
 from config_handler import ConfigHandler
 from request_handler import RequestHandler
-from json_handler import JsonHandler
 from exceptions import IncorrectParametersException
 from writers import get_writer
 from betting import Betting
 import convert
 import time
 
-jh = JsonHandler()
-LEAGUES_DATA = jh.load_leagues()
+LEAGUES_DATA = []
 
 
 def get_params(api_token, timezone):
