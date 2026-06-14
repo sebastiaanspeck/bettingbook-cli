@@ -104,6 +104,8 @@ class RequestHandler(object):
             for i in range(2, pages + 1):
                 self.params["page"] = i
                 req = requests.get(RequestHandler.BASE_URL + url, params=self.params)
+                if req.status_code != requests.codes.ok or not req.text:
+                    continue
                 next_parts = json.loads(req.text)
                 next_data = next_parts.get("data")
                 if next_data:
