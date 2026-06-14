@@ -182,7 +182,20 @@ class RequestHandler(object):
         try:
             self.get_match_data(parameters, start, end, first)
         except APIErrorException as e:
-            click.secho(str(e), fg="red", bold=True)
+            if parameters.show_odds and "not accessible from your plan" in str(e):
+                click.secho(
+                    "Odds not available on your plan, showing matches without odds.",
+                    fg="yellow",
+                    bold=True,
+                )
+                self.params["include"] = self.params["include"].replace(";odds", "")
+                self.params.pop("markets", None)
+                try:
+                    self.get_match_data(parameters, start, end, first)
+                except APIErrorException as e2:
+                    click.secho(str(e2), fg="red", bold=True)
+            else:
+                click.secho(str(e), fg="red", bold=True)
 
     def get_multi_matches(self, match_ids, predictions, parameters):
         """
