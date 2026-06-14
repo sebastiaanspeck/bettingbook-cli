@@ -4,12 +4,13 @@ import datetime
 import json
 import time
 
+import convert
 from exceptions import APIErrorException
 from betting import Betting
 
 
 class RequestHandler(object):
-    BASE_URL = "https://soccer.sportmonks.com/api/v2.0/"
+    BASE_URL = "https://api.sportmonks.com/v3/football/"
 
     def __init__(self, params, league_data, writer, config_handler):
         self.params = params
@@ -71,6 +72,8 @@ class RequestHandler(object):
             raise APIErrorException(
                 "You have exceeded your allowed requests per minute/day"
             )
+        elif req.status_code == requests.codes.unprocessable_entity:
+            raise APIErrorException("Unprocessable request. Check your parameters.")
         else:
             raise APIErrorException("Whoops... Something went wrong!")
 
@@ -86,16 +89,17 @@ class RequestHandler(object):
     def get_data(self, req, url):
         parts = json.loads(req.text)
         data = parts.get("data")
-        meta = parts.get("meta")
-        pagination = meta.get("pagination")
+        pagination = parts.get("pagination")
         if pagination:
-            pages = int(pagination["total_pages"])
+            pages = int(pagination["count"])
         else:
             pages = 1
         if pages > 1:
             for i in range(2, pages + 1):
                 self.params["page"] = i
                 req = requests.get(RequestHandler.BASE_URL + url, params=self.params)
+                if req.status_code != requests.codes.ok or not req.text:
+                    continue
                 next_parts = json.loads(req.text)
                 next_data = next_parts.get("data")
                 if next_data:
@@ -118,13 +122,15 @@ class RequestHandler(object):
                 return ids
         return None
 
-    def set_params(self):
+    def set_params(self, include_odds=True):
         league_ids = self.get_league_ids()
         self.params["leagues"] = ",".join(str(val) for val in league_ids)
-        self.params["include"] = (
-            "localTeam,visitorTeam,league,round,events,stage,flatOdds"
-        )
-        self.params["markets"] = "1"
+        self.params["include"] = "participants;league;round;events;stage;scores;periods"
+        if include_odds:
+            self.params["include"] += ";odds"
+            self.params["markets"] = "1"
+        else:
+            self.params.pop("markets", None)
 
     @staticmethod
     def set_start_end(show_history, days):
@@ -148,7 +154,7 @@ class RequestHandler(object):
         Queries the API and fetches the scores for fixtures
         based upon the league and time parameter
         """
-        self.set_params()
+        self.set_params(include_odds=parameters.show_odds or parameters.place_bet)
         if parameters.league_name:
             if parameters.refresh:
                 while True:
@@ -224,17 +230,20 @@ class RequestHandler(object):
         self.reset_params()
         for league in leagues:
             for league_id in self.get_league_abbreviation(league):
-                url = f"leagues/{league_id}"
                 try:
-                    league_data = self._get(url)
-                    current_season_id = league_data["current_season_id"]
-                    url = f"standings/season/{current_season_id}"
-                    standings_data = self._get(url)
-                    if len(standings_data) == 0:
+                    self.params["include"] = "currentSeason"
+                    league_data = self._get(f"leagues/{league_id}")
+                    current_season_id = league_data["currentseason"]["id"]
+                    self.reset_params()
+                    self.params["include"] = "participant;details;stage;group"
+                    standings_data = self._get(f"standings/seasons/{current_season_id}")
+                    if not standings_data:
                         continue
                     self.writer.standings(standings_data, league_id, show_details)
                 except APIErrorException as e:
                     click.secho(str(e), fg="red", bold=True)
+                except (KeyError, TypeError):
+                    pass
 
     def place_bet(self, bet_matches):
         match_bet = click.prompt(
@@ -260,9 +269,7 @@ class RequestHandler(object):
 
     def get_match_bet(self, matches):
         url = f"fixtures/multi/{matches}"
-        self.params["include"] = (
-            "localTeam,visitorTeam,league,round,events,stage,flatOdds"
-        )
+        self.params["include"] = "participants;league;round;events;stage;odds"
         self.params["markets"] = "1"
         matches = self._get(url)
         return matches
@@ -295,17 +302,18 @@ class RequestHandler(object):
     def check_match_data(match_data):
         matches = []
         for match in match_data:
-            if len(match["flatOdds"]["data"]) == 0:
+            home = convert.get_home_team(match).get("name", "")
+            away = convert.get_away_team(match).get("name", "")
+            status = convert.state_id_to_status(match.get("state_id"))
+            if not match.get("odds"):
                 click.secho(
-                    f"The match {match['localTeam']['data']['name']} - {match['visitorTeam']['data']['name']} "
-                    f"doesn't have any odds available (yet).",
+                    f"The match {home} - {away} doesn't have any odds available (yet).",
                     fg="red",
                     bold=True,
                 )
-            elif match["time"]["status"] != "NS":
+            elif status != "NS":
                 click.secho(
-                    f"The match {match['localTeam']['data']['name']} - {match['visitorTeam']['data']['name']} "
-                    f"has already started.",
+                    f"The match {home} - {away} has already started.",
                     fg="red",
                     bold=True,
                 )
