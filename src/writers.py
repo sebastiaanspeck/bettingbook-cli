@@ -85,58 +85,89 @@ Your timezone: {profile_data['timezone']}""",
                 f"{league[0]:<7} {league[1]:<30} {league[2]:<15} {league[3]:<15}"
             )
 
+    STANDING_TYPE_IDS = {
+        129: "games_played",
+        130: "won",
+        131: "draw",
+        132: "lost",
+        133: "goals_scored",
+        134: "goals_against",
+    }
+
     def standings(self, standings_data, league_id, show_details):
         """Prints the league standings in a pretty way"""
-        for standing in standings_data:
-            self.standings_header(
-                convert.league_id_to_league_name(league_id),
-                show_details,
-                standing["name"],
+        league_name = convert.league_id_to_league_name(league_id)
+        stages = {}
+        for entry in sorted(
+            standings_data,
+            key=lambda x: (x.get("stage_id", 0), x.get("group_id") or 0, x.get("position", 0)),
+        ):
+            stages.setdefault(entry.get("stage_id", 0), []).append(entry)
+        for stage_teams in stages.values():
+            if not stage_teams:
+                continue
+            stage_name = (stage_teams[0].get("stage") or {}).get("name") or league_name
+            has_groups = any(e.get("group_id") for e in stage_teams)
+            if has_groups:
+                groups = {}
+                for entry in stage_teams:
+                    groups.setdefault(entry.get("group_id", 0), []).append(entry)
+                for group_teams in groups.values():
+                    if not group_teams:
+                        continue
+                    group_name = (group_teams[0].get("group") or {}).get("name") or stage_name
+                    self.standings_header(league_name, show_details, group_name)
+                    self._print_standings_table(group_teams, show_details)
+            else:
+                self.standings_header(league_name, show_details, stage_name)
+                self._print_standings_table(stage_teams, show_details)
+
+    def _print_standings_table(self, teams, show_details):
+        """Prints the standings table rows for a group or stage"""
+        if show_details:
+            click.secho(
+                f"{'POS':6}  {'CLUB':25}    {'PLAYED':8}    {'WON':8}    {'DRAW':8}    {'LOST':8}    "
+                f"{'GOALS':8}    {'GOAL DIFF':8}    {'POINTS':8}"
             )
-            number_of_teams = len(standing["standings"]["data"])
-            positions = list()
+        else:
+            click.secho(
+                f"{'POS':6}  {'CLUB':25}    {'PLAYED':8}    {'GOAL DIFF':6}    {'POINTS':8}"
+            )
+        number_of_teams = len(teams)
+        positions = []
+        for i, team in enumerate(teams):
+            stats = {
+                self.STANDING_TYPE_IDS[d["type_id"]]: d["value"]
+                for d in team.get("details", [])
+                if d["type_id"] in self.STANDING_TYPE_IDS
+            }
+            team_name = team.get("participant", {}).get("name", "Unknown")
+            position = team.get("position", i + 1)
+            points = team.get("points", 0)
+            result = team.get("result")
+            goals_scored = stats.get("goals_scored") or 0
+            goals_against = stats.get("goals_against") or 0
+            goal_difference = goals_scored - goals_against
+            goals = f"{goals_scored}:{goals_against}"
+            while len(goals) < 4:
+                goals = goals + " "
             if show_details:
-                click.secho(
-                    f"{'POS':6}  {'CLUB':20}    {'PLAYED':8}    {'WON':8}    {'DRAW':8}    {'LOST':8}    "
-                    f"{'GOALS':8}    {'GOAL DIFF':8}    {'POINTS':8}    {'RECENT FORM':8}"
+                team_str = (
+                    f"{position:<7} {team_name:<25} {str(stats.get('games_played', 0)):>9}"
+                    f"{str(stats.get('won', 0)):>9} {str(stats.get('draw', 0)):>12} "
+                    f"{str(stats.get('lost', 0)):>11} {goals:>12} "
+                    f"{goal_difference:>15} {points:>9}"
                 )
             else:
-                click.secho(
-                    f"{'POS':6}  {'CLUB':20}    {'PLAYED':8}    {'GOAL DIFF':6}    {'POINTS':8}"
+                team_str = (
+                    f"{position:<7} {team_name:<25} {str(stats.get('games_played', 0)):>9}"
+                    f"{goal_difference:>15} {points:>9}"
                 )
-            for team in standing["standings"]["data"]:
-                goal_difference = team["total"]["goal_difference"]
-                position = team["position"]
-                result = team["result"]
-                recent_form = " ".join(
-                    str(item) for item in (team["recent_form"] or [])
-                )
-                goals = (
-                    str(team["overall"]["goals_scored"])
-                    + ":"
-                    + str(team["overall"]["goals_against"])
-                )
-
-                while len(goals) < 4:
-                    goals = goals + " "
-
-                if show_details:
-                    team_str = (
-                        f"{position:<7} {team['team_name']:<20} {str(team['overall']['games_played']):>9}"
-                        f"{str(team['overall']['won']):>9} {str(team['overall']['draw']):>12} "
-                        f"{str(team['overall']['lost']):>11} {goals:>12} "
-                        f"{goal_difference:>15} {team['total']['points']:>9} {recent_form:>16}"
-                    )
-                else:
-                    team_str = (
-                        f"{position:<7} {team['team_name']:<20} {str(team['overall']['games_played']):>9}"
-                        f"{goal_difference:>15} {team['total']['points']:>9}"
-                    )
-                positions = self.color_position(result, team_str, positions)
-                if team["position"] == number_of_teams:
-                    click.echo()
-            positions = self.remove_duplicates(positions)
-            self.print_colors(positions)
+            positions = self.color_position(result, team_str, positions)
+            if i + 1 == number_of_teams:
+                click.echo()
+        positions = self.remove_duplicates(positions)
+        self.print_colors(positions)
 
     def color_position(self, result, team_str, positions):
         """Based on the result, color the position"""
@@ -291,7 +322,10 @@ Your timezone: {profile_data['timezone']}""",
 
     def standings_header(self, league, details, prefix=None):
         """Prints the league header"""
-        league_name = f" {league} - {prefix} "
+        if prefix and prefix != league:
+            league_name = f" {league} - {prefix} "
+        else:
+            league_name = f" {league} "
         if details:
             click.secho(f"{league_name:#^138}", fg=self.colors.MISC)
         else:
@@ -370,23 +404,29 @@ Your timezone: {profile_data['timezone']}""",
             pass
         return odds
 
+    @staticmethod
+    def _get_match_minute(match):
+        """Get current minute from direct field or active period."""
+        if match.get("minute") is not None:
+            return match["minute"], match.get("extra_minute")
+        for period in match.get("periods", []):
+            if period.get("started") and not period.get("ended"):
+                return period.get("minutes") or period.get("minute"), None
+        return None, None
+
     def print_datetime_status(self, match, parameters):
         """Prints the date/time in a pretty format based on the match status"""
         status = convert.state_id_to_status(match.get("state_id"))
         if status in ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK"]:
+            minute, extra_minute = self._get_match_minute(match)
             if status == "HT":
                 click.secho("   HT", fg=self.colors.TIME)
-            # print 0' instead of None'
-            elif match.get("minute") is None and match.get("extra_minute") in [0, None]:
+            elif minute is None and extra_minute in [0, None]:
                 click.secho("   0'", fg=self.colors.TIME)
-            # print minute
-            elif match.get("extra_minute") in [0, None]:
-                click.secho(f"   {match['minute']}'", fg=self.colors.TIME)
+            elif extra_minute in [0, None]:
+                click.secho(f"   {minute}'", fg=self.colors.TIME)
             else:
-                click.secho(
-                    f"   {match['minute']}+{match['extra_minute']}'",
-                    fg=self.colors.TIME,
-                )
+                click.secho(f"   {minute}+{extra_minute}'", fg=self.colors.TIME)
         elif status in [
             "FT",
             "FT_PEN",
@@ -419,7 +459,7 @@ Your timezone: {profile_data['timezone']}""",
         """Prints the date/time in a pretty format based on the match status"""
         status = convert.state_id_to_status(match.get("state_id"))
         starting_at = match.get("starting_at", "")
-        if status in ["FT", "FT_PEN", "AET", "TBA"]:
+        if status in ["FT", "FT_PEN", "AET", "ET", "TBA"]:
             click.secho(
                 f"   {convert.date(starting_at[:10], parameters.date_format)} {status}",
                 fg=self.colors.TIME,
@@ -735,8 +775,10 @@ Your timezone: {profile_data['timezone']}""",
                 "BREAK",
                 "AU",
             ]
-        elif type_sort == "today" or type_sort == "matches":
+        elif type_sort == "today":
             return ["LIVE", "HT", "ET", "PEN_LIVE", "AET", "BREAK", "AU"]
+        elif type_sort == "matches":
+            return ["LIVE", "HT", "PEN_LIVE", "BREAK", "AU"]
         elif type_sort == "live":
             return [
                 "NS",
@@ -770,8 +812,8 @@ Your timezone: {profile_data['timezone']}""",
             and match_status == {"FT"}
         ):
             return True
-        elif type_sort == "matches" and not any(
-            status in match_status for status in ["NS", "FT"]
+        elif type_sort == "matches" and all(
+            status in {"LIVE", "HT", "PEN_LIVE", "BREAK"} for status in match_status
         ):
             return True
         else:

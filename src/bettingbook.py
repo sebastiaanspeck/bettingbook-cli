@@ -65,11 +65,35 @@ def check_options_standings(leagues, history):
 ch = ConfigHandler()
 
 
+def _generate_league_abbreviation(league, existing_abbrs):
+    short_code = (league.get("short_code") or "").upper().replace(" ", "")
+    if short_code and short_code not in existing_abbrs:
+        return short_code
+    initials = "".join(w[0] for w in (league.get("name") or "").split() if w).upper()
+    if initials and initials not in existing_abbrs:
+        return initials
+    return str(league["id"])
+
+
 def get_possible_leagues():
     params = get_params(ch.get("auth", "api_token"), ch.get("profile", "timezone"))
     rh = RequestHandler(params, LEAGUES_DATA, None, ch)
     leagues = rh.get_leagues()
-    return [convert.league_id_to_league_abbreviation(x["id"]) for x in leagues]
+    if not leagues:
+        return []
+    existing_abbrs = {list(entry.keys())[0] for entry in LEAGUES_DATA}
+    result = []
+    for league in leagues:
+        abbr = convert.league_id_to_league_abbreviation(league["id"])
+        if not abbr:
+            abbr = _generate_league_abbreviation(league, existing_abbrs)
+            new_entry = {abbr: [league["id"]], "name": league["name"]}
+            LEAGUES_DATA.append(new_entry)
+            convert.LEAGUES_DATA.append(new_entry)
+            existing_abbrs.add(abbr)
+        if abbr:
+            result.append(abbr)
+    return sorted(set(result))
 
 
 @click.command()
@@ -262,7 +286,7 @@ def main(
             if live:
                 not_started = False
                 parameters = Parameters(
-                    "livescores/now",
+                    "livescores/latest",
                     [
                         "No live action at this moment",
                         "There was problem getting live scores, check your parameters",

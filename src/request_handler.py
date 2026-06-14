@@ -76,6 +76,10 @@ class RequestHandler(object):
             raise exceptions.APIErrorException(
                 "You have exceeded your allowed requests per minute/day"
             )
+        elif req.status_code == requests.codes.unprocessable_entity:
+            raise exceptions.APIErrorException(
+                "Unprocessable request. Check your parameters."
+            )
         else:
             raise exceptions.APIErrorException("Whoops... Something went wrong!")
 
@@ -122,11 +126,15 @@ class RequestHandler(object):
                 return ids
         return None
 
-    def set_params(self):
+    def set_params(self, include_odds=True):
         league_ids = self.get_league_ids()
         self.params["leagues"] = ",".join(str(val) for val in league_ids)
-        self.params["include"] = "participants;league;round;events;stage;odds"
-        self.params["markets"] = "1"
+        self.params["include"] = "participants;league;round;events;stage;scores;periods"
+        if include_odds:
+            self.params["include"] += ";odds"
+            self.params["markets"] = "1"
+        else:
+            self.params.pop("markets", None)
 
     @staticmethod
     def set_start_end(show_history, days):
@@ -150,7 +158,7 @@ class RequestHandler(object):
         Queries the API and fetches the scores for fixtures
         based upon the league and time parameter
         """
-        self.set_params()
+        self.set_params(include_odds=parameters.show_odds or parameters.place_bet)
         if parameters.league_name:
             if parameters.refresh:
                 while True:
@@ -229,14 +237,17 @@ class RequestHandler(object):
                 try:
                     self.params["include"] = "currentSeason"
                     league_data = self._get(f"leagues/{league_id}")
-                    current_season_id = league_data["current_season"]["id"]
+                    current_season_id = league_data["currentseason"]["id"]
                     self.reset_params()
+                    self.params["include"] = "participant;details;stage;group"
                     standings_data = self._get(f"standings/seasons/{current_season_id}")
-                    if len(standings_data) == 0:
+                    if not standings_data:
                         continue
                     self.writer.standings(standings_data, league_id, show_details)
                 except exceptions.APIErrorException as e:
                     click.secho(str(e), fg="red", bold=True)
+                except (KeyError, TypeError):
+                    pass
 
     def place_bet(self, bet_matches):
         match_bet = click.prompt(
