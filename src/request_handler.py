@@ -110,6 +110,7 @@ class RequestHandler(object):
                 next_data = next_parts.get("data")
                 if next_data:
                     data.extend(next_data)
+            self.params.pop("page", None)
         return data
 
     def get_league_ids(self):
@@ -285,7 +286,7 @@ class RequestHandler(object):
         matches = set()
         for match_id in match_bet:
             try:
-                if 0 <= int(match_id) > max_match_id:
+                if int(match_id) < 1 or int(match_id) > max_match_id:
                     click.secho(
                         f"The match with id {match_id} is an invalid match.",
                         fg="red",
