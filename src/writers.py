@@ -100,7 +100,11 @@ Your timezone: {profile_data['timezone']}""",
         stages = {}
         for entry in sorted(
             standings_data,
-            key=lambda x: (x.get("stage_id", 0), x.get("group_id") or 0, x.get("position", 0)),
+            key=lambda x: (
+                x.get("stage_id", 0),
+                x.get("group_id") or 0,
+                x.get("position", 0),
+            ),
         ):
             stages.setdefault(entry.get("stage_id", 0), []).append(entry)
         for stage_teams in stages.values():
@@ -115,7 +119,9 @@ Your timezone: {profile_data['timezone']}""",
                 for group_teams in groups.values():
                     if not group_teams:
                         continue
-                    group_name = (group_teams[0].get("group") or {}).get("name") or stage_name
+                    group_name = (group_teams[0].get("group") or {}).get(
+                        "name"
+                    ) or stage_name
                     self.standings_header(league_name, show_details, group_name)
                     self._print_standings_table(group_teams, show_details)
             else:
