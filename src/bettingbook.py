@@ -34,11 +34,11 @@ def bettable_balance(balance):
     return False if float(balance) <= 0.00 else True
 
 
-def check_options(history, bet, live, today, refresh, matches):
-    if history and live or history and today:
+def check_options(days, bet, live, today, refresh, matches):
+    if days < 0 and (live or today):
         raise IncorrectParametersException(
-            "--history and --days is not supported for --live/--today. "
-            "Use --matches to use these parameters"
+            "Negative --days is not supported for --live/--today. "
+            "Use --matches to view history."
         )
     if bet and live:
         raise IncorrectParametersException(
@@ -56,15 +56,15 @@ def check_options(history, bet, live, today, refresh, matches):
         )
 
 
-def check_options_standings(leagues, history):
+def check_options_standings(leagues, days):
     if not leagues:
         raise IncorrectParametersException(
             "Please specify a league. " "Example --standings --league=EN1"
         )
-    if history:
+    if days < 0:
         raise IncorrectParametersException(
-            "--history and --days is not supported for --standings. "
-            "Use --matches to use these parameters"
+            "Negative --days is not supported for --standings. "
+            "Use --matches to view history."
         )
     for league in leagues:
         if league.endswith("C") and league not in ["WC", "EC"]:
@@ -145,19 +145,13 @@ def get_possible_leagues():
     "--days",
     "-d",
     default=7,
+    type=int,
     show_default=True,
     help=(
-        "The number of days in the future for which you "
-        "want to see the scores, or the number of days "
-        "in the past when used with --history"
+        "Number of days ahead to show (e.g. -d 7), "
+        "or negative for history (e.g. -d -7 for past 7 days). "
+        "Use with --matches (-M)."
     ),
-)
-@click.option(
-    "--history",
-    "-H",
-    is_flag=True,
-    default=False,
-    help="Displays past games. Use with --matches (-M).",
 )
 @click.option(
     "--details",
@@ -214,7 +208,6 @@ def main(
     league,
     sort_by,
     days,
-    history,
     details,
     odds,
     not_started,
@@ -240,7 +233,7 @@ def main(
         Parameters = namedtuple(
             "parameters",
             "url, msg, league_name, sort_by, days, "
-            "show_history, show_details, show_odds, not_started, refresh, place_bet, date_format, type_sort",
+            "show_details, show_odds, not_started, refresh, place_bet, date_format, type_sort",
         )
 
         def get_multi_matches(filename, parameters):
@@ -261,7 +254,6 @@ def main(
                 ],
                 None,
                 sort_by,
-                None,
                 None,
                 details,
                 True,
@@ -288,14 +280,8 @@ def main(
             get_multi_matches(filename, parameters)
             return
 
-        if history and not (live or today or matches):
-            click.secho(
-                "--history has no effect on its own. Use it with --matches (-M).",
-                fg="red",
-                bold=True,
-            )
-        elif live or today or matches:
-            check_options(history, bet, live, today, refresh, matches)
+        if live or today or matches:
+            check_options(days, bet, live, today, refresh, matches)
             date_format = convert.format_date(ch.get("profile", "date_format"))
             if sort_by is None:
                 sort_by = "league"
@@ -313,7 +299,6 @@ def main(
                     league,
                     sort_by,
                     days,
-                    history,
                     details,
                     odds,
                     not_started,
@@ -332,7 +317,6 @@ def main(
                     league,
                     sort_by,
                     days,
-                    history,
                     details,
                     odds,
                     not_started,
@@ -344,14 +328,10 @@ def main(
             else:
                 parameters = Parameters(
                     "fixtures/between/",
-                    [
-                        [f"No matches in the past {str(days)} days."],
-                        [f"No matches in the coming {str(days)} days."],
-                    ],
+                    None,
                     league,
                     sort_by,
                     days,
-                    history,
                     details,
                     odds,
                     not_started,
@@ -364,7 +344,7 @@ def main(
             return
 
         if standings:
-            check_options_standings(league, history)
+            check_options_standings(league, days)
             rh.get_standings(league, details)
             return
 
