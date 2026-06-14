@@ -148,7 +148,7 @@ def get_possible_leagues():
     "-H",
     is_flag=True,
     default=False,
-    help="Displays past games when used with --time command.",
+    help="Displays past games. Use with --matches (-M).",
 )
 @click.option(
     "--details",
@@ -276,7 +276,13 @@ def main(
             get_multi_matches(filename, parameters)
             return
 
-        if live or today or matches:
+        if history and not (live or today or matches):
+            click.secho(
+                "--history has no effect on its own. Use it with --matches (-M).",
+                fg="red",
+                bold=True,
+            )
+        elif live or today or matches:
             check_options(history, bet, live, today, refresh, matches)
             date_format = convert.format_date(ch.get("profile", "date_format"))
             if sort_by is None:
