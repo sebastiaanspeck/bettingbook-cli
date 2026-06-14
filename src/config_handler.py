@@ -49,6 +49,9 @@ class ConfigHandler(object):
         config.add_section("betting_files")
         config.set("betting_files", "open_bets", "betting_files/open_bets.csv")
         config.set("betting_files", "closed_bets", "betting_files/closed_bets.csv")
+        config.set(
+            "betting_files", "balance_history", "betting_files/balance_history.csv"
+        )
         with open(ConfigHandler.FILENAME, "w") as cfgfile:
             config.write(cfgfile)
 
@@ -86,6 +89,7 @@ class ConfigHandler(object):
             if missing_key not in [
                 "balance",
                 "date_format",
+                "balance_history",
                 "open_bets",
                 "closed_bets",
             ]:
@@ -94,9 +98,11 @@ class ConfigHandler(object):
                 value = "100"
             elif missing_key == "date_format":
                 value = "d-m-Y"
+            elif missing_key == "balance_history":
+                value = "betting_files/balance_history.csv"
             elif missing_key == "open_bets":
                 value = "betting_files/open_bets.csv"
-            else:
+            elif missing_key == "closed_bets":
                 value = "betting_files/closed_bets.csv"
             if missing_key in ["name", "balance", "timezone", "date_format"]:
                 if "profile" in missing_sections:
@@ -106,7 +112,7 @@ class ConfigHandler(object):
                 if "auth" in missing_sections:
                     config.add_section("auth")
                 self.update_config_file("auth", missing_key, value)
-            elif missing_key in ["open_bets", "closed_bets"]:
+            elif missing_key in ["open_bets", "closed_bets", "balance_history"]:
                 if "betting_files" in missing_sections:
                     config.add_section("betting_files")
                 self.update_config_file("betting_files", missing_key, value)
@@ -117,6 +123,7 @@ class ConfigHandler(object):
             if missing_option[0] not in [
                 "balance",
                 "date_format",
+                "balance_history",
                 "open_bets",
                 "closed_bets",
             ]:
@@ -125,13 +132,15 @@ class ConfigHandler(object):
                 value = "100"
             elif missing_option[0] == "date_format":
                 value = "d-m-Y"
+            elif missing_option[0] == "balance_history":
+                value = "betting_files/balance_history.csv"
             elif missing_option[0] == "open_bets":
                 value = "betting_files/open_bets.csv"
-            else:
+            elif missing_option[0] == "closed_bets":
                 value = "betting_files/closed_bets.csv"
             if missing_option[0] in ["name", "balance", "timezone", "date_format"]:
                 self.update_config_file("profile", missing_option[0], value)
             elif missing_option[0] == "api_token":
                 self.update_config_file("auth", missing_option[0], value)
-            elif missing_option[0] in ["open_bets", "closed_bets"]:
+            elif missing_option[0] in ["open_bets", "closed_bets", "balance_history"]:
                 self.update_config_file("betting_files", missing_option[0], value)
