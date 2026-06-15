@@ -1,7 +1,6 @@
 import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-import mplcursors
 import csv
 
 import convert
@@ -30,11 +29,10 @@ def show_full_graph():
 
     ax.plot(dates, balances, marker=".", color="red", label="Balance")
 
-    mplcursors.cursor(hover=True)
-
     ax.set(title="Balance history")
 
     plt.gcf().autofmt_xdate()
     plt.legend()
 
     plt.savefig("balance_history.png")
+    plt.show()
