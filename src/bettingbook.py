@@ -64,9 +64,6 @@ def check_options_standings(leagues, days):
             "Negative --days is not supported for --standings. "
             "Use --matches to view history."
         )
-    for league in leagues:
-        if league.endswith("C") and league not in ["WC", "EC"]:
-            raise IncorrectParametersException(f"Standings for {league} not supported")
 
 
 ch = ConfigHandler()
