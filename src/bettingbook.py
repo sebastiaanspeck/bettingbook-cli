@@ -190,7 +190,7 @@ def get_possible_leagues():
     "--possible-leagues",
     "-PL",
     is_flag=True,
-    help="Show all leagues that are in your Sportmonks API Plan.",
+    help="Show all leagues available in your API plan.",
 )
 @click.option("--balance-history", "-BH", is_flag=True)
 def main(
