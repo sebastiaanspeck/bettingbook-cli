@@ -78,6 +78,7 @@ class ConfigHandler(object):
                 "date_format",
                 "open_bets",
                 "closed_bets",
+                "balance_history",
             ]
             if x not in keys
         ]
