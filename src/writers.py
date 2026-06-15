@@ -296,7 +296,11 @@ Your timezone: {profile_data['timezone']}""",
             self.print_odds(match, parameters.place_bet, prediction)
         if parameters.place_bet:
             self.bet_matches.extend([match["id"]])
-        self.scores(self.parse_result(match), parameters.place_bet, convert.state_id_to_status(match.get("state_id")))
+        self.scores(
+            self.parse_result(match),
+            parameters.place_bet,
+            convert.state_id_to_status(match.get("state_id")),
+        )
         if parameters.type_sort != "matches":
             self.print_datetime_status(match, parameters)
         else:
