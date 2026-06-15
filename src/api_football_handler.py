@@ -331,32 +331,20 @@ class ApiFootballHandler(object):
     # ------------------------------------------------------------------ #
 
     def _fetch_live(self, league_ids=None):
-        """Fetch live fixtures. One API call."""
+        """Fetch live fixtures. Always fetches all live matches, then filters by league."""
+        items = self._get("fixtures", {"live": "all"}) or []
+        fixtures = [self._normalize_fixture(item) for item in items]
         if league_ids:
-            live_param = "-".join(str(lid) for lid in league_ids)
-        else:
-            live_param = "all"
-        items = self._get("fixtures", {"live": live_param}) or []
-        return [self._normalize_fixture(item) for item in items]
+            fixtures = [f for f in fixtures if f["league_id"] in league_ids]
+        return fixtures
 
     def _fetch_today(self, league_ids=None):
-        """Fetch today's fixtures.
-        Without a league filter: one API call for all plan leagues.
-        With a league filter: one call per league ID."""
+        """Fetch today's fixtures including finished matches.
+        With a league filter: use from/to so FT matches are included.
+        Without a league filter: use date (single call, may omit FT)."""
         today = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d")
         if league_ids:
-            fixtures = []
-            for league_id in league_ids:
-                season = self._get_current_season(league_id)
-                items = (
-                    self._get(
-                        "fixtures",
-                        {"date": today, "league": league_id, "season": season},
-                    )
-                    or []
-                )
-                fixtures.extend(self._normalize_fixture(item) for item in items)
-            return fixtures
+            return self._fetch_range(today, today, league_ids)
         items = self._get("fixtures", {"date": today}) or []
         return [self._normalize_fixture(item) for item in items]
 
@@ -384,11 +372,13 @@ class ApiFootballHandler(object):
         return fixtures
 
     def _attach_odds(self, fixtures):
-        """Fetch Match Winner odds for each NS fixture and attach inline.
-        Only called when -O / --odds is requested."""
+        """Fetch Match Winner odds for each non-finished fixture and attach inline.
+        Only called when -O / --odds is requested.
+        Returns True if odds are unavailable due to plan restrictions."""
         label_map = {"Home": "1", "Draw": "X", "Away": "2"}
+        finished = {"FT", "AET", "FT_PEN", "CANCL", "POSTP", "ABAN", "WO"}
         for fixture in fixtures:
-            if convert.state_id_to_status(fixture.get("state_id", 1)) != "NS":
+            if convert.state_id_to_status(fixture.get("state_id", 1)) in finished:
                 continue
             try:
                 odds_data = (
@@ -408,8 +398,12 @@ class ApiFootballHandler(object):
                                 )
                         break
                     break
-            except (APIErrorException, KeyError, IndexError, TypeError):
+            except APIErrorException as e:
+                if "not accessible from your plan" in str(e):
+                    return True
+            except (KeyError, IndexError, TypeError):
                 pass
+        return False
 
     def _attach_events(self, fixtures):
         """Fetch goal events per started fixture for --details display.
@@ -486,11 +480,6 @@ class ApiFootballHandler(object):
             self.get_match_data(parameters, start, end, first, league_ids=league_ids)
         except APIErrorException as e:
             if parameters.show_odds and "not accessible from your plan" in str(e):
-                click.secho(
-                    "Odds not available on your plan, showing matches without odds.",
-                    fg="yellow",
-                    bold=True,
-                )
                 try:
                     self.get_match_data(
                         parameters,
@@ -520,7 +509,12 @@ class ApiFootballHandler(object):
             fixtures = self._fetch_range(start, end, league_ids)
 
         if include_odds and fixtures:
-            self._attach_odds(fixtures)
+            if self._attach_odds(fixtures):
+                click.secho(
+                    "Odds not available on your plan, showing matches without odds.",
+                    fg="yellow",
+                    bold=True,
+                )
 
         if parameters.show_details and fixtures:
             self._attach_events(fixtures)

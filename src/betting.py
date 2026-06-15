@@ -82,19 +82,22 @@ class Betting(object):
             reader = self.get_bets(
                 self.config_handler.get("betting_files", "open_bets")
             )
-            for i, row in enumerate(reader):
+        except Exception:
+            return
+        for i, row in enumerate(reader):
+            try:
                 match_bets = self.request_handler.get_match_bet(row[0])
-                if not match_bets:
-                    continue
-                match_data = match_bets[0]
-                if convert.state_id_to_status(match_data.get("state_id")) in [
-                    "FT",
-                    "AET",
-                    "FT_PEN",
-                ]:
-                    self.calculate_winning_odd(match_data, i, row, reader)
-        except APIErrorException as e:
-            click.secho(str(e), fg="red", bold=True)
+            except APIErrorException:
+                continue
+            if not match_bets:
+                continue
+            match_data = match_bets[0]
+            if convert.state_id_to_status(match_data.get("state_id")) in [
+                "FT",
+                "AET",
+                "FT_PEN",
+            ]:
+                self.calculate_winning_odd(match_data, i, row, reader)
 
     def calculate_winning_odd(self, match_data, i, row, reader):
         home_score = convert.get_current_score(match_data, "home")

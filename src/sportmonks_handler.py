@@ -167,7 +167,12 @@ class SportmonksHandler(object):
     def get_match_data_for_leagues(self, parameters):
         for i, league in enumerate(parameters.league_name):
             league_id = self.get_league_abbreviation(league)
-            self.params["leagues"] = ",".join(str(val) for val in league_id)
+            if parameters.type_sort == "live":
+                self.params.pop("leagues", None)
+                self.params["live"] = "-".join(str(val) for val in league_id)
+            else:
+                self.params.pop("live", None)
+                self.params["leagues"] = ",".join(str(val) for val in league_id)
             self.try_to_get_match_data(parameters, i == 0)
 
     def try_to_get_match_data(self, parameters, first=False):
@@ -193,6 +198,9 @@ class SportmonksHandler(object):
     def get_match_data(self, parameters, start, end, first=False):
         if parameters.type_sort == "matches":
             fixtures_results = self._get(parameters.url + f"{start}/{end}")
+        elif parameters.type_sort == "today":
+            today = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d")
+            fixtures_results = self._get(f"fixtures/between/{today}/{today}")
         else:
             fixtures_results = self._get(parameters.url)
         if not fixtures_results:
