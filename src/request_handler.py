@@ -48,6 +48,7 @@ class RequestHandler(object):
         self.league_data = league_data
         self.writer = writer
         self.config_handler = config_handler
+        self._season_cache = {}
 
     def _headers(self):
         return {"x-apisports-key": self.params.get("api_token", "")}
@@ -267,11 +268,24 @@ class RequestHandler(object):
                 return int(rnd.strip()), stage.strip()
         return None, round_str
 
-    @staticmethod
-    def _infer_season():
-        """Return current football season year (July = new season starts)."""
+    def _get_current_season(self, league_id):
+        """Return the current season year for a league via /leagues?id=.
+        Result is cached per league_id to avoid redundant API calls."""
+        if league_id in self._season_cache:
+            return self._season_cache[league_id]
+        try:
+            data = self._get("leagues", {"id": league_id}) or []
+            if data:
+                for season in data[0].get("seasons") or []:
+                    if season.get("current"):
+                        self._season_cache[league_id] = season["year"]
+                        return season["year"]
+        except (APIErrorException, KeyError, TypeError, IndexError):
+            pass
         now = datetime.datetime.now()
-        return now.year if now.month >= 7 else now.year - 1
+        fallback = now.year if now.month >= 7 else now.year - 1
+        self._season_cache[league_id] = fallback
+        return fallback
 
     def _normalize_standings(self, standings_response):
         """Convert API-Football standings response to the internal format
@@ -331,9 +345,9 @@ class RequestHandler(object):
         With a league filter: one call per league ID."""
         today = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d")
         if league_ids:
-            season = self._infer_season()
             fixtures = []
             for league_id in league_ids:
+                season = self._get_current_season(league_id)
                 items = (
                     self._get(
                         "fixtures",
@@ -349,14 +363,11 @@ class RequestHandler(object):
     def _fetch_range(self, start, end, league_ids=None):
         """Fetch fixtures for a date range.
         API-Football requires league + season for range queries, so one
-        call per league ID. If the inferred season yields nothing, retry
-        with the alternate year (handles tournaments on a calendar year)."""
-        season = self._infer_season()
-        now = datetime.datetime.now()
-        alt_season = now.year if now.month < 7 else now.year - 1
+        call per league ID."""
         all_ids = league_ids or self.get_league_ids()
         fixtures = []
         for league_id in all_ids:
+            season = self._get_current_season(league_id)
             items = (
                 self._get(
                     "fixtures",
@@ -369,19 +380,6 @@ class RequestHandler(object):
                 )
                 or []
             )
-            if not items:
-                items = (
-                    self._get(
-                        "fixtures",
-                        {
-                            "league": league_id,
-                            "season": alt_season,
-                            "from": start,
-                            "to": end,
-                        },
-                    )
-                    or []
-                )
             fixtures.extend(self._normalize_fixture(item) for item in items)
         return fixtures
 
@@ -569,19 +567,13 @@ class RequestHandler(object):
         self.writer.league_scores(fixtures, parameters, True, predictions)
 
     def get_standings(self, leagues, show_details):
-        season = self._infer_season()
-        now = datetime.datetime.now()
-        alt_season = now.year if now.month < 7 else now.year - 1
         for league in leagues:
             for league_id in self.get_league_abbreviation(league):
                 try:
+                    season = self._get_current_season(league_id)
                     standings_data = self._get(
                         "standings", {"league": league_id, "season": season}
                     )
-                    if not standings_data:
-                        standings_data = self._get(
-                            "standings", {"league": league_id, "season": alt_season}
-                        )
                     if not standings_data:
                         continue
                     normalized = self._normalize_standings(standings_data[0])
