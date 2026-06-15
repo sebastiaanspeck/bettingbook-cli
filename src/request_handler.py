@@ -554,12 +554,18 @@ class RequestHandler(object):
 
     def get_standings(self, leagues, show_details):
         season = self._infer_season()
+        now = datetime.datetime.now()
+        alt_season = now.year if now.month < 7 else now.year - 1
         for league in leagues:
             for league_id in self.get_league_abbreviation(league):
                 try:
                     standings_data = self._get(
                         "standings", {"league": league_id, "season": season}
                     )
+                    if not standings_data:
+                        standings_data = self._get(
+                            "standings", {"league": league_id, "season": alt_season}
+                        )
                     if not standings_data:
                         continue
                     normalized = self._normalize_standings(standings_data[0])
