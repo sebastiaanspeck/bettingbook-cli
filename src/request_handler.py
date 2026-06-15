@@ -349,8 +349,11 @@ class RequestHandler(object):
     def _fetch_range(self, start, end, league_ids=None):
         """Fetch fixtures for a date range.
         API-Football requires league + season for range queries, so one
-        call per league ID."""
+        call per league ID. If the inferred season yields nothing, retry
+        with the alternate year (handles tournaments on a calendar year)."""
         season = self._infer_season()
+        now = datetime.datetime.now()
+        alt_season = now.year if now.month < 7 else now.year - 1
         all_ids = league_ids or self.get_league_ids()
         fixtures = []
         for league_id in all_ids:
@@ -366,6 +369,19 @@ class RequestHandler(object):
                 )
                 or []
             )
+            if not items:
+                items = (
+                    self._get(
+                        "fixtures",
+                        {
+                            "league": league_id,
+                            "season": alt_season,
+                            "from": start,
+                            "to": end,
+                        },
+                    )
+                    or []
+                )
             fixtures.extend(self._normalize_fixture(item) for item in items)
         return fixtures
 
