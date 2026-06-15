@@ -78,7 +78,7 @@ class RequestHandler(object):
     def _get(self, endpoint, extra_params=None):
         """GET from API-Football; handles auth, error checking, and pagination."""
         params = {}
-        if self.params.get("tz"):
+        if self.params.get("tz") and endpoint == "fixtures":
             params["timezone"] = self.params["tz"]
         if extra_params:
             params.update(extra_params)
@@ -397,6 +397,28 @@ class RequestHandler(object):
             except (APIErrorException, KeyError, IndexError, TypeError):
                 pass
 
+    def _attach_events(self, fixtures):
+        """Fetch goal events per started fixture for --details display.
+        API-Football does not include events in list responses."""
+        for fixture in fixtures:
+            if fixture.get("state_id", 1) in (1, 10, 12, 13):
+                continue
+            try:
+                raw_events = (
+                    self._get("fixtures/events", {"fixture": fixture["id"]}) or []
+                )
+                home_id = next(
+                    (
+                        p["id"]
+                        for p in fixture.get("participants", [])
+                        if p["meta"]["location"] == "home"
+                    ),
+                    None,
+                )
+                fixture["events"] = self._normalize_events(raw_events, home_id)
+            except (APIErrorException, KeyError, TypeError):
+                pass
+
     # ------------------------------------------------------------------ #
     #  Public interface (unchanged from Sportmonks version)               #
     # ------------------------------------------------------------------ #
@@ -485,6 +507,9 @@ class RequestHandler(object):
 
         if include_odds and fixtures:
             self._attach_odds(fixtures)
+
+        if parameters.show_details and fixtures:
+            self._attach_events(fixtures)
 
         if not fixtures:
             if type_sort == "matches":
