@@ -1,12 +1,28 @@
-import datetime as dt
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-import mplcursors
+import copy
 import csv
+import datetime as dt
+
+import matplotlib.dates as mdates
+import matplotlib.path
+import matplotlib.pyplot as plt
 
 import convert
-
 from config_handler import ConfigHandler
+
+
+# matplotlib 3.10.x has a broken Path.__deepcopy__ that calls
+# copy.deepcopy(super(), memo), which recurses infinitely on Python 3.14.
+# Replace it with a straightforward __dict__ copy.
+def _path_deepcopy(self, memo):
+    cls = self.__class__
+    result = cls.__new__(cls)
+    memo[id(self)] = result
+    for k, v in self.__dict__.items():
+        setattr(result, k, copy.deepcopy(v, memo))
+    return result
+
+
+matplotlib.path.Path.__deepcopy__ = _path_deepcopy
 
 
 def show_full_graph():
@@ -30,11 +46,10 @@ def show_full_graph():
 
     ax.plot(dates, balances, marker=".", color="red", label="Balance")
 
-    mplcursors.cursor(hover=True)
-
     ax.set(title="Balance history")
 
     plt.gcf().autofmt_xdate()
     plt.legend()
 
     plt.savefig("balance_history.png")
+    plt.show()

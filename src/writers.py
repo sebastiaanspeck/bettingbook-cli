@@ -296,7 +296,11 @@ Your timezone: {profile_data['timezone']}""",
             self.print_odds(match, parameters.place_bet, prediction)
         if parameters.place_bet:
             self.bet_matches.extend([match["id"]])
-        self.scores(self.parse_result(match), parameters.place_bet)
+        self.scores(
+            self.parse_result(match),
+            parameters.place_bet,
+            convert.state_id_to_status(match.get("state_id")),
+        )
         if parameters.type_sort != "matches":
             self.print_datetime_status(match, parameters)
         else:
@@ -343,17 +347,21 @@ Your timezone: {profile_data['timezone']}""",
             click.secho(f"{league_subheader:-^62}", fg=self.colors.MISC)
         click.echo()
 
-    def scores(self, result, place_bet):
+    def scores(self, result, place_bet, status=""):
         """Prints out the scores in a pretty format"""
-        winning_team = self.calculate_winning_team(
-            result.goals_home_team, result.goals_away_team, ""
-        )
-        if winning_team == "1":
-            home_color, away_color = (self.colors.WIN, self.colors.LOSE)
-        elif winning_team == "2":
-            home_color, away_color = (self.colors.LOSE, self.colors.WIN)
-        else:
+        live_statuses = {"LIVE", "HT", "ET", "PEN_LIVE", "BREAK", "AU", "INT"}
+        if status in live_statuses:
             home_color = away_color = self.colors.TIE
+        else:
+            winning_team = self.calculate_winning_team(
+                result.goals_home_team, result.goals_away_team, status
+            )
+            if winning_team == "1":
+                home_color, away_color = (self.colors.WIN, self.colors.LOSE)
+            elif winning_team == "2":
+                home_color, away_color = (self.colors.LOSE, self.colors.WIN)
+            else:
+                home_color = away_color = self.colors.TIE
 
         if place_bet:
             if self.score_id < 10:
@@ -382,6 +390,8 @@ Your timezone: {profile_data['timezone']}""",
 
         for odd in match.get("odds", []):
             odds_dict = self.fill_odds(odd, odds_dict)
+        if not any(odds_dict.values()):
+            return
         status = convert.state_id_to_status(match.get("state_id"))
         self.odds(
             self.parse_odd(
@@ -702,6 +712,8 @@ Your timezone: {profile_data['timezone']}""",
 
         def winning_odd():
             """Returns the winning_odd"""
+            if status in {"LIVE", "HT", "ET", "PEN_LIVE", "BREAK", "AU", "INT"}:
+                return "no_winner_yet"
             winning_team = self.calculate_winning_team(home_goals, away_goals, status)
             return winning_team
 

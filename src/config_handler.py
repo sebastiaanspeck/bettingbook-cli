@@ -41,6 +41,7 @@ class ConfigHandler(object):
     def create_config_file(api_token, name, timezone):
         config.add_section("auth")
         config.set("auth", "api_token", api_token)
+        config.set("auth", "backend", "api-football")
         config.add_section("profile")
         config.set("profile", "name", name)
         config.set("profile", "balance", "100.00")
@@ -72,12 +73,14 @@ class ConfigHandler(object):
             x
             for x in [
                 "api_token",
+                "backend",
                 "name",
                 "balance",
                 "timezone",
                 "date_format",
                 "open_bets",
                 "closed_bets",
+                "balance_history",
             ]
             if x not in keys
         ]
@@ -87,6 +90,7 @@ class ConfigHandler(object):
         missing_sections, missing_keys, missing_options = self.get_missing_data_config()
         for missing_key in missing_keys:
             if missing_key not in [
+                "backend",
                 "balance",
                 "date_format",
                 "balance_history",
@@ -94,6 +98,8 @@ class ConfigHandler(object):
                 "closed_bets",
             ]:
                 value = str(input(f"Give the value for {missing_key}: "))
+            elif missing_key == "backend":
+                value = "api-football"
             elif missing_key == "balance":
                 value = "100"
             elif missing_key == "date_format":
@@ -108,7 +114,7 @@ class ConfigHandler(object):
                 if "profile" in missing_sections:
                     config.add_section("profile")
                 self.update_config_file("profile", missing_key, value)
-            elif missing_key == "api_token":
+            elif missing_key in ["api_token", "backend"]:
                 if "auth" in missing_sections:
                     config.add_section("auth")
                 self.update_config_file("auth", missing_key, value)

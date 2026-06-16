@@ -1,0 +1,342 @@
+import requests
+import click
+import datetime
+import json
+import time
+
+import convert
+from exceptions import APIErrorException
+from betting import Betting
+
+
+class SportmonksHandler(object):
+    BASE_URL = "https://api.sportmonks.com/v3/football/"
+
+    def __init__(self, params, league_data, writer, config_handler):
+        self.params = params
+        self.league_data = league_data
+        self.writer = writer
+        self.config_handler = config_handler
+
+    def show_profile(self):
+        self.writer.show_profile(self.config_handler.get_data("profile"))
+
+    def get_leagues(self):
+        self.params["include"] = "country"
+        data = self._get("leagues") or []
+        return [
+            {"id": lg["id"], "name": lg["name"], "short_code": lg.get("short_code", "")}
+            for lg in data
+        ]
+
+    def show_leagues(self):
+        leagues = self.get_leagues()
+        self.writer.show_leagues(leagues)
+
+    def _get(self, url):
+        req = requests.get(SportmonksHandler.BASE_URL + url, params=self.params)
+
+        if req.status_code != requests.codes.ok:
+            self._show_request_error(req)
+
+        msg, code = self._get_error(req)
+
+        if code == requests.codes.ok:
+            return self._get_data(req, url)
+        else:
+            click.secho(
+                f"The API returned the next error code: {code} with message: {msg}",
+                fg="red",
+                bold=True,
+            )
+
+    def reset_params(self):
+        self.params = {
+            "api_token": self.config_handler.get("auth", "api_token"),
+            "tz": self.config_handler.get("profile", "timezone"),
+        }
+
+    @staticmethod
+    def _show_request_error(req):
+        if req.status_code in [
+            requests.codes.bad,
+            requests.codes.server_error,
+            requests.codes.unauthorized,
+        ]:
+            raise APIErrorException("Invalid request. Check your parameters.")
+        elif req.status_code == requests.codes.forbidden:
+            raise APIErrorException(
+                "The data you requested is not accessible from your plan."
+            )
+        elif req.status_code == requests.codes.not_found:
+            raise APIErrorException("This resource does not exist. Check parameters")
+        elif req.status_code == requests.codes.too_many_requests:
+            raise APIErrorException(
+                "You have exceeded your allowed requests per minute/day"
+            )
+        elif req.status_code == requests.codes.unprocessable_entity:
+            raise APIErrorException("Unprocessable request. Check your parameters.")
+        else:
+            raise APIErrorException("Whoops... Something went wrong!")
+
+    @staticmethod
+    def _get_error(req):
+        parts = json.loads(req.text)
+        error = parts.get("error")
+        if error is None:
+            return "", 200
+        return error["message"], error["code"]
+
+    def _get_data(self, req, url):
+        parts = json.loads(req.text)
+        data = parts.get("data")
+        pagination = parts.get("pagination")
+        pages = int(pagination["count"]) if pagination else 1
+        if pages > 1:
+            for i in range(2, pages + 1):
+                self.params["page"] = i
+                req = requests.get(SportmonksHandler.BASE_URL + url, params=self.params)
+                if req.status_code != requests.codes.ok or not req.text:
+                    continue
+                next_data = json.loads(req.text).get("data")
+                if next_data:
+                    data.extend(next_data)
+            self.params.pop("page", None)
+        return data
+
+    def get_league_ids(self):
+        league_ids = []
+        for x in self.league_data:
+            ids = list(x.values())[0]
+            for league_id in ids:
+                league_ids.extend([league_id])
+        return league_ids
+
+    def get_league_abbreviation(self, league_name):
+        for x in self.league_data:
+            abbreviation = list(x.keys())[0]
+            ids = list(x.values())[0]
+            if league_name == abbreviation:
+                return ids
+        return None
+
+    def set_params(self, include_odds=True):
+        league_ids = self.get_league_ids()
+        self.params["leagues"] = ",".join(str(val) for val in league_ids)
+        self.params["include"] = "participants;league;round;events;stage;scores;periods"
+        if include_odds:
+            self.params["include"] += ";odds"
+            self.params["markets"] = "1"
+        else:
+            self.params.pop("markets", None)
+
+    @staticmethod
+    def set_start_end(days):
+        now = datetime.datetime.now()
+        if days < 0:
+            start = datetime.datetime.strftime(
+                now + datetime.timedelta(days=days), "%Y-%m-%d"
+            )
+            end = datetime.datetime.strftime(
+                now - datetime.timedelta(days=1), "%Y-%m-%d"
+            )
+        else:
+            start = datetime.datetime.strftime(now, "%Y-%m-%d")
+            end = datetime.datetime.strftime(
+                now + datetime.timedelta(days=days), "%Y-%m-%d"
+            )
+        return start, end
+
+    def get_matches(self, parameters):
+        self.set_params(include_odds=parameters.show_odds or parameters.place_bet)
+        if parameters.league_name:
+            if parameters.refresh:
+                while True:
+                    self.get_match_data_for_leagues(parameters)
+                    time.sleep(60)
+            else:
+                self.get_match_data_for_leagues(parameters)
+        else:
+            if parameters.refresh:
+                while True:
+                    self.try_to_get_match_data(parameters)
+                    time.sleep(60)
+            else:
+                self.try_to_get_match_data(parameters)
+
+    def get_match_data_for_leagues(self, parameters):
+        for i, league in enumerate(parameters.league_name):
+            league_id = self.get_league_abbreviation(league)
+            if parameters.type_sort == "live":
+                self.params.pop("leagues", None)
+                self.params["live"] = "-".join(str(val) for val in league_id)
+            else:
+                self.params.pop("live", None)
+                self.params["leagues"] = ",".join(str(val) for val in league_id)
+            self.try_to_get_match_data(parameters, i == 0)
+
+    def try_to_get_match_data(self, parameters, first=False):
+        start, end = self.set_start_end(parameters.days)
+        try:
+            self.get_match_data(parameters, start, end, first)
+        except APIErrorException as e:
+            if parameters.show_odds and "not accessible from your plan" in str(e):
+                click.secho(
+                    "Odds not available on your plan, showing matches without odds.",
+                    fg="yellow",
+                    bold=True,
+                )
+                self.params["include"] = self.params["include"].replace(";odds", "")
+                self.params.pop("markets", None)
+                try:
+                    self.get_match_data(parameters, start, end, first)
+                except APIErrorException as e2:
+                    click.secho(str(e2), fg="red", bold=True)
+            else:
+                click.secho(str(e), fg="red", bold=True)
+
+    def get_match_data(self, parameters, start, end, first=False):
+        if parameters.type_sort == "matches":
+            fixtures_results = self._get(parameters.url + f"{start}/{end}")
+        elif parameters.type_sort == "today":
+            today = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d")
+            fixtures_results = self._get(f"fixtures/between/{today}/{today}")
+        else:
+            fixtures_results = self._get(parameters.url)
+        if not fixtures_results:
+            if parameters.type_sort == "matches":
+                if parameters.days < 0:
+                    click.secho(
+                        f"No matches in the past {abs(parameters.days)} days.",
+                        fg="red",
+                        bold=True,
+                    )
+                else:
+                    click.secho(
+                        f"No matches in the coming {parameters.days} days.",
+                        fg="red",
+                        bold=True,
+                    )
+            else:
+                click.secho(parameters.msg[0], fg="red", bold=True)
+            return
+        bet_matches = self.writer.league_scores(fixtures_results, parameters, first)
+        if parameters.place_bet:
+            if bet_matches:
+                self.place_bet(bet_matches)
+            else:
+                click.secho(
+                    "There are no matches in the selected timespan to bet on.",
+                    fg="red",
+                    bold=True,
+                )
+
+    def get_standings(self, leagues, show_details):
+        self.reset_params()
+        for league in leagues:
+            for league_id in self.get_league_abbreviation(league):
+                try:
+                    self.params["include"] = "currentSeason"
+                    league_data = self._get(f"leagues/{league_id}")
+                    current_season_id = league_data["currentseason"]["id"]
+                    self.reset_params()
+                    self.params["include"] = "participant;details;stage;group"
+                    standings_data = self._get(f"standings/seasons/{current_season_id}")
+                    if not standings_data:
+                        continue
+                    self.writer.standings(standings_data, league_id, show_details)
+                except APIErrorException as e:
+                    click.secho(str(e), fg="red", bold=True)
+                except (KeyError, TypeError):
+                    pass
+
+    def get_multi_matches(self, match_ids, predictions, parameters):
+        if not match_ids:
+            click.secho(parameters.msg[0], fg="red", bold=True)
+            return True
+        self.set_params()
+        fixtures = self._get(f"fixtures/multi/{match_ids}")
+        if not fixtures:
+            click.secho(parameters.msg[0], fg="red", bold=True)
+            return
+        self.writer.league_scores(fixtures, parameters, True, predictions)
+
+    def place_bet(self, bet_matches):
+        match_bet = click.prompt(
+            "Give the numbers of the matches you want to bet on (comma-separated)"
+        ).split(",")
+        match_bet = sorted(self.check_match_bet(match_bet, len(bet_matches)))
+        if match_bet == "no_matches":
+            click.secho("There are no valid matches selected.", fg="red", bold=True)
+        else:
+            matches = []
+            for match_id in match_bet:
+                try:
+                    matches.extend([str(bet_matches[int(match_id) - 1])])
+                except (IndexError, ValueError):
+                    pass
+            match_data = self.get_match_bet(",".join(matches))
+            match_data = self.check_match_data(match_data)
+            if match_data == "no_matches":
+                click.secho("There are no valid matches selected.", fg="red", bold=True)
+            else:
+                self.place_bet_betting(match_data)
+
+    def get_match_bet(self, matches):
+        self.params["include"] = "participants;league;round;events;stage;odds"
+        self.params["markets"] = "1"
+        return self._get(f"fixtures/multi/{matches}")
+
+    @staticmethod
+    def check_match_bet(match_bet, max_match_id):
+        matches = set()
+        for match_id in match_bet:
+            try:
+                if int(match_id) < 1 or int(match_id) > max_match_id:
+                    click.secho(
+                        f"The match with id {match_id} is an invalid match.",
+                        fg="red",
+                        bold=True,
+                    )
+                else:
+                    matches.add(match_id)
+            except ValueError:
+                click.secho(
+                    f"The match with id {match_id} is an invalid match.",
+                    fg="red",
+                    bold=True,
+                )
+        if not matches:
+            return "no_matches"
+        return matches
+
+    @staticmethod
+    def check_match_data(match_data):
+        matches = []
+        for match in match_data:
+            home = convert.get_home_team(match).get("name", "")
+            away = convert.get_away_team(match).get("name", "")
+            status = convert.state_id_to_status(match.get("state_id"))
+            if not match.get("odds"):
+                click.secho(
+                    f"The match {home} - {away} doesn't have any odds available (yet).",
+                    fg="red",
+                    bold=True,
+                )
+            elif status != "NS":
+                click.secho(
+                    f"The match {home} - {away} has already started.",
+                    fg="red",
+                    bold=True,
+                )
+            else:
+                matches.extend([match])
+        if not matches:
+            return "no_matches"
+        return matches
+
+    def place_bet_betting(self, matches):
+        bet = Betting(
+            self.params, self.league_data, self.writer, self, self.config_handler
+        )
+        bet.place_bet(matches)
